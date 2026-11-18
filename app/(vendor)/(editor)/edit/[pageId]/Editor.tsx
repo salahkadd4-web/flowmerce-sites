@@ -12,6 +12,7 @@ import { BTN_GHOST, BTN_PRIMARY, FOCUS, Notice } from "@/components/dashboard/ui
 import { dictionaryFr } from "@/blocks/dictionary.fr";
 import { editorConfig } from "./editor-config";
 import { publishPage, saveDraft, type EditorActionResult } from "./actions";
+import { installKeyboardEventGuard } from "./keyboard-event-guard";
 
 type Status = "clean" | "dirty" | "saving" | "saved" | "publishing" | "published";
 
@@ -41,6 +42,10 @@ export function Editor({ pageId, site, initialData }: Props) {
   const [isOnline, setIsOnline] = useState(site.published);
   // Dernier contenu enregistré : « modifié » se compare à lui, pas au premier onChange.
   const savedSnapshot = useRef(JSON.stringify(initialData));
+
+  // Remplissage automatique et extensions envoient des keydown incomplets qui
+  // font planter les raccourcis de Puck (voir keyboard-event-guard.ts).
+  useEffect(() => installKeyboardEventGuard(window), []);
 
   // Avertir avant de quitter avec des modifications non enregistrées.
   useEffect(() => {
