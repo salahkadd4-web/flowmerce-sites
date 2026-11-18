@@ -10,12 +10,22 @@ export type OwnerSite = {
   subdomain: string;
   type: SiteType;
   status: SiteStatus;
+  /** Page d'accueil (slug ""), ou null si elle n'existe pas. */
+  homePageId: string | null;
 };
 
-export function listSitesForOwner(ownerUserId: string): Promise<OwnerSite[]> {
-  return prisma.site.findMany({
+export async function listSitesForOwner(ownerUserId: string): Promise<OwnerSite[]> {
+  const sites = await prisma.site.findMany({
     where: { tenant: { ownerUserId } },
     orderBy: { createdAt: "desc" },
-    select: { id: true, name: true, subdomain: true, type: true, status: true },
+    select: {
+      id: true,
+      name: true,
+      subdomain: true,
+      type: true,
+      status: true,
+      pages: { where: { slug: "" }, select: { id: true }, take: 1 },
+    },
   });
+  return sites.map(({ pages, ...site }) => ({ ...site, homePageId: pages[0]?.id ?? null }));
 }

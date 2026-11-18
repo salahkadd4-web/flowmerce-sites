@@ -1,8 +1,17 @@
-// « Mes sites » — liste des sites du vendeur connecté.
+// « Mes sites » — liste des sites du vendeur connecté, avec création, édition et aperçu.
 // Structure de liste reprise de flowmerce-web-app (app/dashboard/api-keys/page.tsx).
 
-import { ExternalLink, Globe } from "lucide-react";
-import { Card, EmptyState, FOCUS, PageHeader, SiteStatusBadge } from "@/components/dashboard/ui";
+import Link from "next/link";
+import { Eye, ExternalLink, Globe, PenLine, Plus } from "lucide-react";
+import {
+  BTN_GHOST,
+  BTN_PRIMARY,
+  Card,
+  EmptyState,
+  FOCUS,
+  PageHeader,
+  SiteStatusBadge,
+} from "@/components/dashboard/ui";
 import { auth } from "@/lib/auth";
 import { env } from "@/lib/env";
 import { siteUrl } from "@/lib/host";
@@ -17,11 +26,32 @@ export default async function SitesPage() {
 
   return (
     <div className="w-full max-w-3xl p-5 sm:p-10">
-      <PageHeader title="Mes sites" subtitle={`${sites.length} site${sites.length !== 1 ? "s" : ""}.`} />
+      <PageHeader
+        title="Mes sites"
+        subtitle={`${sites.length} site${sites.length !== 1 ? "s" : ""}.`}
+        action={
+          sites.length > 0 && (
+            <Link href="/sites/new" className={BTN_PRIMARY}>
+              <Plus size={15} strokeWidth={2} aria-hidden />
+              Créer un site
+            </Link>
+          )
+        }
+      />
 
       {sites.length === 0 ? (
         <Card padded={false}>
-          <EmptyState icon={Globe} title="Aucun site pour l'instant." />
+          <EmptyState
+            icon={Globe}
+            title="Aucun site pour l'instant."
+            hint="Créez votre landing page en quelques minutes, puis publiez-la sur votre propre adresse."
+            action={
+              <Link href="/sites/new" className={BTN_PRIMARY}>
+                <Plus size={15} strokeWidth={2} aria-hidden />
+                Créer mon premier site
+              </Link>
+            }
+          />
         </Card>
       ) : (
         <Card padded={false}>
@@ -41,15 +71,35 @@ export default async function SitesPage() {
                     </div>
                     <SiteStatusBadge status={site.status} />
                   </div>
-                  <a
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`mt-3 inline-flex items-center gap-1.5 rounded-control text-[13px] font-semibold text-brand-ink hover:underline ${FOCUS}`}
-                  >
-                    {url.replace(/^https?:\/\//, "")}
-                    <ExternalLink size={13} strokeWidth={2} aria-hidden />
-                  </a>
+
+                  {site.status === "PUBLISHED" ? (
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`mt-3 inline-flex items-center gap-1.5 rounded-control text-[13px] font-semibold text-brand-ink hover:underline ${FOCUS}`}
+                    >
+                      {url.replace(/^https?:\/\//, "")}
+                      <ExternalLink size={13} strokeWidth={2} aria-hidden />
+                    </a>
+                  ) : (
+                    <p className="mt-3 text-[13px] text-body">
+                      Pas encore en ligne : publiez-le depuis l&apos;éditeur.
+                    </p>
+                  )}
+
+                  {site.homePageId && (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <Link href={`/edit/${site.homePageId}`} className={BTN_GHOST}>
+                        <PenLine size={15} aria-hidden />
+                        Modifier la page
+                      </Link>
+                      <a href={`/preview/${site.homePageId}`} target="_blank" rel="noopener noreferrer" className={BTN_GHOST}>
+                        <Eye size={15} aria-hidden />
+                        Aperçu
+                      </a>
+                    </div>
+                  )}
                 </li>
               );
             })}

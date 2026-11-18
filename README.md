@@ -31,6 +31,18 @@ Les navigateurs envoient `*.localhost` vers la machine locale : aucun réglage D
 ni fichier `hosts` n'est nécessaire. Le port 3100 laisse le 3000 à
 `flowmerce-web-app`, pour faire tourner les deux en même temps.
 
+## Créer et publier une landing page
+
+1. Sur http://localhost:3100, **Créer un site** : un nom, un sous-domaine (proposé à
+   partir du nom), le modèle « Landing page — produit unique ».
+2. L'éditeur s'ouvre (vue Mobile par défaut) : cliquez un bloc pour le régler à droite,
+   glissez les blocs de la colonne de gauche pour en ajouter.
+3. **Enregistrer** garde le brouillon ; **Aperçu** l'affiche tel que les acheteurs le
+   verront ; **Publier** le met en ligne immédiatement sur `http://<sous-domaine>.localhost:3100`.
+
+Les images envoyées sont stockées dans `storage/uploads/` (ignoré par git) et servies
+sous `/media/…`. Au déploiement, `lib/storage.ts` recevra un pilote de stockage objet.
+
 ## Tests
 
 ```bash
@@ -49,5 +61,10 @@ charge vitest deux fois, et l'import direct échoue.
 - `proxy.ts` décide, à partir du seul nom d'hôte et sans requête en base, entre
   l'espace vendeur (`DASHBOARD_HOST`) et un site (réécrit vers `app/s/[host]/…`).
 - `lib/tenant.ts` résout l'hôte en site publié, avec cache et tags d'invalidation.
-- `app/(dashboard)` : espace vendeur, protégé par la session.
-- `app/(auth)/login` : connexion provisoire (remplacée par le SSO Flowmerce en Phase 3).
+- `app/(vendor)` : espace vendeur (layout racine avec la police de la marque) —
+  `(dashboard)` protégé par la session, `(auth)/login` (connexion provisoire, remplacée
+  par le SSO Flowmerce en Phase 3), `(editor)/edit` et `preview`.
+- `app/s/[host]` : sites publics, avec leur propre layout racine (langue du site,
+  polices système) ; rendu serveur de Puck, sans code de l'éditeur.
+- `blocks/` : un dossier par bloc (schéma zod, composant, réglages Puck) ;
+  `blocks/puck.config.ts` sert à l'éditeur comme au rendu public.

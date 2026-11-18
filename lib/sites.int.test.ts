@@ -37,3 +37,17 @@ it("ne montre jamais les sites d'un autre vendeur", async () => {
 it("renvoie une liste vide pour un utilisateur sans site", async () => {
   expect(await listSitesForOwner("inconnu")).toEqual([]);
 });
+
+it("donne l'identifiant de la page d'accueil, ou null s'il n'y en a pas", async () => {
+  const a = await owner("a@test.local");
+  const withHome = await site(a.tenant.id, "avec", new Date("2026-11-02"));
+  await site(a.tenant.id, "sans", new Date("2026-11-01"));
+  const home = await prisma.page.create({ data: { siteId: withHome.id, slug: "", title: "Accueil", draft: {} } });
+  await prisma.page.create({ data: { siteId: withHome.id, slug: "promo", title: "Promo", draft: {} } });
+
+  const sites = await listSitesForOwner(a.user.id);
+  expect(sites.map((s) => [s.subdomain, s.homePageId])).toEqual([
+    ["avec", home.id],
+    ["sans", null],
+  ]);
+});
