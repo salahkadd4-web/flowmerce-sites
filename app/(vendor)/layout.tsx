@@ -16,6 +16,8 @@ const jakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: "Flowmerce Sites",
+  // Même icône que flowmerce-web-app.
+  icons: { icon: "/logos/logo-mark.svg", apple: "/logos/logo-mark.svg" },
 };
 
 export default function RootLayout({

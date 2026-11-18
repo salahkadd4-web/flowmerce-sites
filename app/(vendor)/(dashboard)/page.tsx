@@ -2,7 +2,7 @@
 // Structure de liste reprise de flowmerce-web-app (app/dashboard/api-keys/page.tsx).
 
 import Link from "next/link";
-import { Eye, ExternalLink, Globe, PenLine, Plus } from "lucide-react";
+import { Eye, ExternalLink, Globe, PenLine, Plus, Truck } from "lucide-react";
 import {
   BTN_GHOST,
   BTN_PRIMARY,
@@ -82,24 +82,34 @@ export default async function SitesPage() {
                       {url.replace(/^https?:\/\//, "")}
                       <ExternalLink size={13} strokeWidth={2} aria-hidden />
                     </a>
+                  ) : site.status === "SUSPENDED" ? (
+                    <p className="mt-3 text-[13px] font-medium text-red-800">
+                      Site suspendu : il n&apos;est plus visible et ne peut pas être publié.
+                    </p>
                   ) : (
                     <p className="mt-3 text-[13px] text-body">
                       Pas encore en ligne : publiez-le depuis l&apos;éditeur.
                     </p>
                   )}
 
-                  {site.homePageId && (
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      <Link href={`/edit/${site.homePageId}`} className={BTN_GHOST}>
-                        <PenLine size={15} aria-hidden />
-                        Modifier la page
-                      </Link>
-                      <a href={`/preview/${site.homePageId}`} target="_blank" rel="noopener noreferrer" className={BTN_GHOST}>
-                        <Eye size={15} aria-hidden />
-                        Aperçu
-                      </a>
-                    </div>
-                  )}
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {site.homePageId && (
+                      <>
+                        <Link href={`/edit/${site.homePageId}`} className={BTN_GHOST}>
+                          <PenLine size={15} aria-hidden />
+                          Modifier la page
+                        </Link>
+                        <a href={`/preview/${site.homePageId}`} target="_blank" rel="noopener noreferrer" className={BTN_GHOST}>
+                          <Eye size={15} aria-hidden />
+                          Aperçu
+                        </a>
+                      </>
+                    )}
+                    <Link href={`/sites/${site.id}/livraison`} className={BTN_GHOST}>
+                      <Truck size={15} aria-hidden />
+                      Livraison
+                    </Link>
+                  </div>
                 </li>
               );
             })}
