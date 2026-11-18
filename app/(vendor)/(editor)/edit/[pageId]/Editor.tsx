@@ -10,7 +10,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AlertTriangle, ArrowLeft, Eye, Loader2, Save, Send } from "lucide-react";
 import { BTN_GHOST, BTN_PRIMARY, FOCUS, Notice } from "@/components/dashboard/ui";
 import { dictionaryFr } from "@/blocks/dictionary.fr";
-import { puckConfig } from "@/blocks/puck.config";
+import { editorConfig } from "./editor-config";
 import { publishPage, saveDraft, type EditorActionResult } from "./actions";
 
 type Status = "clean" | "dirty" | "saving" | "saved" | "publishing" | "published";
@@ -90,7 +90,7 @@ export function Editor({ pageId, site, initialData }: Props) {
       )}
       <div className="min-h-0 flex-1">
         <Puck
-          config={puckConfig}
+          config={editorConfig}
           data={initialData as Partial<Data>}
           dictionary={dictionaryFr}
           viewports={VIEWPORTS}

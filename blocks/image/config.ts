@@ -1,6 +1,6 @@
 import type { ComponentConfig } from "@puckeditor/core";
 import { createElement } from "react";
-import { MediaField } from "@/blocks/fields/MediaField";
+import { imageField } from "@/blocks/fields/image-field";
 import { ImageBlock } from "./ImageBlock";
 import type { ImageProps } from "./schema";
 
@@ -9,7 +9,7 @@ type Props = Omit<ImageProps, "id">;
 export const imageConfig: ComponentConfig<Props> = {
   label: "Image",
   fields: {
-    image: { type: "custom", label: "Image", render: MediaField },
+    image: imageField("Image"),
     alt: { type: "text", label: "Texte alternatif (décrit l'image)" },
     caption: { type: "text", label: "Légende" },
     width: {
