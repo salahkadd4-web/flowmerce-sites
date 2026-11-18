@@ -2,6 +2,7 @@
 // Fonctions pures (sans base) : utilisées par la gestion des commandes et l'interface.
 
 import type { DeliveryType, OrderStatus } from "@prisma/client";
+import { formatAlgerianPhone } from "@/lib/phone";
 
 /** Table des transitions (conception 1B/1C). RETURNED et CANCELLED sont définitifs. */
 export const ORDER_TRANSITIONS: Record<OrderStatus, readonly OrderStatus[]> = {
@@ -94,7 +95,8 @@ export function ordersToCsv(rows: OrderCsvRow[]): string {
       r.reference,
       r.siteName,
       r.customerName,
-      r.phone,
+      // Format courant « 0555 12 34 56 » : le « + » de +213… serait pris pour une formule.
+      formatAlgerianPhone(r.phone),
       r.wilaya,
       r.commune,
       r.address,

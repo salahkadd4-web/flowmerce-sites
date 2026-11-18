@@ -65,6 +65,12 @@ describe("export CSV", () => {
     expect(line).toContain("À domicile");
   });
 
+  it("écrit le téléphone au format courant, sans apostrophe", () => {
+    const csv = ordersToCsv([row]);
+    expect(csv).toContain(";0555 12 34 56;");
+    expect(csv).not.toContain("'+213");
+  });
+
   it("neutralise les formules (injection dans Excel)", () => {
     const csv = ordersToCsv([{ ...row, customerName: '=HYPERLINK("http://evil","clic")', address: "+33 rue", commune: "-1", items: "@SUM(A1)" }]);
     expect(csv).toContain(`"'=HYPERLINK(""http://evil"",""clic"")"`);
