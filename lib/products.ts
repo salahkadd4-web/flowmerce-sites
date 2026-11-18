@@ -62,19 +62,25 @@ export async function updateProductForUser(userId: string, productId: string, in
   const wanted = new Map(buildVariants(data.optionAxes).map((options) => [variantKey(options), options]));
   const current = new Map(existing.variants.map((v) => [variantKey(v.options as Record<string, string>), v]));
 
-  await prisma.$transaction([
+  const operations: Prisma.PrismaPromise<unknown>[] = [
     prisma.product.update({ where: { id: productId }, data: productData(data) }),
     prisma.variant.deleteMany({
       where: { productId, id: { in: [...current].filter(([key]) => !wanted.has(key)).map(([, v]) => v.id) } },
     }),
-    ...[...wanted].map(([key, options]) => {
+    ...[...wanted].flatMap(([key, options]): Prisma.PrismaPromise<unknown>[] => {
       const stock = data.stocks[key] ?? 0;
       const found = current.get(key);
-      return found
-        ? prisma.variant.update({ where: { id: found.id }, data: { stock } })
-        : prisma.variant.create({ data: { productId, options, stock } });
+      if (!found) return [prisma.variant.create({ data: { productId, options, stock } })];
+
+      const loaded = data.stocksLoaded?.[key];
+      if (loaded === undefined) return [prisma.variant.update({ where: { id: found.id }, data: { stock } })];
+      // Stock non modifié par le vendeur : on n'y touche pas (une confirmation a pu le baisser).
+      if (stock === loaded) return [];
+      // Sinon seulement l'écart voulu, appliqué au stock actuel, jamais sous zéro.
+      return [prisma.$executeRaw`UPDATE "Variant" SET "stock" = GREATEST("stock" + ${stock - loaded}, 0) WHERE "id" = ${found.id}`];
     }),
-  ]);
+  ];
+  await prisma.$transaction(operations);
   return { ok: true, productId };
 }
 

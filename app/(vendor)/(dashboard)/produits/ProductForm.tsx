@@ -55,6 +55,9 @@ export function ProductForm({ productId, initial }: { productId: string | null; 
       images,
       optionAxes: parsedAxes,
       stocks: Object.fromEntries(variants.map((v) => [variantKey(v), toNumber(stocks[variantKey(v)] ?? "") ?? 0])),
+      // Stock affiché à l'ouverture : seul l'écart est appliqué, les confirmations
+      // faites pendant l'édition ne sont pas effacées.
+      ...(productId ? { stocksLoaded: initial.stocks } : {}),
       active,
     };
     startTransition(async () => {

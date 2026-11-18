@@ -75,3 +75,36 @@ it("refuse un contenu invalide en nommant le champ", async () => {
   const result = await createProductForUser(A, { ...INPUT, price: 0 });
   expect(result).toMatchObject({ ok: false, field: "price" });
 });
+
+describe("stock modifié pendant l'édition (commande confirmée dans un autre onglet)", () => {
+  const SIMPLE = { ...INPUT, optionAxes: [], stocks: { "": 10 } };
+
+  async function productWithStock10() {
+    const created = await createProductForUser(A, SIMPLE);
+    if (!created.ok) throw new Error();
+    const variant = await prisma.variant.findFirstOrThrow({ where: { productId: created.productId } });
+    // Une confirmation retire 1 pendant que le formulaire affiche encore 10.
+    await prisma.variant.update({ where: { id: variant.id }, data: { stock: 9 } });
+    return { productId: created.productId, variantId: variant.id };
+  }
+  const stockOf = async (id: string) => (await prisma.variant.findUniqueOrThrow({ where: { id } })).stock;
+
+  it("ne réécrit pas un stock que le vendeur n'a pas modifié", async () => {
+    const { productId, variantId } = await productWithStock10();
+    await updateProductForUser(A, productId, { ...SIMPLE, price: 2600, stocksLoaded: { "": 10 } });
+    expect(await stockOf(variantId)).toBe(9);
+  });
+
+  it("applique seulement la différence voulue par le vendeur", async () => {
+    const { productId, variantId } = await productWithStock10();
+    await updateProductForUser(A, productId, { ...SIMPLE, stocks: { "": 15 }, stocksLoaded: { "": 10 } });
+    expect(await stockOf(variantId)).toBe(14);
+  });
+
+  it("ne descend jamais sous zéro", async () => {
+    const { productId, variantId } = await productWithStock10();
+    await prisma.variant.update({ where: { id: variantId }, data: { stock: 2 } });
+    await updateProductForUser(A, productId, { ...SIMPLE, stocks: { "": 5 }, stocksLoaded: { "": 10 } });
+    expect(await stockOf(variantId)).toBe(0);
+  });
+});

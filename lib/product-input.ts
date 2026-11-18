@@ -25,6 +25,9 @@ export const productInputSchema = z
       .max(2, "Deux options au plus")
       .refine((axes) => new Set(axes.map((a) => a.name)).size === axes.length, "Deux options portent le même nom"),
     stocks: z.record(z.number().int("Stock entier").min(0, "Stock positif").max(100_000)),
+    // Stock affiché quand le formulaire a été ouvert : le serveur n'applique que
+    // l'écart voulu par le vendeur, pour ne pas effacer les confirmations faites entre-temps.
+    stocksLoaded: z.record(z.number().int().min(0)).optional(),
     active: z.boolean(),
   })
   .refine((p) => p.comparePrice === null || p.comparePrice > p.price, {
