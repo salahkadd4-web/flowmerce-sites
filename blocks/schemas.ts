@@ -6,9 +6,11 @@ import type { z } from "zod";
 import { FOOTER_FIELD_LABELS, footerSchema } from "@/blocks/footer/schema";
 import { HERO_FIELD_LABELS, heroSchema } from "@/blocks/hero/schema";
 import { IMAGE_FIELD_LABELS, imageSchema } from "@/blocks/image/schema";
+import { ORDER_FORM_FIELD_LABELS, orderFormSchema } from "@/blocks/order-form/schema";
+import { PRODUCT_FIELD_LABELS, productSchema } from "@/blocks/product/schema";
 import { TEXT_FIELD_LABELS, textSchema } from "@/blocks/text/schema";
 
-export const BLOCK_TYPES = ["Hero", "Text", "Image", "Footer"] as const;
+export const BLOCK_TYPES = ["Hero", "Text", "Image", "Footer", "Product", "OrderForm"] as const;
 export type BlockType = (typeof BLOCK_TYPES)[number];
 
 export const BLOCK_SCHEMAS: Record<BlockType, z.ZodTypeAny> = {
@@ -16,6 +18,8 @@ export const BLOCK_SCHEMAS: Record<BlockType, z.ZodTypeAny> = {
   Text: textSchema,
   Image: imageSchema,
   Footer: footerSchema,
+  Product: productSchema,
+  OrderForm: orderFormSchema,
 };
 
 /** Nom du bloc tel que le vendeur le voit dans l'éditeur. */
@@ -24,6 +28,8 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   Text: "Texte",
   Image: "Image",
   Footer: "Pied de page",
+  Product: "Fiche produit",
+  OrderForm: "Formulaire de commande",
 };
 
 export const BLOCK_FIELD_LABELS: Record<BlockType, Record<string, string>> = {
@@ -31,6 +37,8 @@ export const BLOCK_FIELD_LABELS: Record<BlockType, Record<string, string>> = {
   Text: TEXT_FIELD_LABELS,
   Image: IMAGE_FIELD_LABELS,
   Footer: FOOTER_FIELD_LABELS,
+  Product: PRODUCT_FIELD_LABELS,
+  OrderForm: ORDER_FORM_FIELD_LABELS,
 };
 
 export function isBlockType(type: unknown): type is BlockType {

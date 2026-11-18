@@ -6,8 +6,8 @@ it("le modèle de landing page est un contenu valide", () => {
   expect(result.ok).toBe(true);
 });
 
-it("le modèle contient la bannière, le texte, l'image et le pied de page", () => {
-  expect(template.content.map((block) => block.type)).toEqual(["Hero", "Text", "Image", "Footer"]);
+it("le modèle contient bannière, fiche produit, texte, formulaire et pied de page", () => {
+  expect(template.content.map((block) => block.type)).toEqual(["Hero", "Product", "Text", "OrderForm", "Footer"]);
 });
 
 it("chaque bloc du modèle a un identifiant unique", () => {

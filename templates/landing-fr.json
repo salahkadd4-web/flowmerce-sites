@@ -1,5 +1,9 @@
 {
-  "root": { "props": { "title": "" } },
+  "root": {
+    "props": {
+      "title": ""
+    }
+  },
   "content": [
     {
       "type": "Hero",
@@ -15,6 +19,13 @@
       }
     },
     {
+      "type": "Product",
+      "props": {
+        "id": "product-1",
+        "buttonLabel": "Commander maintenant"
+      }
+    },
+    {
       "type": "Text",
       "props": {
         "id": "text-1",
@@ -24,13 +35,11 @@
       }
     },
     {
-      "type": "Image",
+      "type": "OrderForm",
       "props": {
-        "id": "image-1",
-        "image": null,
-        "alt": "Photo du produit",
-        "caption": "",
-        "width": "contained"
+        "id": "order-form-1",
+        "title": "Commandez maintenant, payez à la livraison",
+        "submitLabel": "Confirmer la commande"
       }
     },
     {
