@@ -11,6 +11,11 @@ const eslintConfig = [
     },
   },
   {
+    // Le seed affiche les identifiants de test : la sortie console est voulue.
+    files: ["prisma/seed.ts"],
+    rules: { "no-console": "off" },
+  },
+  {
     ignores: [".next/**", "out/**", "build/**", "next-env.d.ts", "generated/**", ".superpowers/**"],
   },
 ];
