@@ -7,8 +7,20 @@ const ROOT = "localhost";
 const CONTENT = {
   root: { props: { title: "Accueil" } },
   content: [
-    { type: "Heading", props: { id: "h1", text: "Bonjour" } },
-    { type: "Text", props: { id: "t1", text: "Texte" } },
+    {
+      type: "Hero",
+      props: {
+        id: "h1",
+        title: "Bonjour",
+        subtitle: "",
+        image: null,
+        buttonLabel: "",
+        buttonHref: "",
+        align: "center",
+        background: "light",
+      },
+    },
+    { type: "Text", props: { id: "t1", title: "", body: "Texte", align: "left" } },
   ],
 };
 
