@@ -64,7 +64,7 @@ describe("stock", () => {
   it("décrémente à la confirmation, refuse quand il ne suffit plus", async () => {
     const first = await order(1);
     const second = await order(2);
-    expect(await changeOrderStatus(A, first.id, "CONFIRMED")).toEqual({ ok: true });
+    expect(await changeOrderStatus(A, first.id, "CONFIRMED")).toMatchObject({ ok: true });
     expect(await stock()).toBe(1);
 
     expect(await changeOrderStatus(A, second.id, "CONFIRMED")).toEqual({ ok: false, error: "Stock insuffisant pour confirmer" });
@@ -147,5 +147,18 @@ describe("liste", () => {
     expect(all.total).toBe(2);
     expect(all.orders[0]).toMatchObject({ wilaya: "Alger", siteName: "Boutique", total: 2900, status: "NEW" });
     expect((await listOrdersForOwner(A.id, { status: "CANCELLED" })).orders.map((o) => o.id)).toEqual([first.id]);
+  });
+});
+
+describe("cache de la landing", () => {
+  it("signale quand le stock a bougé, pour rafraîchir la landing", async () => {
+    const confirmed = await order(1);
+    const tenantId = (await prisma.tenant.findUniqueOrThrow({ where: { ownerUserId: A.id } })).id;
+    expect(await changeOrderStatus(A, confirmed.id, "CONFIRMED")).toEqual({ ok: true, tenantId, stockMoved: true });
+    expect(await changeOrderStatus(A, confirmed.id, "SHIPPED")).toEqual({ ok: true, tenantId, stockMoved: false });
+    expect(await changeOrderStatus(A, confirmed.id, "RETURNED")).toEqual({ ok: true, tenantId, stockMoved: true });
+
+    const cancelled = await order(1);
+    expect(await changeOrderStatus(A, cancelled.id, "CANCELLED")).toEqual({ ok: true, tenantId, stockMoved: false });
   });
 });

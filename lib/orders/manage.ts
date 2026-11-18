@@ -118,7 +118,7 @@ export async function changeOrderStatus(
   orderId: string,
   to: OrderStatus,
   note?: string,
-): Promise<{ ok: true } | { ok: false; error: string }> {
+): Promise<{ ok: true; tenantId: string; stockMoved: boolean } | { ok: false; error: string }> {
   if (note !== undefined && note.length > NOTE_MAX) return { ok: false, error: `Note de ${NOTE_MAX} caractères au plus` };
 
   const order = await prisma.order.findFirst({
@@ -159,5 +159,6 @@ export async function changeOrderStatus(
     if (error instanceof StatusChangeError) return { ok: false, error: error.message };
     throw error;
   }
-  return { ok: true };
+  // stockMoved : la landing doit être rafraîchie (stock affiché).
+  return { ok: true, tenantId: order.tenantId, stockMoved: takeStock || giveBack };
 }
