@@ -20,10 +20,10 @@ const READ_METHODS = new Set(["GET", "HEAD"]);
 
 /**
  * API joignables depuis un site vendeur. Toute autre route `/api` y répond 404
- * (auth, envoi d'images, futures routes du tableau de bord). 1B ajoutera
- * `/api/orders` pour le formulaire COD.
+ * (auth, envoi d'images, futures routes du tableau de bord) :
+ * seules la commande COD et la liste des communes (/api/orders/…) passent.
  */
-export const SITE_API_ALLOWLIST: readonly string[] = [];
+export const SITE_API_ALLOWLIST: readonly string[] = ["/api/orders"];
 
 export function routeRequest(
   input: {

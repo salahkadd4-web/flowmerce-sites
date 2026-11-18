@@ -1,4 +1,4 @@
-import { routeRequest } from "@/lib/routing";
+import { routeRequest, SITE_API_ALLOWLIST } from "@/lib/routing";
 
 const cfg = { dashboardHost: "localhost:3000", siteApiAllowlist: ["/api/orders"] };
 const req = (host: string | null, pathname: string, search = "", method = "GET", isServerAction = false) => ({
@@ -86,6 +86,17 @@ describe("routeRequest — sites", () => {
   });
   it("réécrit l'accueil avec une query", () => {
     expect(routeRequest(req("test.localhost:3000", "/", "?a=1"), cfg)).toEqual({ kind: "site", rewritePath: "/s/test.localhost?a=1" });
+  });
+});
+
+describe("routeRequest — commandes sur un hôte de site", () => {
+  const live = { dashboardHost: "localhost:3000", siteApiAllowlist: SITE_API_ALLOWLIST };
+  it("laisse passer la commande et la liste des communes", () => {
+    expect(routeRequest(req("test.localhost:3000", "/api/orders", "", "POST"), live)).toEqual({ kind: "pass" });
+    expect(routeRequest(req("test.localhost:3000", "/api/orders/communes", "?wilaya=16"), live)).toEqual({ kind: "pass" });
+  });
+  it("refuse toujours l envoi d images", () => {
+    expect(routeRequest(req("test.localhost:3000", "/api/media", "", "POST"), live)).toEqual({ kind: "not-found" });
   });
 });
 
