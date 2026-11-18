@@ -38,12 +38,19 @@ it("ne renvoie pas le hash du mot de passe", async () => {
   expect(user).not.toHaveProperty("passwordHash");
 });
 
-it("calcule un bcrypt même pour un email inconnu (pas d'écart de temps révélant les comptes)", async () => {
-  const spy = vi.spyOn(bcrypt, "compare");
-  try {
-    expect(await authorizeCredentials("inconnu@test.local", "bon-mot-de-passe")).toBeNull();
-    expect(spy).toHaveBeenCalledTimes(1);
-  } finally {
-    spy.mockRestore();
+async function medianMs(fn: () => Promise<unknown>, runs = 5): Promise<number> {
+  const times: number[] = [];
+  for (let i = 0; i < runs; i++) {
+    const start = performance.now();
+    await fn();
+    times.push(performance.now() - start);
   }
+  return times.sort((a, b) => a - b)[Math.floor(runs / 2)];
+}
+
+it("répond à un email inconnu en un temps comparable à un mauvais mot de passe", async () => {
+  // Sans bcrypt sur le chemin « inconnu », le rapport tombe vers 1/20 (requête seule).
+  const wrongPassword = await medianMs(() => authorizeCredentials("vendeur@test.local", "mauvais"));
+  const unknownEmail = await medianMs(() => authorizeCredentials("inconnu@test.local", "mauvais"));
+  expect(unknownEmail).toBeGreaterThan(wrongPassword * 0.5);
 });
