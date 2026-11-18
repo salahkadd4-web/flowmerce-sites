@@ -9,6 +9,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { puckConfig } from "@/blocks/puck.config";
 import { pageTitle } from "@/lib/page-title";
+import { getStorefront } from "@/lib/storefront";
 import { getPage, getSiteByHost } from "@/lib/tenant";
 
 type Props = { params: Promise<{ host: string; slug?: string[] }> };
@@ -34,11 +35,15 @@ export default async function SitePage({ params }: Props) {
   const data = await load(params);
   if (!data) notFound();
 
+  // Produit de la page et frais du site, relus à chaque rendu (en cache, invalidés
+  // quand le vendeur les modifie) : passés aux blocs par la metadata de Puck.
+  const storefront = await getStorefront(data.site, data.page.content.root.props.productId);
+
   // Rendu serveur de Puck : aucun code de l'éditeur n'est envoyé à l'acheteur.
   // Le contenu a déjà été filtré bloc par bloc par parsePageContent.
   return (
     <main className="min-h-dvh">
-      <Render config={puckConfig} data={data.page.content as Data} />
+      <Render config={puckConfig} data={data.page.content as Data} metadata={storefront} />
     </main>
   );
 }

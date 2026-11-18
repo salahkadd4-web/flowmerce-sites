@@ -15,7 +15,7 @@ export type OwnedPage = {
   title: string;
   draft: Prisma.JsonValue;
   published: Prisma.JsonValue | null;
-  site: { id: string; name: string; subdomain: string; status: SiteStatus };
+  site: { id: string; tenantId: string; name: string; subdomain: string; status: SiteStatus };
 };
 
 export function findOwnedPage(userId: string, pageId: string): Promise<OwnedPage | null> {
@@ -26,7 +26,7 @@ export function findOwnedPage(userId: string, pageId: string): Promise<OwnedPage
       title: true,
       draft: true,
       published: true,
-      site: { select: { id: true, name: true, subdomain: true, status: true } },
+      site: { select: { id: true, tenantId: true, name: true, subdomain: true, status: true } },
     },
   });
 }

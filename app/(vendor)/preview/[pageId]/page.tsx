@@ -9,6 +9,7 @@ import { puckConfig } from "@/blocks/puck.config";
 import { auth } from "@/lib/auth";
 import { parsePageContent } from "@/lib/page-content";
 import { findOwnedPage } from "@/lib/pages";
+import { loadStorefront } from "@/lib/storefront";
 
 export const metadata: Metadata = { title: "Aperçu — Flowmerce Sites", robots: { index: false } };
 
@@ -23,6 +24,8 @@ export default async function PreviewPage({ params }: { params: Promise<{ pageId
   if (!page) notFound();
 
   const content = parsePageContent(page.draft) ?? { root: { props: {} }, content: [] };
+  // Sans cache : l'aperçu montre l'état exact du produit et des frais.
+  const storefront = await loadStorefront(page.site, content.root.props.productId);
 
   return (
     <div className="min-h-dvh bg-white" style={{ fontFamily: SYSTEM_FONTS }}>
@@ -30,7 +33,7 @@ export default async function PreviewPage({ params }: { params: Promise<{ pageId
         Aperçu — non publié. Les acheteurs ne voient pas encore ces modifications.
       </p>
       <main>
-        <Render config={puckConfig} data={content as Data} />
+        <Render config={puckConfig} data={content as Data} metadata={storefront} />
       </main>
     </div>
   );

@@ -72,3 +72,26 @@ describe("parsePageContent (tolérant, à l'affichage)", () => {
     expect(parsePageContent(null)).toBeNull();
   });
 });
+
+describe("produit de la page (root.props.productId)", () => {
+  it("est accepté à l'enregistrement et conservé", () => {
+    const result = validatePageContent({ root: { props: { title: "Accueil", productId: "prod-1" } }, content: [HERO] });
+    expect(result.ok).toBe(true);
+    if (result.ok) expect(result.content.root.props).toEqual({ title: "Accueil", productId: "prod-1" });
+  });
+
+  it("est refusé s'il n'est pas une chaîne", () => {
+    expect(validatePageContent({ root: { props: { productId: 42 } }, content: [] }).ok).toBe(false);
+  });
+
+  it("est ignoré à l'affichage s'il est invalide, sans casser la page", () => {
+    const parsed = parsePageContent({ root: { props: { productId: { evil: true } } }, content: [HERO] });
+    expect(parsed?.root.props).toEqual({});
+    expect(parsed?.content).toHaveLength(1);
+  });
+
+  it("vide compte comme absent", () => {
+    const result = validatePageContent({ root: { props: { productId: "" } }, content: [] });
+    expect(result.ok && result.content.root.props).toEqual({});
+  });
+});

@@ -10,7 +10,13 @@ import { z } from "zod";
 import { BLOCK_FIELD_LABELS, BLOCK_LABELS, BLOCK_SCHEMAS, isBlockType } from "@/blocks/schemas";
 
 export type PageBlock = { type: string; props: Record<string, unknown> };
-export type PageContent = { root: { props: { title?: string } }; content: PageBlock[] };
+export type PageContent = { root: { props: { title?: string; productId?: string } }; content: PageBlock[] };
+
+/** Slugs pris par les pages système d'un site (app/s/[host]/merci…). */
+export const RESERVED_PAGE_SLUGS: readonly string[] = ["merci"];
+
+const isTitle = (value: unknown): value is string => typeof value === "string" && value.length <= 120;
+const isProductId = (value: unknown): value is string => typeof value === "string" && value.length <= 40;
 
 const RootSchema = z
   .object({ props: z.record(z.unknown()).default({}) })
@@ -25,9 +31,12 @@ const PageShapeSchema = z.object({
 
 const RawBlockSchema = z.object({ type: z.string(), props: z.record(z.unknown()) });
 
+/** Réglages de la page reconnus ; une valeur invalide ou vide est ignorée. */
 function rootProps(props: Record<string, unknown>): PageContent["root"]["props"] {
-  const title = props.title;
-  return typeof title === "string" && title.length <= 120 ? { title } : {};
+  return {
+    ...(isTitle(props.title) ? { title: props.title } : {}),
+    ...(isProductId(props.productId) && props.productId !== "" ? { productId: props.productId } : {}),
+  };
 }
 
 type BlockCheck = { ok: true; block: PageBlock } | { ok: false; error: string };
@@ -53,10 +62,9 @@ export function validatePageContent(
   const shape = PageShapeSchema.safeParse(json);
   if (!shape.success) return { ok: false, error: "Contenu de page invalide" };
 
-  const title = shape.data.root.props.title;
-  if (title !== undefined && (typeof title !== "string" || title.length > 120)) {
-    return { ok: false, error: "« Titre de la page » invalide" };
-  }
+  const { title, productId } = shape.data.root.props;
+  if (title !== undefined && !isTitle(title)) return { ok: false, error: "« Titre de la page » invalide" };
+  if (productId !== undefined && !isProductId(productId)) return { ok: false, error: "« Produit de la page » invalide" };
 
   const blocks: PageBlock[] = [];
   for (const raw of shape.data.content) {
