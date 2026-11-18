@@ -15,8 +15,17 @@ function isUnder(pathname: string, prefix: string): boolean {
   return pathname === prefix || pathname.startsWith(prefix + "/");
 }
 
+const READ_METHODS = new Set(["GET", "HEAD"]);
+
 export function routeRequest(
-  input: { host: string | null; pathname: string; search: string },
+  input: {
+    host: string | null;
+    pathname: string;
+    search: string;
+    method: string;
+    /** La requête porte l'en-tête `Next-Action` (appel de server action). */
+    isServerAction: boolean;
+  },
   cfg: { dashboardHost: string },
 ): RouteDecision {
   const host = input.host?.trim();
@@ -28,10 +37,16 @@ export function routeRequest(
     return isUnder(input.pathname, "/s") ? { kind: "not-found" } : { kind: "pass" };
   }
 
-  // Site vendeur. L'authentification n'existe que sur l'hôte vendeur (§7).
+  // Site vendeur. Next exécute un server action d'après l'en-tête `Next-Action`,
+  // quelle que soit la page visée : sans ce refus, la connexion et toute action
+  // du tableau de bord seraient appelables depuis n'importe quel site vendeur.
+  if (input.isServerAction) return { kind: "not-found" };
+  // L'authentification n'existe que sur l'hôte vendeur (§7).
   if (isUnder(input.pathname, "/api/auth")) return { kind: "not-found" };
   // Les autres API (commandes COD en Phase 1) sont servies telles quelles.
   if (isUnder(input.pathname, "/api")) return { kind: "pass" };
+  // Les pages d'un site sont en lecture seule.
+  if (!READ_METHODS.has(input.method.toUpperCase())) return { kind: "not-found" };
 
   const path = input.pathname === "/" ? "" : input.pathname;
   return {

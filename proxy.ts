@@ -12,6 +12,8 @@ export function proxy(request: NextRequest): NextResponse {
       host: request.headers.get("host"),
       pathname: request.nextUrl.pathname,
       search: request.nextUrl.search,
+      method: request.method,
+      isServerAction: request.headers.has("next-action"),
     },
     { dashboardHost: env.DASHBOARD_HOST },
   );

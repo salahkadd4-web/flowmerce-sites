@@ -12,7 +12,8 @@ import { env } from "@/lib/env";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: env.AUTH_SECRET,
-  // L'hôte est contrôlé par proxy.ts : l'auth n'est joignable que sur DASHBOARD_HOST.
+  // L'hôte est contrôlé par proxy.ts : /api/auth et les server actions (dont
+  // loginAction) ne sont joignables que sur DASHBOARD_HOST (lib/routing.ts).
   trustHost: true,
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },

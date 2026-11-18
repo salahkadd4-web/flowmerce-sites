@@ -1,7 +1,35 @@
 import { routeRequest } from "@/lib/routing";
 
 const cfg = { dashboardHost: "localhost:3000" };
-const req = (host: string | null, pathname: string, search = "") => ({ host, pathname, search });
+const req = (host: string | null, pathname: string, search = "", method = "GET", isServerAction = false) => ({
+  host,
+  pathname,
+  search,
+  method,
+  isServerAction,
+});
+
+describe("routeRequest — écritures sur un hôte de site", () => {
+  it("refuse un server action, quelle que soit la page visée", () => {
+    expect(routeRequest(req("test.localhost:3000", "/", "", "POST", true), cfg)).toEqual({ kind: "not-found" });
+    expect(routeRequest(req("test.localhost:3000", "/promo", "", "POST", true), cfg)).toEqual({ kind: "not-found" });
+  });
+  it("refuse l'en-tête de server action même sur une API", () => {
+    expect(routeRequest(req("test.localhost:3000", "/api/orders", "", "POST", true), cfg)).toEqual({ kind: "not-found" });
+  });
+  it("refuse un POST vers une page", () => {
+    expect(routeRequest(req("test.localhost:3000", "/", "", "POST"), cfg)).toEqual({ kind: "not-found" });
+  });
+  it("accepte un POST vers une API autorisée", () => {
+    expect(routeRequest(req("test.localhost:3000", "/api/orders", "", "POST"), cfg)).toEqual({ kind: "pass" });
+  });
+  it("sert une requête HEAD comme un GET", () => {
+    expect(routeRequest(req("test.localhost:3000", "/", "", "HEAD"), cfg)).toEqual({ kind: "site", rewritePath: "/s/test.localhost" });
+  });
+  it("laisse les server actions de l'espace vendeur", () => {
+    expect(routeRequest(req("localhost:3000", "/login", "", "POST", true), cfg)).toEqual({ kind: "pass" });
+  });
+});
 
 describe("routeRequest — hôte vendeur", () => {
   it("laisse passer l'espace vendeur", () => {
