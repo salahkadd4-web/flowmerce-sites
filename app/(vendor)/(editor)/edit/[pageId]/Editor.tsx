@@ -6,11 +6,14 @@
 import "@puckeditor/core/puck.css";
 import { Puck, useGetPuck, type Data } from "@puckeditor/core";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, ArrowLeft, Eye, Loader2, Save, Send } from "lucide-react";
 import { BTN_GHOST, BTN_PRIMARY, FOCUS, Notice } from "@/components/dashboard/ui";
 import { dictionaryFr } from "@/blocks/dictionary.fr";
-import { editorConfig } from "./editor-config";
+import type { PublicProduct } from "@/lib/product-input";
+import type { ShippingOption } from "@/lib/shipping";
+import type { StorefrontMetadata } from "@/lib/storefront";
+import { buildEditorConfig } from "./editor-config";
 import { publishPage, saveDraft, type EditorActionResult } from "./actions";
 import { installKeyboardEventGuard } from "./keyboard-event-guard";
 
@@ -20,7 +23,15 @@ type Props = {
   pageId: string;
   site: { name: string; url: string; published: boolean };
   initialData: unknown;
+  /** Produits actifs du vendeur et frais du site : mêmes données que le site public. */
+  products: PublicProduct[];
+  shipping: ShippingOption[];
 };
+
+function productIdOf(data: unknown): string | undefined {
+  const value = (data as { root?: { props?: { productId?: unknown } } } | null)?.root?.props?.productId;
+  return typeof value === "string" && value !== "" ? value : undefined;
+}
 
 const VIEWPORTS = [
   { width: 360, height: "auto" as const, label: "Mobile" },
@@ -36,8 +47,19 @@ const STATUS_TEXT: Record<Status, string> = {
   published: "Publié",
 };
 
-export function Editor({ pageId, site, initialData }: Props) {
+export function Editor({ pageId, site, initialData, products, shipping }: Props) {
   const [status, setStatus] = useState<Status>("clean");
+  const config = useMemo(() => buildEditorConfig(products), [products]);
+  // Produit de la page suivi en direct : la fiche et le formulaire s'affichent dès qu'il est choisi.
+  const [pageProductId, setPageProductId] = useState(() => productIdOf(initialData));
+  const metadata = useMemo<StorefrontMetadata>(
+    () => ({
+      products: Object.fromEntries(products.map((p) => [p.id, p])),
+      shipping,
+      ...(pageProductId ? { pageProductId } : {}),
+    }),
+    [products, shipping, pageProductId],
+  );
   const [error, setError] = useState("");
   const [isOnline, setIsOnline] = useState(site.published);
   // Dernier contenu enregistré : « modifié » se compare à lui, pas au premier onChange.
@@ -56,6 +78,7 @@ export function Editor({ pageId, site, initialData }: Props) {
   }, [status]);
 
   const onChange = useCallback((data: Data) => {
+    setPageProductId(productIdOf(data));
     setStatus((current) => {
       if (current === "saving" || current === "publishing") return current;
       return JSON.stringify(data) === savedSnapshot.current ? current : "dirty";
@@ -116,7 +139,8 @@ export function Editor({ pageId, site, initialData }: Props) {
       )}
       <div className="min-h-0 flex-1">
         <Puck
-          config={editorConfig}
+          config={config}
+          metadata={metadata}
           data={initialData as Partial<Data>}
           dictionary={dictionaryFr}
           viewports={VIEWPORTS}

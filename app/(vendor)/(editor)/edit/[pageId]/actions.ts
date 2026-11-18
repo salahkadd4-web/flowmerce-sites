@@ -19,15 +19,21 @@ async function currentUserId(): Promise<string | null> {
   return session?.user?.id ?? null;
 }
 
-export async function saveDraft(pageId: string, data: unknown): Promise<EditorActionResult> {
+// Les arguments d'une server action arrivent du navigateur : un objet à la place
+// de l'identifiant deviendrait un filtre Prisma.
+const NOT_FOUND: EditorActionResult = { ok: false, error: "Page introuvable" };
+
+export async function saveDraft(pageId: unknown, data: unknown): Promise<EditorActionResult> {
   const userId = await currentUserId();
   if (!userId) return { ok: false, error: "Votre session a expiré. Reconnectez-vous." };
+  if (typeof pageId !== "string") return NOT_FOUND;
   return saveDraftForUser(userId, pageId, data);
 }
 
-export async function publishPage(pageId: string, data: unknown): Promise<EditorActionResult> {
+export async function publishPage(pageId: unknown, data: unknown): Promise<EditorActionResult> {
   const userId = await currentUserId();
   if (!userId) return { ok: false, error: "Votre session a expiré. Reconnectez-vous." };
+  if (typeof pageId !== "string") return NOT_FOUND;
 
   const result = await publishPageForUser(userId, pageId, data);
   if (!result.ok) return result;
