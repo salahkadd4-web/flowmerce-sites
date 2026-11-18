@@ -24,10 +24,38 @@ export function isSafeHref(href: string): boolean {
   }
 }
 
-export const hrefSchema = z.string().trim().max(500).refine(isSafeHref);
+// « facebook.com/maboutique », « www.instagram.com/x », « wa.me/213… » : un nom de
+// domaine avec au moins un point, sans schéma — la saisie la plus courante.
+const BARE_DOMAIN = /^(?:[a-z0-9-]+\.)+[a-z]{2,}(?:[/?#]\S*)?$/i;
+
+/** Ajoute https:// à un lien saisi sans schéma ; laisse tout le reste tel quel. */
+export function withDefaultScheme(value: unknown): unknown {
+  if (typeof value !== "string") return value;
+  const trimmed = value.trim();
+  return BARE_DOMAIN.test(trimmed) ? `https://${trimmed}` : trimmed;
+}
+
+const strictHref = z.string().max(500).refine(isSafeHref);
+
+export const hrefSchema = z.preprocess(withDefaultScheme, strictHref);
 
 /** Lien facultatif : chaîne vide = pas de lien. */
-export const optionalHrefSchema = z.union([z.literal(""), hrefSchema]);
+export const optionalHrefSchema = z.preprocess(withDefaultScheme, z.union([z.literal(""), strictHref]));
+
+/** Téléphone tel qu'il s'écrit en Algérie : chiffres, +, espaces, points, tirets, parenthèses. */
+export const phoneSchema = z.union([
+  z.literal(""),
+  z
+    .string()
+    .trim()
+    .regex(/^[+0-9 .()-]{3,25}$/)
+    .refine((value) => (value.match(/\d/g) ?? []).length >= 3),
+]);
+
+/** Lien tel: : seuls les chiffres et le + initial comptent. */
+export function telHref(phone: string): string {
+  return `tel:${phone.replace(/[^+0-9]/g, "")}`;
+}
 
 /** Image envoyée par le vendeur (lib/media.ts) : chemin /media/<clé>. */
 export const mediaSchema = z.object({

@@ -1,10 +1,10 @@
 import { z } from "zod";
-import { optionalHrefSchema, text } from "@/blocks/shared";
+import { optionalHrefSchema, phoneSchema, text } from "@/blocks/shared";
 
 export const footerSchema = z.object({
   id: z.string(),
   shopName: text(80),
-  phone: z.union([z.literal(""), z.string().trim().regex(/^[+0-9 ]{3,20}$/)]),
+  phone: phoneSchema,
   email: z.union([z.literal(""), z.string().trim().email().max(120)]),
   facebook: optionalHrefSchema,
   instagram: optionalHrefSchema,

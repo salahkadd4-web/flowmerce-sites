@@ -11,9 +11,9 @@ export const footerConfig: ComponentConfig<Props> = {
     shopName: { type: "text", label: "Nom de la boutique" },
     phone: { type: "text", label: "Téléphone" },
     email: { type: "text", label: "Email" },
-    facebook: { type: "text", label: "Lien Facebook" },
-    instagram: { type: "text", label: "Lien Instagram" },
-    tiktok: { type: "text", label: "Lien TikTok" },
+    facebook: { type: "text", label: "Lien Facebook (ex. facebook.com/maboutique)" },
+    instagram: { type: "text", label: "Lien Instagram (ex. instagram.com/maboutique)" },
+    tiktok: { type: "text", label: "Lien TikTok (ex. tiktok.com/@maboutique)" },
     returnPolicy: { type: "textarea", label: "Politique de retour" },
   },
   defaultProps: {

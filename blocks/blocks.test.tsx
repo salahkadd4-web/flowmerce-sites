@@ -96,3 +96,10 @@ describe("Footer", () => {
     expect(html).toContain('href="mailto:contact@boutique.dz"');
   });
 });
+
+describe("Footer — téléphone", () => {
+  it("compose le lien tel: avec les seuls chiffres", () => {
+    const html = renderToStaticMarkup(<Footer {...footerConfig.defaultProps!} phone="0555-12-34-56" />);
+    expect(html).toContain('href="tel:0555123456"');
+  });
+});

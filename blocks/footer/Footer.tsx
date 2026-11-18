@@ -1,7 +1,7 @@
 // Pied de page : contacts, réseaux sociaux, politique de retour.
 // Chaque lien repasse par isSafeHref au rendu, même s'il a été validé à l'enregistrement.
 
-import { isSafeHref } from "@/blocks/shared";
+import { isSafeHref, telHref } from "@/blocks/shared";
 import type { FooterProps } from "./schema";
 
 const SOCIALS = [
@@ -14,7 +14,7 @@ const LINK = "font-semibold text-white hover:underline focus-visible:outline-2 f
 
 export function Footer(props: Omit<FooterProps, "id">) {
   const { shopName, phone, email, returnPolicy } = props;
-  const tel = phone ? `tel:${phone.replace(/\s+/g, "")}` : "";
+  const tel = phone ? telHref(phone) : "";
   const mail = email ? `mailto:${email}` : "";
   const socials = SOCIALS.filter(({ key }) => props[key] !== "" && isSafeHref(props[key]));
 
