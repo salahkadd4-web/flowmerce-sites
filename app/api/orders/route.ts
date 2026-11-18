@@ -4,6 +4,7 @@
 import { NextResponse } from "next/server";
 import { isDashboardHost } from "@/lib/dashboard-host";
 import { env } from "@/lib/env";
+import { readLimitedText } from "@/lib/http-body";
 import { checkOrderRequest } from "@/lib/orders/http";
 import { createOrder } from "@/lib/orders/intake";
 
@@ -23,12 +24,13 @@ export async function POST(request: Request) {
   });
   if (refused) return NextResponse.json({ error: refused }, { status: 403 });
 
-  const text = await request.text();
-  if (text.length > MAX_BODY_BYTES) return NextResponse.json({ error: "Requête trop volumineuse" }, { status: 413 });
+  // Lecture bornée : refus sur Content-Length, puis arrêt dès que la limite est dépassée.
+  const read = await readLimitedText(request, MAX_BODY_BYTES);
+  if (!read.ok) return NextResponse.json({ error: "Requête trop volumineuse" }, { status: 413 });
 
   let body: unknown;
   try {
-    body = JSON.parse(text);
+    body = JSON.parse(read.text);
   } catch {
     return NextResponse.json({ error: "Requête invalide" }, { status: 400 });
   }
