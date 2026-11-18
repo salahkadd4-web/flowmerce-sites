@@ -30,14 +30,13 @@ model User {
 model Tenant {
   id                String   @id @default(cuid())
   name              String
-  ownerUserId       String                        // utilisateur du compte unique
+  ownerUserId       String   @unique              // utilisateur du compte unique — un tenant par vendeur (§4.5)
   flowmerceSellerId String?  @unique              // vendeur côté Flowmerce
   flowmerceApiKey   String?                       // chiffrée
   sites             Site[]
+  media             Media[]
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-
-  @@index([ownerUserId])
 }
 
 // ───────── Sites et pages ─────────
@@ -69,10 +68,41 @@ model Page {
   draft     Json                                // JSON Puck en cours d'édition
   published Json?                               // dernière version publiée
   seo       Json?
+  versions  PageVersion[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([siteId, slug])
+}
+
+// Une ligne par publication (§5). Interface d'historique et de restauration en Phase 3.
+model PageVersion {
+  id          String   @id @default(cuid())
+  pageId      String
+  page        Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  content     Json
+  publishedAt DateTime @default(now())
+
+  @@index([pageId, publishedAt])
+}
+
+// ───────── Médias ─────────
+
+// Image envoyée par un vendeur. key = nom du fichier dans le stockage
+// (32 hex + extension) ; url = chemin public (/media/<key> en local).
+model Media {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  key       String   @unique
+  url       String
+  mimeType  String
+  width     Int
+  height    Int
+  sizeBytes Int
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
 }
 
 // ───────── Énumérations ─────────

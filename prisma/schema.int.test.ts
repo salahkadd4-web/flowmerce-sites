@@ -38,3 +38,33 @@ it("refuse deux pages avec le même slug sur un site", async () => {
   await prisma.page.create({ data: page });
   await expect(prisma.page.create({ data: page })).rejects.toMatchObject({ code: "P2002" });
 });
+
+it("refuse deux tenants pour le même utilisateur", async () => {
+  await prisma.tenant.create({ data: { name: "A", ownerUserId: "same-user" } });
+  await expect(prisma.tenant.create({ data: { name: "B", ownerUserId: "same-user" } })).rejects.toMatchObject({
+    code: "P2002",
+  });
+});
+
+it("supprime versions et médias avec le tenant", async () => {
+  const tenant = await createTenant();
+  const site = await prisma.site.create({ data: siteData(tenant.id, "versions") });
+  const page = await prisma.page.create({ data: { siteId: site.id, slug: "", title: "Accueil", draft: {} } });
+  await prisma.pageVersion.create({ data: { pageId: page.id, content: {} } });
+  await prisma.media.create({
+    data: {
+      tenantId: tenant.id,
+      key: "a".repeat(32) + ".png",
+      url: "/media/" + "a".repeat(32) + ".png",
+      mimeType: "image/png",
+      width: 1,
+      height: 1,
+      sizeBytes: 68,
+    },
+  });
+
+  await prisma.tenant.delete({ where: { id: tenant.id } });
+
+  expect(await prisma.pageVersion.count()).toBe(0);
+  expect(await prisma.media.count()).toBe(0);
+});
