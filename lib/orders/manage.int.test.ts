@@ -28,7 +28,7 @@ async function order(quantity: number) {
       address: "1 rue de test",
       deliveryType: "HOME",
       website: "",
-      startedAt: Date.now() - 60_000,
+      elapsedMs: 60_000,
     },
   );
   if (!result.ok) throw new Error(result.error);

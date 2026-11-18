@@ -46,10 +46,10 @@ export function OrderForm({ product, shipping, title, submitLabel }: Props) {
 
   // Fixés à l'ouverture : la même clé rend un nouvel envoi idempotent (double clic,
   // nouvel essai après une coupure réseau).
-  const startedAt = useRef(0);
+  const openedAt = useRef(0);
   const idempotencyKey = useRef("");
   useEffect(() => {
-    startedAt.current = Date.now();
+    openedAt.current = performance.now();
     idempotencyKey.current = crypto.randomUUID();
   }, []);
 
@@ -117,7 +117,7 @@ export function OrderForm({ product, shipping, title, submitLabel }: Props) {
           address,
           deliveryType,
           website,
-          startedAt: startedAt.current,
+          elapsedMs: Math.round(performance.now() - openedAt.current),
           ...(Object.keys(source).length ? { source } : {}),
         }),
       });

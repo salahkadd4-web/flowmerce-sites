@@ -36,7 +36,9 @@ export const orderInputSchema = z.object({
   address: z.string().trim().min(5).max(200),
   deliveryType: z.enum(["HOME", "OFFICE"]),
   website: z.string().max(200),
-  startedAt: z.number(),
+  // Temps passé sur le formulaire, mesuré par le navigateur lui-même (performance.now) :
+  // comparer l'heure du téléphone à celle du serveur refusait les téléphones en avance.
+  elapsedMs: z.number().min(0).max(86_400_000),
   source: z
     .object({ utm_source: utm, utm_medium: utm, utm_campaign: utm, utm_content: utm, utm_term: utm })
     .partial()
@@ -84,7 +86,7 @@ export async function createOrder(
   const input = parsed.data;
 
   // Robots : champ piège rempli ou formulaire envoyé trop vite. Message générique.
-  if (input.website !== "" || Date.now() - input.startedAt < MIN_FILL_MS) {
+  if (input.website !== "" || input.elapsedMs < MIN_FILL_MS) {
     return fail(400, "Votre commande n'a pas pu être envoyée. Réessayez dans un instant.");
   }
 

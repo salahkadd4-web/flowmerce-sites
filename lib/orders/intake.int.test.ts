@@ -9,7 +9,7 @@ import { resetDb } from "@/lib/test/db";
 const A = { id: "user-a", name: "A", email: "a@test.local" };
 const B = { id: "user-b", name: "B", email: "b@test.local" };
 const HOST = "boutique.localhost:3100";
-const LONG_AGO = Date.now() - 60_000;
+
 
 let productId: string;
 let variant39: string;
@@ -34,7 +34,7 @@ function body(overrides: Record<string, unknown> = {}) {
     address: "12 rue Didouche Mourad",
     deliveryType: "HOME",
     website: "",
-    startedAt: LONG_AGO,
+    elapsedMs: 60_000,
     ...overrides,
   };
 }
@@ -126,6 +126,19 @@ describe("commande valide", () => {
   });
 });
 
+describe("horloge du téléphone", () => {
+  it("accepte la commande d'un téléphone dont l'horloge avance (le délai est mesuré par le formulaire)", async () => {
+    // L'ancien protocole envoyait l'heure du téléphone : 2 minutes d'avance suffisaient à refuser.
+    const result = await createOrder(ctx(), body({ elapsedMs: 8000, startedAt: Date.now() + 120_000 }));
+    expect(result).toMatchObject({ ok: true });
+  });
+
+  it("refuse un délai négatif ou absent", async () => {
+    expect(await createOrder(ctx(), body({ elapsedMs: -5 }))).toMatchObject({ ok: false, status: 400 });
+    expect(await createOrder(ctx(), body({ elapsedMs: undefined }))).toMatchObject({ ok: false, status: 400 });
+  });
+});
+
 describe("idempotence", () => {
   it("renvoie la même commande pour la même clé", async () => {
     const payload = body();
@@ -196,7 +209,7 @@ describe("refus", () => {
 
   it("refuse silencieusement un robot (champ piège rempli ou envoi trop rapide)", async () => {
     expect(await createOrder(ctx(), body({ website: "http://spam" }))).toMatchObject({ ok: false, status: 400 });
-    expect(await createOrder(ctx(), body({ startedAt: Date.now() - 1000 }))).toMatchObject({ ok: false, status: 400 });
+    expect(await createOrder(ctx(), body({ elapsedMs: 1000 }))).toMatchObject({ ok: false, status: 400 });
     expect(await prisma.order.count()).toBe(0);
   });
 });
