@@ -1,4 +1,4 @@
-import { buildVariants, productInputSchema, toPublicProduct, variantKey } from "@/lib/product-input";
+import { buildVariants, parseOptionValues, productInputSchema, toPublicProduct, variantKey } from "@/lib/product-input";
 
 const VALID = {
   name: "Chaussure cuir",
@@ -78,5 +78,13 @@ describe("toPublicProduct", () => {
       { id: "v2", options: { Taille: "40" }, inStock: false },
     ]);
     expect(JSON.stringify(product)).not.toContain("stock\"");
+  });
+});
+
+describe("parseOptionValues", () => {
+  it("découpe sur les virgules, retire espaces, vides et doublons", () => {
+    expect(parseOptionValues(" 38, 39 ,40,, 39 ")).toEqual(["38", "39", "40"]);
+    expect(parseOptionValues("Noir")).toEqual(["Noir"]);
+    expect(parseOptionValues("  ,  ")).toEqual([]);
   });
 });

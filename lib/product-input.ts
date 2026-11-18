@@ -42,6 +42,11 @@ export function variantKey(options: Record<string, string>): string {
     .join("|");
 }
 
+/** « 38, 39 ,40 » → ["38", "39", "40"] : valeurs d'une option saisies par le vendeur. */
+export function parseOptionValues(input: string): string[] {
+  return [...new Set(input.split(",").map((v) => v.trim()).filter(Boolean))];
+}
+
 /** Toutes les combinaisons des axes ; une variante unique {} sans axe. */
 export function buildVariants(axes: OptionAxis[]): Record<string, string>[] {
   return axes.reduce<Record<string, string>[]>(

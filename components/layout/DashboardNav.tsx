@@ -1,17 +1,19 @@
 "use client";
 
 // Navigation de l'espace vendeur — même lien que flowmerce-web-app
-// (components/layout/DashboardNav.tsx, NavLink). Phase 0 : une seule entrée.
+// (components/layout/DashboardNav.tsx, NavLink).
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Globe, type LucideIcon } from "lucide-react";
+import { Globe, Package, ShoppingBag, type LucideIcon } from "lucide-react";
 import { FOCUS } from "@/components/dashboard/ui";
 
 type NavItem = { href: string; label: string; sublabel: string; Icon: LucideIcon; exact: boolean };
 
 const NAV_LINKS: NavItem[] = [
   { href: "/", label: "Mes sites", sublabel: "Landing pages et boutiques", Icon: Globe, exact: true },
+  { href: "/produits", label: "Produits", sublabel: "Catalogue et stock", Icon: Package, exact: false },
+  { href: "/commandes", label: "Commandes", sublabel: "À confirmer, à expédier", Icon: ShoppingBag, exact: false },
 ];
 
 function NavLink({ item, active }: { item: NavItem; active: boolean }) {
