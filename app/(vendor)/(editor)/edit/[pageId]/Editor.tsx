@@ -58,7 +58,7 @@ export function Editor({ pageId, site, initialData }: Props) {
   }, []);
 
   const run = useCallback(
-    async (kind: "save" | "publish", data: Data) => {
+    async (kind: "save" | "publish", data: Data): Promise<boolean> => {
       setError("");
       setStatus(kind === "save" ? "saving" : "publishing");
       let result: EditorActionResult;
@@ -70,13 +70,34 @@ export function Editor({ pageId, site, initialData }: Props) {
       if (!result.ok) {
         setError(result.error);
         setStatus("dirty");
-        return;
+        return false;
       }
       savedSnapshot.current = JSON.stringify(data);
       setStatus(kind === "save" ? "saved" : "published");
       if (kind === "publish") setIsOnline(true);
+      return true;
     },
     [pageId],
+  );
+
+  // L'aperçu affiche le brouillon enregistré : s'il reste des modifications, on
+  // enregistre d'abord. L'onglet est ouvert dès le clic (sinon le navigateur le
+  // bloquerait comme fenêtre surgissante), puis dirigé vers l'aperçu.
+  const preview = useCallback(
+    async (data: Data, dirty: boolean) => {
+      const url = `/preview/${pageId}`;
+      if (!dirty) {
+        window.open(url, "_blank", "noopener");
+        return;
+      }
+      const tab = window.open("", "_blank");
+      if (await run("save", data)) {
+        if (tab) tab.location.href = url;
+      } else {
+        tab?.close();
+      }
+    },
+    [pageId, run],
   );
 
   return (
@@ -102,12 +123,12 @@ export function Editor({ pageId, site, initialData }: Props) {
           overrides={{
             headerActions: () => (
               <HeaderActions
-                pageId={pageId}
                 site={site}
                 status={status}
                 isOnline={isOnline}
-                onSave={(data) => run("save", data)}
-                onPublish={(data) => run("publish", data)}
+                onSave={(data) => void run("save", data)}
+                onPublish={(data) => void run("publish", data)}
+                onPreview={(data) => void preview(data, status === "dirty")}
               />
             ),
           }}
@@ -118,19 +139,19 @@ export function Editor({ pageId, site, initialData }: Props) {
 }
 
 function HeaderActions({
-  pageId,
   site,
   status,
   isOnline,
   onSave,
   onPublish,
+  onPreview,
 }: {
-  pageId: string;
   site: Props["site"];
   status: Status;
   isOnline: boolean;
   onSave: (data: Data) => void;
   onPublish: (data: Data) => void;
+  onPreview: (data: Data) => void;
 }) {
   const getPuck = useGetPuck();
   const busy = status === "saving" || status === "publishing";
@@ -138,7 +159,16 @@ function HeaderActions({
 
   return (
     <div className="flex flex-nowrap items-center gap-2 whitespace-nowrap">
-      <Link href="/" className={`inline-flex items-center gap-1.5 rounded-control px-2 py-1.5 text-[13px] font-semibold text-body hover:text-ink ${FOCUS}`}>
+      <Link
+        href="/"
+        // Navigation interne : beforeunload ne se déclenche pas, d'où la confirmation ici.
+        onClick={(event) => {
+          if (status === "dirty" && !window.confirm("Quitter l'éditeur ? Vos modifications non enregistrées seront perdues.")) {
+            event.preventDefault();
+          }
+        }}
+        className={`inline-flex items-center gap-1.5 rounded-control px-2 py-1.5 text-[13px] font-semibold text-body hover:text-ink ${FOCUS}`}
+      >
         <ArrowLeft size={15} aria-hidden />
         Mes sites
       </Link>
@@ -156,10 +186,10 @@ function HeaderActions({
         )}
       </span>
 
-      <a href={`/preview/${pageId}`} target="_blank" rel="noopener noreferrer" className={BTN_GHOST}>
+      <button type="button" className={BTN_GHOST} disabled={busy} onClick={() => onPreview(currentData())}>
         <Eye size={15} aria-hidden />
         Aperçu
-      </a>
+      </button>
       <button type="button" className={BTN_GHOST} disabled={busy} onClick={() => onSave(currentData())}>
         {status === "saving" ? <Loader2 size={15} className="animate-spin" aria-hidden /> : <Save size={15} aria-hidden />}
         Enregistrer
