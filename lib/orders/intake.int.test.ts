@@ -217,4 +217,17 @@ describe("limitation de débit", () => {
     expect(results.slice(0, 3).every((r) => r.ok)).toBe(true);
     expect(results[3]).toMatchObject({ ok: false, status: 429 });
   });
+
+  it("ne compte pas, pour un téléphone, les envois refusés (pas de blocage ciblé d'un acheteur)", async () => {
+    await prisma.variant.update({ where: { id: variant40 }, data: { stock: 100 } });
+    for (let i = 0; i < 5; i++) await createOrder(ctx(), body({ quantity: 1, phone: "0770 11 22 33", commune: "Reggane" }));
+    expect(await createOrder(ctx(), body({ quantity: 1, phone: "0770 11 22 33" }))).toMatchObject({ ok: true });
+  });
+
+  it("limite aussi les requêtes sans adresse IP", async () => {
+    await prisma.variant.update({ where: { id: variant40 }, data: { stock: 100 } });
+    const results = [];
+    for (let i = 0; i < 6; i++) results.push(await createOrder({ host: HOST, ip: null, userAgent: null }, body({ quantity: 1 })));
+    expect(results[5]).toMatchObject({ ok: false, status: 429 });
+  });
 });

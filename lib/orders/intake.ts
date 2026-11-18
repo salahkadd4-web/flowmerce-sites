@@ -20,6 +20,8 @@ export const IP_LIMIT = { count: 5, windowSeconds: 600 };
 export const PHONE_LIMIT = { count: 3, windowSeconds: 3600 };
 export const MIN_FILL_MS = 3000;
 
+const TOO_MANY = "Trop de commandes en peu de temps. Réessayez plus tard.";
+
 const utm = z.string().max(100);
 
 export const orderInputSchema = z.object({
@@ -95,9 +97,11 @@ export async function createOrder(
   const phone = normalizeAlgerianPhone(input.phone);
   if (!phone) return fail(400, FIELD_ERRORS.phone!, "phone");
 
-  const tooMany = "Trop de commandes en peu de temps. Réessayez plus tard.";
-  if (ctx.ip && !(await hitRateLimit(`order:ip:${ctx.ip}`, IP_LIMIT.count, IP_LIMIT.windowSeconds))) return fail(429, tooMany);
-  if (!(await hitRateLimit(`order:phone:${phone}`, PHONE_LIMIT.count, PHONE_LIMIT.windowSeconds))) return fail(429, tooMany);
+  // Limite par IP avant tout le reste (freine l'inondation). Sans IP, un compteur
+  // commun « inconnue » : une requête sans IP n'échappe jamais à la limite.
+  // L'IP vient de x-forwarded-for, fixé par l'hébergeur (Vercel) en production.
+  const ipKey = `order:ip:${ctx.ip ?? "unknown"}`;
+  if (!(await hitRateLimit(ipKey, IP_LIMIT.count, IP_LIMIT.windowSeconds))) return fail(429, TOO_MANY);
 
   const variant = await prisma.variant.findFirst({
     where: { id: input.variantId, productId: input.productId, product: { tenantId: site.tenantId, active: true } },
@@ -114,6 +118,12 @@ export async function createOrder(
     return fail(400, "Livraison au bureau non disponible dans cette wilaya", "deliveryType");
   }
   if (!isCommuneOf(input.wilayaCode, input.commune)) return fail(400, FIELD_ERRORS.commune!, "commune");
+
+  // Limite par téléphone seulement pour une commande valide, et par site : des
+  // envois refusés au nom d'un acheteur ne peuvent pas l'empêcher de commander.
+  if (!(await hitRateLimit(`order:phone:${site.id}:${phone}`, PHONE_LIMIT.count, PHONE_LIMIT.windowSeconds))) {
+    return fail(429, TOO_MANY);
+  }
 
   const shippingFee = input.deliveryType === "OFFICE" ? rate.office! : rate.home;
   const { subtotal, total } = computeTotals({ unitPrice: variant.product.price, quantity: input.quantity, shippingFee });
