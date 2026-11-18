@@ -1,0 +1,31 @@
+# Flowmerce Sites — PostgreSQL local de développement
+#
+#   npm run db:up            démarre la base
+#   docker compose down      l'arrête (les données sont conservées)
+#
+#   localhost:5434           base flowmerce_sites (dev) et flowmerce_sites_test (tests)
+#
+# Port 5434 : 5433 est utilisé par flowmerce-web-app. Publié sur 127.0.0.1 uniquement.
+name: flowmerce-sites-dev
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: flowmerce_sites
+      POSTGRES_PASSWORD: flowmerce_sites
+      POSTGRES_DB: flowmerce_sites
+    ports:
+      - "127.0.0.1:5434:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./docker/init-test-db.sql:/docker-entrypoint-initdb.d/init-test-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flowmerce_sites -d flowmerce_sites"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+volumes:
+  db-data:

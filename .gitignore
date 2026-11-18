@@ -1,0 +1,23 @@
+# dépendances
+node_modules/
+
+# Next.js
+.next/
+out/
+build/
+next-env.d.ts
+*.tsbuildinfo
+
+# Prisma
+generated/
+
+# environnement — .env.example et .env.test restent versionnés
+.env
+.env*.local
+
+# divers
+.DS_Store
+*.log
+coverage/
+.vercel
+.superpowers/
