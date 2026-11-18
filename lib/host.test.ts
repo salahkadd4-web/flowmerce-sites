@@ -13,6 +13,9 @@ describe("normalizeHost", () => {
   it("retire le point final", () => {
     expect(normalizeHost("test.localhost.")).toBe("test.localhost");
   });
+  it("retire le point final placé avant le port", () => {
+    expect(normalizeHost("TEST.Localhost.:3000")).toBe("test.localhost");
+  });
   it("retire les espaces", () => {
     expect(normalizeHost("  test.localhost:3100 ")).toBe("test.localhost");
   });

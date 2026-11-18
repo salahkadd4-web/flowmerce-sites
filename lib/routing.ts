@@ -18,6 +18,13 @@ function isUnder(pathname: string, prefix: string): boolean {
 
 const READ_METHODS = new Set(["GET", "HEAD"]);
 
+/**
+ * API joignables depuis un site vendeur. Toute autre route `/api` y répond 404
+ * (auth, envoi d'images, futures routes du tableau de bord). 1B ajoutera
+ * `/api/orders` pour le formulaire COD.
+ */
+export const SITE_API_ALLOWLIST: readonly string[] = [];
+
 export function routeRequest(
   input: {
     host: string | null;
@@ -27,7 +34,7 @@ export function routeRequest(
     /** La requête porte l'en-tête `Next-Action` (appel de server action). */
     isServerAction: boolean;
   },
-  cfg: { dashboardHost: string },
+  cfg: { dashboardHost: string; siteApiAllowlist: readonly string[] },
 ): RouteDecision {
   const host = input.host?.trim();
   if (!host) return { kind: "not-found" };
@@ -42,12 +49,20 @@ export function routeRequest(
   // quelle que soit la page visée : sans ce refus, la connexion et toute action
   // du tableau de bord seraient appelables depuis n'importe quel site vendeur.
   if (input.isServerAction) return { kind: "not-found" };
-  // L'authentification n'existe que sur l'hôte vendeur (§7).
-  if (isUnder(input.pathname, "/api/auth")) return { kind: "not-found" };
-  // Les autres API (commandes COD en Phase 1) sont servies telles quelles.
-  if (isUnder(input.pathname, "/api")) return { kind: "pass" };
+
+  const isRead = READ_METHODS.has(input.method.toUpperCase());
+
+  // Images des sites, servies en chemin relatif sur tous les hôtes.
+  if (isUnder(input.pathname, "/media")) return isRead ? { kind: "pass" } : { kind: "not-found" };
+
+  // API : liste blanche seulement. L'authentification n'existe que sur l'hôte vendeur (§7).
+  if (isUnder(input.pathname, "/api")) {
+    const allowed = cfg.siteApiAllowlist.some((prefix) => isUnder(input.pathname, prefix));
+    return allowed ? { kind: "pass" } : { kind: "not-found" };
+  }
+
   // Les pages d'un site sont en lecture seule.
-  if (!READ_METHODS.has(input.method.toUpperCase())) return { kind: "not-found" };
+  if (!isRead) return { kind: "not-found" };
 
   const path = input.pathname === "/" ? "" : input.pathname;
   return {

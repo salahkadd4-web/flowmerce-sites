@@ -9,7 +9,7 @@ export const RESERVED_SUBDOMAINS: ReadonlySet<string> = new Set([
   "cdn", "assets", "help", "support", "status", "blog", "docs", "s",
 ]);
 
-/** `"TEST.Localhost:3000."` → `"test.localhost"` : minuscules, sans port ni point final. */
+/** `"TEST.Localhost.:3000"` → `"test.localhost"` : minuscules, sans port ni point final. */
 export function normalizeHost(host: string): string {
   return host.trim().toLowerCase().replace(/:\d+$/, "").replace(/\.$/, "");
 }

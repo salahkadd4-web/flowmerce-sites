@@ -4,7 +4,7 @@
 
 import { NextResponse, type NextRequest } from "next/server";
 import { env } from "@/lib/env";
-import { routeRequest } from "@/lib/routing";
+import { routeRequest, SITE_API_ALLOWLIST } from "@/lib/routing";
 
 export function proxy(request: NextRequest): NextResponse {
   const decision = routeRequest(
@@ -15,7 +15,7 @@ export function proxy(request: NextRequest): NextResponse {
       method: request.method,
       isServerAction: request.headers.has("next-action"),
     },
-    { dashboardHost: env.DASHBOARD_HOST },
+    { dashboardHost: env.DASHBOARD_HOST, siteApiAllowlist: SITE_API_ALLOWLIST },
   );
 
   switch (decision.kind) {

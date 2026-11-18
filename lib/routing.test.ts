@@ -1,6 +1,6 @@
 import { routeRequest } from "@/lib/routing";
 
-const cfg = { dashboardHost: "localhost:3000" };
+const cfg = { dashboardHost: "localhost:3000", siteApiAllowlist: ["/api/orders"] };
 const req = (host: string | null, pathname: string, search = "", method = "GET", isServerAction = false) => ({
   host,
   pathname,
@@ -65,8 +65,24 @@ describe("routeRequest — sites", () => {
     expect(routeRequest(req("test.localhost:3000", "/api/auth/session"), cfg)).toEqual({ kind: "not-found" });
     expect(routeRequest(req("test.localhost:3000", "/api/auth"), cfg)).toEqual({ kind: "not-found" });
   });
-  it("laisse passer les autres API", () => {
+  it("laisse passer une API de la liste blanche et ses sous-chemins", () => {
     expect(routeRequest(req("test.localhost:3000", "/api/orders"), cfg)).toEqual({ kind: "pass" });
+    expect(routeRequest(req("test.localhost:3000", "/api/orders/123"), cfg)).toEqual({ kind: "pass" });
+  });
+  it("refuse toute API hors de la liste blanche", () => {
+    expect(routeRequest(req("test.localhost:3000", "/api/media"), cfg)).toEqual({ kind: "not-found" });
+    expect(routeRequest(req("test.localhost:3000", "/api/autre"), cfg)).toEqual({ kind: "not-found" });
+    expect(routeRequest(req("test.localhost:3000", "/api/ordersx"), cfg)).toEqual({ kind: "not-found" });
+  });
+  it("sert les images /media en lecture", () => {
+    expect(routeRequest(req("test.localhost:3000", "/media/abc.png"), cfg)).toEqual({ kind: "pass" });
+    expect(routeRequest(req("test.localhost:3000", "/media/abc.png", "", "HEAD"), cfg)).toEqual({ kind: "pass" });
+  });
+  it("refuse d'écrire sous /media", () => {
+    expect(routeRequest(req("test.localhost:3000", "/media/abc.png", "", "POST"), cfg)).toEqual({ kind: "not-found" });
+  });
+  it("ne confond pas /media avec une page qui commence par media", () => {
+    expect(routeRequest(req("test.localhost:3000", "/mediatheque"), cfg)).toEqual({ kind: "site", rewritePath: "/s/test.localhost/mediatheque" });
   });
   it("réécrit l'accueil avec une query", () => {
     expect(routeRequest(req("test.localhost:3000", "/", "?a=1"), cfg)).toEqual({ kind: "site", rewritePath: "/s/test.localhost?a=1" });
