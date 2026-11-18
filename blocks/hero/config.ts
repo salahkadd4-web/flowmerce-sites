@@ -1,6 +1,6 @@
 import type { ComponentConfig } from "@puckeditor/core";
 import { createElement } from "react";
-import { PendingMediaField } from "@/blocks/fields/PendingMediaField";
+import { MediaField } from "@/blocks/fields/MediaField";
 import { Hero } from "./Hero";
 import type { HeroProps } from "./schema";
 
@@ -16,7 +16,7 @@ export const heroConfig: ComponentConfig<Props> = {
   fields: {
     title: { type: "text", label: "Titre" },
     subtitle: { type: "textarea", label: "Sous-titre" },
-    image: { type: "custom", label: "Image", render: PendingMediaField },
+    image: { type: "custom", label: "Image", render: MediaField },
     buttonLabel: { type: "text", label: "Texte du bouton" },
     buttonHref: { type: "text", label: "Lien du bouton" },
     align: { type: "radio", label: "Alignement", options: ALIGN },
