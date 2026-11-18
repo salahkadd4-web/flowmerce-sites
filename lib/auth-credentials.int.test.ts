@@ -37,3 +37,13 @@ it("ne renvoie pas le hash du mot de passe", async () => {
   const user = await authorizeCredentials("vendeur@test.local", "bon-mot-de-passe");
   expect(user).not.toHaveProperty("passwordHash");
 });
+
+it("calcule un bcrypt même pour un email inconnu (pas d'écart de temps révélant les comptes)", async () => {
+  const spy = vi.spyOn(bcrypt, "compare");
+  try {
+    expect(await authorizeCredentials("inconnu@test.local", "bon-mot-de-passe")).toBeNull();
+    expect(spy).toHaveBeenCalledTimes(1);
+  } finally {
+    spy.mockRestore();
+  }
+});
