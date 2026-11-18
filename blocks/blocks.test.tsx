@@ -103,3 +103,33 @@ describe("Footer — téléphone", () => {
     expect(html).toContain('href="tel:0555123456"');
   });
 });
+
+describe("Footer — icônes", () => {
+  const props = {
+    ...footerConfig.defaultProps!,
+    phone: "0555 12 34 56",
+    email: "contact@boutique.dz",
+    facebook: "https://facebook.com/maboutique",
+    instagram: "https://instagram.com/maboutique",
+    tiktok: "https://tiktok.com/@maboutique",
+  };
+  const html = renderToStaticMarkup(<Footer {...props} />);
+  const link = (href: string) => html.match(new RegExp(`<a[^>]*href="${href.replace(/[.?+]/g, "\$&")}"[^>]*>(.*?)</a>`))?.[1] ?? "";
+
+  it.each([
+    ["tel:0555123456", "0555 12 34 56"],
+    ["mailto:contact@boutique.dz", "contact@boutique.dz"],
+    ["https://facebook.com/maboutique", "Facebook"],
+    ["https://instagram.com/maboutique", "Instagram"],
+    ["https://tiktok.com/@maboutique", "TikTok"],
+  ])("le lien %s porte une icône décorative et garde son texte", (href, text) => {
+    const content = link(href);
+    expect(content).toMatch(/<svg[^>]*aria-hidden="true"/);
+    expect(content).toContain(text);
+  });
+
+  it("garde le mot Téléphone / Email pour les lecteurs d'écran", () => {
+    expect(link("tel:0555123456")).toMatch(/class="sr-only"[^>]*>Téléphone/);
+    expect(link("mailto:contact@boutique.dz")).toMatch(/class="sr-only"[^>]*>Email/);
+  });
+});
