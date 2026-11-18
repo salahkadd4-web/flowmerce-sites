@@ -12,6 +12,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      'next/image': fileURLToPath(new URL('./test/next-image-stub.tsx', import.meta.url)),
       '@': fileURLToPath(new URL('.', import.meta.url)),
     },
   },

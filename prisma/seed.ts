@@ -8,17 +8,23 @@
 
 import bcrypt from "bcryptjs";
 import { prisma } from "../lib/prisma";
+import template from "../templates/landing-fr.json";
 
 const EMAIL = "vendeur@test.local";
 const PASSWORD = "motdepasse-test";
 const TENANT_ID = "seed-tenant-test";
 
+// Le modèle de landing page, avec un titre propre à la boutique de test.
 const HOME_CONTENT = {
+  ...template,
   root: { props: { title: "Accueil" } },
-  content: [
-    { type: "Heading", props: { id: "h1", text: "Bienvenue sur la boutique test" } },
-    { type: "Text", props: { id: "t1", text: "Cette page est lue en base." } },
-  ],
+  content: template.content.map((block) =>
+    block.type === "Hero"
+      ? { ...block, props: { ...block.props, title: "Bienvenue sur la boutique test" } }
+      : block.type === "Footer"
+        ? { ...block, props: { ...block.props, shopName: "Boutique Test" } }
+        : block,
+  ),
 };
 
 async function main() {

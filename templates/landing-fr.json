@@ -1,0 +1,50 @@
+{
+  "root": { "props": { "title": "" } },
+  "content": [
+    {
+      "type": "Hero",
+      "props": {
+        "id": "hero-1",
+        "title": "Le nom de votre produit",
+        "subtitle": "Une phrase qui dit pourquoi vos clients vont l'adorer.",
+        "image": null,
+        "buttonLabel": "Commander maintenant",
+        "buttonHref": "#commande",
+        "align": "center",
+        "background": "light"
+      }
+    },
+    {
+      "type": "Text",
+      "props": {
+        "id": "text-1",
+        "title": "Pourquoi choisir notre produit",
+        "body": "Premier avantage : dites ce qui le rend unique.\n\nDeuxième avantage : rassurez sur la qualité.\n\nTroisième avantage : livraison partout en Algérie, paiement à la livraison.",
+        "align": "left"
+      }
+    },
+    {
+      "type": "Image",
+      "props": {
+        "id": "image-1",
+        "image": null,
+        "alt": "Photo du produit",
+        "caption": "",
+        "width": "contained"
+      }
+    },
+    {
+      "type": "Footer",
+      "props": {
+        "id": "footer-1",
+        "shopName": "Ma boutique",
+        "phone": "",
+        "email": "",
+        "facebook": "",
+        "instagram": "",
+        "tiktok": "",
+        "returnPolicy": "Échange ou remboursement sous 7 jours après la livraison, produit non utilisé."
+      }
+    }
+  ]
+}
