@@ -3,16 +3,14 @@
 import { AuthError } from "next-auth";
 import { headers } from "next/headers";
 import { signIn } from "@/lib/auth";
-import { isDashboardHost } from "@/lib/dashboard-host";
+import { assertDashboardHost } from "@/lib/dashboard-host";
 import { env } from "@/lib/env";
 
 export async function loginAction(
   formData: FormData,
 ): Promise<{ error?: string; redirectTo?: string }> {
   // Seconde barrière derrière proxy.ts : jamais de connexion depuis un site vendeur.
-  if (!isDashboardHost((await headers()).get("host"), env.DASHBOARD_HOST)) {
-    throw new Error("loginAction appelée hors de l'hôte vendeur");
-  }
+  assertDashboardHost((await headers()).get("host"), env.DASHBOARD_HOST);
 
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");

@@ -120,3 +120,16 @@ describe("saisies courantes des vendeurs", () => {
     expect(parse({ phone: "--" }).success).toBe(false);
   });
 });
+
+describe("Hero — texte alternatif de l'image", () => {
+  it("accepte un texte alternatif et garde la compatibilité des anciens contenus", () => {
+    const withAlt = BLOCK_SCHEMAS.Hero.safeParse({ ...HERO, imageAlt: "Chaussure noire en cuir" });
+    expect(withAlt.success && withAlt.data.imageAlt).toBe("Chaussure noire en cuir");
+    const old = BLOCK_SCHEMAS.Hero.safeParse(HERO);
+    expect(old.success && old.data.imageAlt).toBe("");
+  });
+
+  it("refuse un texte alternatif de plus de 150 caractères", () => {
+    expect(BLOCK_SCHEMAS.Hero.safeParse({ ...HERO, imageAlt: "a".repeat(151) }).success).toBe(false);
+  });
+});

@@ -49,3 +49,25 @@ describe("isMediaKey", () => {
     },
   );
 });
+
+describe("dimensions", () => {
+  // En-tête PNG seul (signature + IHDR) : image-size ne lit que les dimensions.
+  function pngHeader(width: number, height: number) {
+    const bytes = new Uint8Array(33);
+    bytes.set([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13, 0x49, 0x48, 0x44, 0x52]);
+    const view = new DataView(bytes.buffer);
+    view.setUint32(16, width);
+    view.setUint32(20, height);
+    bytes.set([8, 2, 0, 0, 0], 24);
+    return bytes;
+  }
+
+  it("refuse une image de plus de 10 000 px de côté (bombe de décompression)", () => {
+    expect(inspectImage(pngHeader(10_001, 100))).toEqual({ ok: false, error: "Image trop grande (10 000 px maximum par côté)" });
+    expect(inspectImage(pngHeader(100, 10_001))).toEqual({ ok: false, error: "Image trop grande (10 000 px maximum par côté)" });
+  });
+
+  it("accepte 10 000 px exactement", () => {
+    expect(inspectImage(pngHeader(10_000, 10_000))).toMatchObject({ ok: true, width: 10_000, height: 10_000 });
+  });
+});

@@ -133,3 +133,10 @@ describe("Footer — icônes", () => {
     expect(link("mailto:contact@boutique.dz")).toMatch(/class="sr-only"[^>]*>Email/);
   });
 });
+
+describe("Hero — image", () => {
+  it("rend le texte alternatif de l'image", () => {
+    const html = renderToStaticMarkup(<Hero {...heroConfig.defaultProps!} image={MEDIA} imageAlt="Chaussure noire en cuir" />);
+    expect(html).toContain('alt="Chaussure noire en cuir"');
+  });
+});

@@ -43,6 +43,29 @@ ni fichier `hosts` n'est nécessaire. Le port 3100 laisse le 3000 à
 Les images envoyées sont stockées dans `storage/uploads/` (ignoré par git) et servies
 sous `/media/…`. Au déploiement, `lib/storage.ts` recevra un pilote de stockage objet.
 
+## Recevoir des commandes (paiement à la livraison)
+
+1. **Produits** → **Nouveau produit** : nom, prix, prix barré, photos, options (jusqu'à
+   deux, ex. Taille : 38, 39, 40) et stock par combinaison.
+2. **Mes sites** → **Livraison** : prix domicile et bureau par wilaya (69 wilayas) ; une
+   wilaya sans prix domicile n'est pas proposée.
+3. Dans l'éditeur, réglages de la page → **Produit de la page**, puis **Publier**. La fiche
+   produit et le formulaire de commande affichent ce produit, toujours à jour (prix, stock).
+4. L'acheteur remplit le formulaire et reçoit une référence (page Merci). Le serveur
+   recalcule tous les montants, ignore les doubles envois et freine les robots.
+5. **Commandes** : liste (filtres par statut et par site, export CSV), détail avec bouton
+   **Appeler**, changement de statut et historique. Le stock baisse à la **confirmation**
+   et revient à l'annulation après confirmation ou au retour.
+
+| Statut | Suites possibles |
+|---|---|
+| Nouvelle | Confirmée, Annulée |
+| Confirmée | Expédiée, Annulée |
+| Expédiée | Livrée, Retournée |
+| Livrée | Retournée |
+
+Wilayas et communes : `lib/algeria/` (69 wilayas, 1 577 communes, mêmes données que Caba-Store).
+
 ## Tests
 
 ```bash

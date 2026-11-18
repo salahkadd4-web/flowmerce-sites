@@ -12,7 +12,7 @@ const BACKGROUNDS: Record<HeroProps["background"], { section: string; button: st
   sand: { section: "bg-warm text-ink", button: "bg-deep text-white hover:bg-ink", subtitle: "text-body" },
 };
 
-export function Hero({ title, subtitle, image, buttonLabel, buttonHref, align, background }: Omit<HeroProps, "id">) {
+export function Hero({ title, subtitle, image, imageAlt = "", buttonLabel, buttonHref, align, background }: Omit<HeroProps, "id" | "imageAlt"> & { imageAlt?: string }) {
   const tone = BACKGROUNDS[background] ?? BACKGROUNDS.light;
   const centered = align === "center";
   const showButton = buttonLabel.trim() !== "" && buttonHref !== "" && isSafeHref(buttonHref);
@@ -25,11 +25,12 @@ export function Hero({ title, subtitle, image, buttonLabel, buttonHref, align, b
         {image && (
           <Image
             src={image.url}
-            alt=""
+            alt={imageAlt}
             width={image.width}
             height={image.height}
             sizes="(max-width: 768px) 100vw, 768px"
-            priority
+            // Image du haut de page : préchargée (Next 16 : `preload` remplace `priority`).
+            preload
             className="h-auto w-full rounded-card"
           />
         )}

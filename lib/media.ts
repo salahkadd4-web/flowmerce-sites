@@ -8,6 +8,10 @@ import { imageSize } from "image-size";
 
 export const MAX_MEDIA_BYTES = 5 * 1024 * 1024;
 
+// Au-delà, une image légère peut cacher une toile énorme (bombe de décompression)
+// que l'optimiseur next/image devrait décoder.
+export const MAX_MEDIA_DIMENSION = 10_000;
+
 const ALLOWED = {
   jpg: "image/jpeg",
   png: "image/png",
@@ -36,6 +40,9 @@ export function inspectImage(
 
   const ext = result.type as MediaExt | undefined;
   if (!ext || !(ext in ALLOWED) || !result.width || !result.height) return { ok: false, error: UNSUPPORTED };
+  if (result.width > MAX_MEDIA_DIMENSION || result.height > MAX_MEDIA_DIMENSION) {
+    return { ok: false, error: "Image trop grande (10 000 px maximum par côté)" };
+  }
   return { ok: true, ext, mimeType: ALLOWED[ext], width: result.width, height: result.height };
 }
 

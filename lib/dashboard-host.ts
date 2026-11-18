@@ -8,3 +8,8 @@ export function isDashboardHost(host: string | null, dashboardHost: string): boo
   const value = host?.trim().toLowerCase();
   return !!value && value === dashboardHost.toLowerCase();
 }
+
+/** Garde des server actions vendeur : lève si la requête ne vient pas de l'hôte vendeur. */
+export function assertDashboardHost(host: string | null, dashboardHost: string): void {
+  if (!isDashboardHost(host, dashboardHost)) throw new Error("Action appelée hors de l'hôte vendeur");
+}

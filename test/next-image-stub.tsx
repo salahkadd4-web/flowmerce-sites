@@ -4,6 +4,6 @@
 // chargement de vitest (lettre de lecteur en minuscule) empêche vi.mock de s'appliquer.
 
 /* eslint-disable @next/next/no-img-element, jsx-a11y/alt-text */
-export default function NextImageStub({ priority: _priority, ...props }: Record<string, unknown>) {
+export default function NextImageStub({ priority: _priority, preload: _preload, ...props }: Record<string, unknown>) {
   return <img {...(props as React.ImgHTMLAttributes<HTMLImageElement>)} />;
 }

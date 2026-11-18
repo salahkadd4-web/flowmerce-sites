@@ -3,7 +3,7 @@
 import { updateTag } from "next/cache";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { isDashboardHost } from "@/lib/dashboard-host";
+import { assertDashboardHost } from "@/lib/dashboard-host";
 import { env } from "@/lib/env";
 import { publishPageForUser, saveDraftForUser } from "@/lib/pages";
 import { siteHostTag, sitePagesTag, siteTag } from "@/lib/tenant";
@@ -12,9 +12,7 @@ export type EditorActionResult = { ok: true } | { ok: false; error: string };
 
 /** Garde commune : hôte vendeur (seconde barrière derrière proxy.ts) puis session. */
 async function currentUserId(): Promise<string | null> {
-  if (!isDashboardHost((await headers()).get("host"), env.DASHBOARD_HOST)) {
-    throw new Error("Action de l'éditeur appelée hors de l'hôte vendeur");
-  }
+  assertDashboardHost((await headers()).get("host"), env.DASHBOARD_HOST);
   const session = await auth();
   return session?.user?.id ?? null;
 }
