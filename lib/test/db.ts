@@ -7,6 +7,13 @@ export async function resetDb(): Promise<void> {
   if (!process.env.DATABASE_URL?.includes("_test")) {
     throw new Error("resetDb refuse de vider une base qui n'est pas une base de test");
   }
+  await prisma.orderStatusEvent.deleteMany();
+  await prisma.orderItem.deleteMany();
+  await prisma.order.deleteMany();
+  await prisma.variant.deleteMany();
+  await prisma.product.deleteMany();
+  await prisma.shippingRate.deleteMany();
+  await prisma.rateLimit.deleteMany();
   await prisma.pageVersion.deleteMany();
   await prisma.page.deleteMany();
   await prisma.media.deleteMany();

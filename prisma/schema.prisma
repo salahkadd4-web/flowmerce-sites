@@ -35,6 +35,8 @@ model Tenant {
   flowmerceApiKey   String?                       // chiffrée
   sites             Site[]
   media             Media[]
+  products          Product[]
+  orders            Order[]
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }
@@ -53,6 +55,8 @@ model Site {
   pixels    Json?                               // { facebook: "...", tiktok: "..." }
   status    SiteStatus @default(DRAFT)
   pages     Page[]
+  orders    Order[]
+  shipping  ShippingRate[]
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
@@ -105,6 +109,129 @@ model Media {
   @@index([tenantId])
 }
 
+// ───────── Catalogue (§5) ─────────
+
+// Produit du vendeur, utilisable sur tous ses sites (§2.4). Pas de relation
+// Site.products : le produit d'une landing est choisi dans l'éditeur.
+model Product {
+  id           String      @id @default(cuid())
+  tenantId     String
+  tenant       Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name         String
+  description  String      @default("")
+  price        Int                             // en DA
+  comparePrice Int?                            // prix barré
+  images       Json        @default("[]")      // [{ url, width, height }] — dimensions pour next/image
+  optionAxes   Json        @default("[]")      // [{ name: "Taille", values: ["39", "40"] }], deux au plus
+  sizeGuide    Json?                           // Phase 3
+  active       Boolean     @default(true)
+  variants     Variant[]
+  orderItems   OrderItem[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([tenantId])
+}
+
+// Une combinaison des axes du produit ({} sans axe), avec son stock.
+model Variant {
+  id         String      @id @default(cuid())
+  productId  String
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  options    Json                              // { Taille: "39", Couleur: "noir" }
+  stock      Int         @default(0)
+  sku        String?
+  orderItems OrderItem[]
+
+  @@index([productId])
+}
+
+// Frais de livraison d'un site pour une wilaya (1 à 69). Sans ligne : non desservie.
+model ShippingRate {
+  id         String @id @default(cuid())
+  siteId     String
+  site       Site   @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  wilayaCode Int
+  home       Int                               // livraison à domicile, en DA
+  office     Int?                              // livraison au bureau ; absent = non proposée
+
+  @@unique([siteId, wilayaCode])
+}
+
+// ───────── Commandes (§5) ─────────
+
+model Order {
+  id             String             @id @default(cuid())
+  tenantId       String
+  tenant         Tenant             @relation(fields: [tenantId], references: [id])
+  siteId         String
+  site           Site               @relation(fields: [siteId], references: [id])
+  idempotencyKey String             @unique    // évite les doublons (double clic, réessai)
+  reference      String             @unique    // référence courte donnée à l'acheteur
+  customerName   String
+  phone          String                        // normalisé (+213…)
+  wilayaCode     Int
+  commune        String
+  address        String
+  deliveryType   DeliveryType                  // HOME | OFFICE
+  items          OrderItem[]
+  subtotal       Int
+  shippingFee    Int
+  total          Int
+  status         OrderStatus        @default(NEW)
+  events         OrderStatusEvent[]
+  ip             String?
+  userAgent      String?
+  source         Json?                         // utm_source, utm_campaign…
+  fraudScore     Float?                        // Phase 2 (Flowmerce)
+  fraudAdvice    String?                       // Phase 2 (Flowmerce)
+  flowmerceId    String?            @unique    // Phase 2 (Flowmerce)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@index([siteId, status, createdAt])
+  @@index([tenantId, createdAt])
+  @@index([phone])
+}
+
+model OrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  variantId   String?
+  variant     Variant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  productName String                           // copie au moment de la commande
+  options     Json?                            // copie des options de la variante
+  unitPrice   Int                              // copie du prix
+  quantity    Int
+
+  @@index([orderId])
+  @@index([productId])
+  @@index([variantId])
+}
+
+model OrderStatusEvent {
+  id        String       @id @default(cuid())
+  orderId   String
+  order     Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  from      OrderStatus?
+  to        OrderStatus
+  actor     String?                            // email du vendeur, "client" ou "flowmerce"
+  note      String?
+  createdAt DateTime     @default(now())
+
+  @@index([orderId, createdAt])
+}
+
+// Compteur local de la limitation de débit (Redis / Upstash au déploiement).
+model RateLimit {
+  key     String   @id
+  count   Int
+  resetAt DateTime
+}
+
 // ───────── Énumérations ─────────
 
 enum SiteType {
@@ -116,4 +243,18 @@ enum SiteStatus {
   DRAFT
   PUBLISHED
   SUSPENDED
+}
+
+enum DeliveryType {
+  HOME
+  OFFICE
+}
+
+enum OrderStatus {
+  NEW
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  RETURNED
+  CANCELLED
 }
