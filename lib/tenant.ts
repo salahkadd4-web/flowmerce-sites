@@ -23,6 +23,14 @@ export function sitePagesTag(siteId: string): string {
   return "site-pages:" + siteId;
 }
 
+/**
+ * Tout ce qui dépend du site (pages comprises). L'invalider retire d'un coup un
+ * site suspendu : findPublishedPage revérifie son statut.
+ */
+export function siteTag(siteId: string): string {
+  return "site:" + siteId;
+}
+
 export function getSiteByHost(host: string) {
   const normalized = normalizeHost(host);
   return unstable_cache(
@@ -36,6 +44,6 @@ export function getPage(siteId: string, slug: string) {
   return unstable_cache(
     () => findPublishedPage(siteId, slug),
     ["page", siteId, slug],
-    { tags: [sitePagesTag(siteId)], revalidate: CACHE_SECONDS },
+    { tags: [sitePagesTag(siteId), siteTag(siteId)], revalidate: CACHE_SECONDS },
   )();
 }

@@ -87,6 +87,13 @@ describe("findPublishedPage", () => {
     expect(await findPublishedPage(site.id, "casse")).toBeNull();
   });
 
+  it("ne renvoie plus les pages d'un site suspendu", async () => {
+    const site = await createSite("test");
+    await prisma.page.create({ data: { siteId: site.id, slug: "", title: "Accueil", draft: CONTENT, published: CONTENT } });
+    await prisma.site.update({ where: { id: site.id }, data: { status: "SUSPENDED" } });
+    expect(await findPublishedPage(site.id, "")).toBeNull();
+  });
+
   it("ne renvoie pas la page d'un autre site", async () => {
     const site = await createSite("test");
     const other = await createSite("autre");

@@ -34,16 +34,21 @@ export async function findPublishedSiteByHost(
   });
 }
 
-/** Version publiée de la page `slug` du site, ou `null` (absente, non publiée ou invalide). */
+/**
+ * Version publiée de la page `slug` du site, ou `null` (absente, non publiée,
+ * invalide, ou site qui n'est plus publié). Le statut du site est revérifié ici :
+ * invalider le tag `site:<id>` suffit à retirer toutes les pages d'un site
+ * suspendu, même si la résolution de l'hôte est encore en cache.
+ */
 export async function findPublishedPage(
   siteId: string,
   slug: string,
 ): Promise<{ title: string; content: PageContent } | null> {
   const page = await prisma.page.findUnique({
     where: { siteId_slug: { siteId, slug } },
-    select: { title: true, published: true },
+    select: { title: true, published: true, site: { select: { status: true } } },
   });
-  if (!page || page.published === null) return null;
+  if (!page || page.published === null || page.site.status !== "PUBLISHED") return null;
 
   const content = parsePageContent(page.published);
   return content ? { title: page.title, content } : null;
