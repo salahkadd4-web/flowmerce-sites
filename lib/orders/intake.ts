@@ -102,7 +102,9 @@ export async function createOrder(
   // Limite par IP avant tout le reste (freine l'inondation). Sans IP, un compteur
   // commun « inconnue » : une requête sans IP n'échappe jamais à la limite.
   // L'IP vient de x-forwarded-for, fixé par l'hébergeur (Vercel) en production.
-  const ipKey = `order:ip:${ctx.ip ?? "unknown"}`;
+  // Par site : derrière un opérateur mobile, une même IP porte beaucoup d'acheteurs,
+  // qui ne doivent pas se gêner d'une boutique à l'autre. Seuils à revoir avant la mise en ligne.
+  const ipKey = `order:ip:${site.id}:${ctx.ip ?? "unknown"}`;
   if (!(await hitRateLimit(ipKey, IP_LIMIT.count, IP_LIMIT.windowSeconds))) return fail(429, TOO_MANY);
 
   const variant = await prisma.variant.findFirst({

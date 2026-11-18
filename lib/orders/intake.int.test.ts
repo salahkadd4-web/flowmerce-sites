@@ -223,6 +223,20 @@ describe("limitation de débit", () => {
     expect(results[5]).toMatchObject({ ok: false, status: 429 });
   });
 
+  it("compte la limite par IP site par site (opérateurs mobiles : une IP pour beaucoup d'acheteurs)", async () => {
+    await prisma.variant.update({ where: { id: variant40 }, data: { stock: 100 } });
+    const other = await prisma.site.findFirstOrThrow({ where: { subdomain: "autre" } });
+    await prisma.site.update({ where: { id: other.id }, data: { status: "PUBLISHED" } });
+    await saveShippingForUser(B.id, other.id, [{ wilayaCode: 16, home: 300, office: null }]);
+    for (let i = 0; i < 5; i++) expect((await createOrder(ctx("2.2.2.2"), body({ quantity: 1 }))).ok).toBe(true);
+
+    const elsewhere = await createOrder(
+      { host: "autre.localhost:3100", ip: "2.2.2.2", userAgent: null },
+      body({ productId: otherProductId, variantId: otherVariant, quantity: 1 }),
+    );
+    expect(elsewhere).toMatchObject({ ok: true });
+  });
+
   it("refuse la 4e commande d'un même téléphone en une heure", async () => {
     await prisma.variant.update({ where: { id: variant40 }, data: { stock: 100 } });
     const results = [];
