@@ -1,4 +1,6 @@
+import type { OrderStatus } from "@prisma/client";
 import type { LucideIcon } from "lucide-react";
+import { ORDER_STATUS_LABELS } from "@/lib/orders/status";
 
 /**
  * Primitives du tableau de bord — extrait de flowmerce-web-app
@@ -156,5 +158,25 @@ export function EmptyState({
       {hint && <p className="mx-auto mt-1.5 max-w-sm text-[13px] text-body">{hint}</p>}
       {action && <div className="mt-5">{action}</div>}
     </div>
+  );
+}
+
+// ── Statut d'une commande ────────────────────────────────────────────────────
+// Même pastille que SiteStatusBadge, avec l'échelle des statuts de commande.
+
+const ORDER_STATUS_TONE: Record<OrderStatus, string> = {
+  NEW: "bg-blue-50 text-blue-800",
+  CONFIRMED: "bg-brand-soft text-brand-ink",
+  SHIPPED: "bg-amber-50 text-amber-800",
+  DELIVERED: "bg-green-50 text-green-800",
+  RETURNED: "bg-red-50 text-red-800",
+  CANCELLED: "bg-page text-body",
+};
+
+export function OrderStatusBadge({ status }: { status: OrderStatus }) {
+  return (
+    <span className={`inline-flex items-center whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-semibold ${ORDER_STATUS_TONE[status]}`}>
+      {ORDER_STATUS_LABELS[status]}
+    </span>
   );
 }

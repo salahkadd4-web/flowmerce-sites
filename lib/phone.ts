@@ -18,3 +18,13 @@ export function normalizeAlgerianPhone(input: string): string | null {
   if (!MOBILE.test(digits) && !LANDLINE.test(digits)) return null;
   return "+213" + digits.slice(1);
 }
+
+/** +213555123456 → « 0555 12 34 56 » ; +21321234567 → « 021 23 45 67 ». */
+export function formatAlgerianPhone(normalized: string): string {
+  const match = /^\+213(\d{8,9})$/.exec(normalized);
+  if (!match) return normalized;
+  const local = "0" + match[1];
+  return local.length === 10
+    ? `${local.slice(0, 4)} ${local.slice(4, 6)} ${local.slice(6, 8)} ${local.slice(8)}`
+    : `${local.slice(0, 3)} ${local.slice(3, 5)} ${local.slice(5, 7)} ${local.slice(7)}`;
+}

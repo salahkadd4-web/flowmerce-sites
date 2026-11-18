@@ -1,4 +1,4 @@
-import { normalizeAlgerianPhone } from "@/lib/phone";
+import { formatAlgerianPhone, normalizeAlgerianPhone } from "@/lib/phone";
 
 it.each([
   ["0555 12 34 56", "+213555123456"],
@@ -19,3 +19,13 @@ it.each(["0812345678", "055512345", "05551234567", "0155123456", "abc", "", "+33
     expect(normalizeAlgerianPhone(input)).toBeNull();
   },
 );
+
+describe("formatAlgerianPhone", () => {
+  it("affiche un mobile et un fixe au format courant", () => {
+    expect(formatAlgerianPhone("+213555123456")).toBe("0555 12 34 56");
+    expect(formatAlgerianPhone("+21321234567")).toBe("021 23 45 67");
+  });
+  it("laisse tel quel un numéro non normalisé", () => {
+    expect(formatAlgerianPhone("abc")).toBe("abc");
+  });
+});
