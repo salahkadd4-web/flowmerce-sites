@@ -4,6 +4,7 @@
 // requête en base ici. La résolution hôte → site se fait dans la page
 // `app/s/[host]/[[...slug]]`, avec cache.
 
+import { isDashboardHost } from "@/lib/dashboard-host";
 import { normalizeHost } from "@/lib/host";
 
 export type RouteDecision =
@@ -33,7 +34,7 @@ export function routeRequest(
 
   // Espace vendeur. Le dossier interne des sites n'y est pas accessible :
   // sinon n'importe quel site s'afficherait sous l'hôte vendeur.
-  if (host.toLowerCase() === cfg.dashboardHost.toLowerCase()) {
+  if (isDashboardHost(host, cfg.dashboardHost)) {
     return isUnder(input.pathname, "/s") ? { kind: "not-found" } : { kind: "pass" };
   }
 
