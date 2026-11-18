@@ -21,3 +21,6 @@ generated/
 coverage/
 .vercel
 .superpowers/
+
+# Fichiers envoyés par les vendeurs (pilote de stockage local)
+storage/

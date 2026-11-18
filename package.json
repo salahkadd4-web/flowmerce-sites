@@ -21,6 +21,7 @@
     "@puckeditor/core": "0.24.0",
     "bcryptjs": "^3.0.2",
     "clsx": "^2.1.1",
+    "image-size": "^2.1.0",
     "lucide-react": "^0.487.0",
     "next": "^16.2.4",
     "next-auth": "5.0.0-beta.32",

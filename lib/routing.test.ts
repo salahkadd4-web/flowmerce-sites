@@ -90,6 +90,10 @@ describe("routeRequest — sites", () => {
 });
 
 describe("routeRequest — hôte absent", () => {
+  it("sert /media en lecture (requête interne de l'optimiseur next/image, sans en-tête)", () => {
+    expect(routeRequest(req(null, "/media/abc.png"), cfg)).toEqual({ kind: "pass" });
+    expect(routeRequest(req(null, "/media/abc.png", "", "POST"), cfg)).toEqual({ kind: "not-found" });
+  });
   it("renvoie not-found", () => {
     expect(routeRequest(req(null, "/"), cfg)).toEqual({ kind: "not-found" });
     expect(routeRequest(req("  ", "/"), cfg)).toEqual({ kind: "not-found" });

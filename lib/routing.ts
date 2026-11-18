@@ -36,6 +36,15 @@ export function routeRequest(
   },
   cfg: { dashboardHost: string; siteApiAllowlist: readonly string[] },
 ): RouteDecision {
+  const isRead = READ_METHODS.has(input.method.toUpperCase());
+
+  // Images des sites : publiques, en lecture seule, servies quel que soit l'hôte —
+  // y compris sans en-tête Host : l'optimiseur next/image les récupère par une
+  // requête interne sans en-têtes.
+  if (isUnder(input.pathname, "/media")) {
+    return isRead && !input.isServerAction ? { kind: "pass" } : { kind: "not-found" };
+  }
+
   const host = input.host?.trim();
   if (!host) return { kind: "not-found" };
 
@@ -49,11 +58,6 @@ export function routeRequest(
   // quelle que soit la page visée : sans ce refus, la connexion et toute action
   // du tableau de bord seraient appelables depuis n'importe quel site vendeur.
   if (input.isServerAction) return { kind: "not-found" };
-
-  const isRead = READ_METHODS.has(input.method.toUpperCase());
-
-  // Images des sites, servies en chemin relatif sur tous les hôtes.
-  if (isUnder(input.pathname, "/media")) return isRead ? { kind: "pass" } : { kind: "not-found" };
 
   // API : liste blanche seulement. L'authentification n'existe que sur l'hôte vendeur (§7).
   if (isUnder(input.pathname, "/api")) {
