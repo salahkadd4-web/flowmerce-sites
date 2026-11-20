@@ -7,10 +7,19 @@
 //                        les autres s'affichent (un bloc ne met jamais la page hors ligne).
 
 import { z } from "zod";
+import { isFontId, type FontId } from "@/blocks/fonts";
+import { isPageLang, type PageLang } from "@/blocks/i18n";
 import { BLOCK_FIELD_LABELS, BLOCK_LABELS, BLOCK_SCHEMAS, isBlockType } from "@/blocks/schemas";
 
 export type PageBlock = { type: string; props: Record<string, unknown> };
-export type PageContent = { root: { props: { title?: string; productId?: string } }; content: PageBlock[] };
+export type PageRootProps = {
+  title?: string;
+  productId?: string;
+  lang?: PageLang;
+  headingFont?: FontId;
+  bodyFont?: FontId;
+};
+export type PageContent = { root: { props: PageRootProps }; content: PageBlock[] };
 
 /** Slugs pris par les pages système d'un site (app/s/[host]/merci…). */
 export const RESERVED_PAGE_SLUGS: readonly string[] = ["merci"];
@@ -32,10 +41,13 @@ const PageShapeSchema = z.object({
 const RawBlockSchema = z.object({ type: z.string(), props: z.record(z.unknown()) });
 
 /** Réglages de la page reconnus ; une valeur invalide ou vide est ignorée. */
-function rootProps(props: Record<string, unknown>): PageContent["root"]["props"] {
+function rootProps(props: Record<string, unknown>): PageRootProps {
   return {
     ...(isTitle(props.title) ? { title: props.title } : {}),
     ...(isProductId(props.productId) && props.productId !== "" ? { productId: props.productId } : {}),
+    ...(isPageLang(props.lang) ? { lang: props.lang } : {}),
+    ...(isFontId(props.headingFont) ? { headingFont: props.headingFont } : {}),
+    ...(isFontId(props.bodyFont) ? { bodyFont: props.bodyFont } : {}),
   };
 }
 
@@ -62,9 +74,13 @@ export function validatePageContent(
   const shape = PageShapeSchema.safeParse(json);
   if (!shape.success) return { ok: false, error: "Contenu de page invalide" };
 
-  const { title, productId } = shape.data.root.props;
+  const { title, productId, lang, headingFont, bodyFont } = shape.data.root.props;
   if (title !== undefined && !isTitle(title)) return { ok: false, error: "« Titre de la page » invalide" };
   if (productId !== undefined && !isProductId(productId)) return { ok: false, error: "« Produit de la page » invalide" };
+  if (lang !== undefined && !isPageLang(lang)) return { ok: false, error: "« Langue de la page » invalide" };
+  for (const font of [headingFont, bodyFont]) {
+    if (font !== undefined && !isFontId(font)) return { ok: false, error: "« Police » invalide" };
+  }
 
   const blocks: PageBlock[] = [];
   for (const raw of shape.data.content) {

@@ -5,6 +5,7 @@
 // cache, invalidés quand le vendeur modifie un produit ou ses frais.
 
 import { unstable_cache } from "next/cache";
+import type { PageLang } from "@/blocks/i18n";
 import { productsTag, toPublicProduct, type PublicProduct } from "@/lib/product-input";
 import { prisma } from "@/lib/prisma";
 import { shippingOptions, shippingTag, type ShippingOption } from "@/lib/shipping";
@@ -15,6 +16,8 @@ export type StorefrontMetadata = {
   shipping: ShippingOption[];
   /** Produit choisi dans les réglages de la page, lu par les blocs. */
   pageProductId?: string;
+  /** Langue de la page (réglage de la racine), pour les textes fixes de l'acheteur. */
+  lang?: PageLang;
 };
 
 /** Sans cache : testable hors de Next. Produit inactif ou d'un autre vendeur → absent. */

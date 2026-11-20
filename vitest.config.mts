@@ -18,7 +18,8 @@ export default defineConfig({
     dedupe: ['react', 'react-dom'],
     alias: {
       'next/image': fileURLToPath(new URL('./test/next-image-stub.tsx', import.meta.url)),
-      'next/navigation': fileURLToPath(new URL('./test/next-navigation-stub.ts', import.meta.url)),
+      'next/font/google': fileURLToPath(new URL('./test/next-font-stub.ts', import.meta.url)),
+      'next/navigation':fileURLToPath(new URL('./test/next-navigation-stub.ts', import.meta.url)),
       '@': ROOT,
     },
   },

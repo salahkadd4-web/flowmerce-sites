@@ -43,7 +43,7 @@ export default async function SitePage({ params }: Props) {
   // Le contenu a déjà été filtré bloc par bloc par parsePageContent.
   return (
     <main className="min-h-dvh">
-      <Render config={puckConfig} data={data.page.content as Data} metadata={storefront} />
+      <Render config={puckConfig} data={data.page.content as Data} metadata={{ ...storefront, lang: data.page.content.root.props.lang ?? "fr" }} />
     </main>
   );
 }

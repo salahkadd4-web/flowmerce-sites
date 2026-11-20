@@ -8,6 +8,7 @@ import { heroConfig } from "@/blocks/hero/config";
 import { imageConfig } from "@/blocks/image/config";
 import { orderFormConfig } from "@/blocks/order-form/config";
 import { productConfig } from "@/blocks/product/config";
+import { rootConfig } from "@/blocks/root/config";
 import { textConfig } from "@/blocks/text/config";
 
 export const puckConfig: Config = {
@@ -19,9 +20,5 @@ export const puckConfig: Config = {
     Image: imageConfig,
     Footer: footerConfig,
   } as Config["components"],
-  root: {
-    fields: {
-      title: { type: "text", label: "Titre de la page (onglet du navigateur)" },
-    },
-  },
+  root: rootConfig,
 };

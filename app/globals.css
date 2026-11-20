@@ -36,3 +36,9 @@
   --radius-card:    1rem;
   --radius-block:   1.5rem;
 }
+
+/* Pages des vendeurs : les titres prennent la police des titres choisie
+   (blocks/root/PageRoot.tsx), le reste la police du texte. */
+.fm-page :is(h1, h2, h3) {
+  font-family: var(--font-heading, inherit);
+}

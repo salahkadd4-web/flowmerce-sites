@@ -13,7 +13,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('.', import.meta.url)),
+      // Polices : téléchargées par Next à la construction, pas dans un test.
+      'next/font/google': fileURLToPath(new URL('./test/next-font-stub.ts', import.meta.url)),
+      '@':fileURLToPath(new URL('.', import.meta.url)),
     },
   },
 })

@@ -10,6 +10,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AlertTriangle, ArrowLeft, Eye, Loader2, Save, Send } from "lucide-react";
 import { BTN_GHOST, BTN_PRIMARY, FOCUS, Notice } from "@/components/dashboard/ui";
 import { dictionaryFr } from "@/blocks/dictionary.fr";
+import { isPageLang, type PageLang } from "@/blocks/i18n";
 import type { PublicProduct } from "@/lib/product-input";
 import type { ShippingOption } from "@/lib/shipping";
 import type { StorefrontMetadata } from "@/lib/storefront";
@@ -27,6 +28,11 @@ type Props = {
   products: PublicProduct[];
   shipping: ShippingOption[];
 };
+
+function langOf(data: unknown): PageLang {
+  const value = (data as { root?: { props?: { lang?: unknown } } } | null)?.root?.props?.lang;
+  return isPageLang(value) ? value : "fr";
+}
 
 function productIdOf(data: unknown): string | undefined {
   const value = (data as { root?: { props?: { productId?: unknown } } } | null)?.root?.props?.productId;
@@ -52,13 +58,15 @@ export function Editor({ pageId, site, initialData, products, shipping }: Props)
   const config = useMemo(() => buildEditorConfig(products), [products]);
   // Produit de la page suivi en direct : la fiche et le formulaire s'affichent dès qu'il est choisi.
   const [pageProductId, setPageProductId] = useState(() => productIdOf(initialData));
+  const [lang, setLang] = useState(() => langOf(initialData));
   const metadata = useMemo<StorefrontMetadata>(
     () => ({
       products: Object.fromEntries(products.map((p) => [p.id, p])),
       shipping,
       ...(pageProductId ? { pageProductId } : {}),
+      lang,
     }),
-    [products, shipping, pageProductId],
+    [products, shipping, pageProductId, lang],
   );
   const [error, setError] = useState("");
   const [isOnline, setIsOnline] = useState(site.published);
@@ -79,6 +87,7 @@ export function Editor({ pageId, site, initialData, products, shipping }: Props)
 
   const onChange = useCallback((data: Data) => {
     setPageProductId(productIdOf(data));
+    setLang(langOf(data));
     setStatus((current) => {
       if (current === "saving" || current === "publishing") return current;
       return JSON.stringify(data) === savedSnapshot.current ? current : "dirty";

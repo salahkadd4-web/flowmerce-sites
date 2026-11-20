@@ -16,6 +16,18 @@ const HERO = {
 
 const page = (content: unknown[]) => ({ root: { props: { title: "Accueil" } }, content });
 
+describe("langue et polices de la page", () => {
+  it("garde langue et polices valides, refuse les inconnues", () => {
+    expect(validatePageContent({ root: { props: { lang: "ar", bodyFont: "cairo" } }, content: [] })).toMatchObject({
+      ok: true,
+      content: { root: { props: { lang: "ar", bodyFont: "cairo" } } },
+    });
+    expect(validatePageContent({ root: { props: { lang: "en" } }, content: [] }).ok).toBe(false);
+    expect(validatePageContent({ root: { props: { headingFont: "Comic" } }, content: [] }).ok).toBe(false);
+    expect(parsePageContent({ root: { props: { lang: "en" } }, content: [] })?.root.props.lang).toBeUndefined();
+  });
+});
+
 describe("validatePageContent (strict, à l'enregistrement)", () => {
   it("accepte une page valide", () => {
     const result = validatePageContent(page([HERO]));

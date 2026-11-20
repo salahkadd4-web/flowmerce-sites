@@ -33,7 +33,7 @@ export default async function PreviewPage({ params }: { params: Promise<{ pageId
         Aperçu — non publié. Les acheteurs ne voient pas encore ces modifications.
       </p>
       <main>
-        <Render config={puckConfig} data={content as Data} metadata={storefront} />
+        <Render config={puckConfig} data={content as Data} metadata={{ ...storefront, lang: content.root.props.lang ?? "fr" }} />
       </main>
     </div>
   );
