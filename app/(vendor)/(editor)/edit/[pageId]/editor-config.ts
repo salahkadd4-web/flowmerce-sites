@@ -6,6 +6,7 @@
 import type { Config, Field } from "@puckeditor/core";
 import { createElement } from "react";
 import { ResizableImageBox } from "@/blocks/editor/ResizableImageBox";
+import { textToolbar, type TextStyle } from "@/blocks/editor/TextToolbar";
 import { ColorField } from "@/blocks/fields/ColorField";
 import type { EditorFieldKind } from "@/blocks/fields/editor-fields";
 import { MediaField } from "@/blocks/fields/MediaField";
@@ -23,14 +24,35 @@ const RENDERERS: Record<EditorFieldKind, unknown> = {
 type AnyField = Field & { editorKind?: EditorFieldKind; objectFields?: Record<string, AnyField> };
 type Fields = Record<string, AnyField>;
 
-/** Remplace chaque emplacement de champ d'édition par son composant, groupes compris ; limite la barre de mise en forme. */
-function withEditorRenderers(fields: Fields | undefined): Fields | undefined {
+/** Texte écrit dans la page → réglages de taille, couleur (et alignement) de sa barre. */
+export const TEXT_STYLES: Record<string, Record<string, TextStyle>> = {
+  Hero: {
+    title: { size: "titleSize", color: "titleColor", align: true },
+    subtitle: { size: "textSize", color: "textColor", align: true },
+  },
+  Text: {
+    title: { size: "titleSize", color: "titleColor", align: true },
+    body: { size: "textSize", color: "textColor", align: true },
+  },
+  Footer: {
+    returnPolicy: { size: "textSize", color: "textColor" },
+  },
+};
+
+/**
+ * Remplace chaque emplacement de champ d'édition par son composant, groupes compris.
+ * Textes : dans la page, la barre de mise en forme complète (quatre styles, taille,
+ * couleur, alignement) ; ailleurs, les quatre styles permis.
+ */
+function withEditorRenderers(fields: Fields | undefined, textStyles: Record<string, TextStyle> = {}): Fields | undefined {
   if (!fields) return fields;
   return Object.fromEntries(
     Object.entries(fields).map(([name, field]) => {
       if (field.type === "custom" && field.editorKind) return [name, { ...field, render: RENDERERS[field.editorKind] }];
-      // Barre de mise en forme limitée aux quatre styles permis, dans la page et le panneau.
-      if (field.type === "richtext") return [name, { ...field, renderMenu: FourStylesMenu, renderInlineMenu: FourStylesMenu }];
+      if (field.type === "richtext") {
+        const style = textStyles[name];
+        return [name, { ...field, renderMenu: FourStylesMenu, renderInlineMenu: style ? textToolbar(style) : FourStylesMenu }];
+      }
       if (field.type === "object" && field.objectFields) return [name, { ...field, objectFields: withEditorRenderers(field.objectFields) }];
       return [name, field];
     }),
@@ -41,7 +63,7 @@ function withEditorFields(config: Config): Config {
   const components = Object.fromEntries(
     Object.entries(config.components).map(([name, component]) => [
       name,
-      { ...component, fields: withEditorRenderers(component.fields as Fields | undefined) },
+      { ...component, fields: withEditorRenderers(component.fields as Fields | undefined, TEXT_STYLES[name]) },
     ]),
   ) as Config["components"];
   return { ...config, components };

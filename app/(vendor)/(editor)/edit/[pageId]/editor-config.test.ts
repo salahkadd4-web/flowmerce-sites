@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { buildEditorConfig } from "./editor-config";
+import { buildEditorConfig, TEXT_STYLES } from "./editor-config";
 
 it("propose « Produit de la page » avec les produits du vendeur", () => {
   const config = buildEditorConfig([
@@ -58,11 +58,25 @@ it("l'éditeur donne une poignée aux blocs à image", () => {
   }
 });
 
-it("la barre de mise en forme propose gras, italique, souligné et barré", () => {
+it("la barre de mise en forme du texte : quatre styles, puis taille, couleur et alignement de ce texte", () => {
   const config = buildEditorConfig([]);
-  for (const [block, name] of [["Hero", "title"], ["Text", "body"], ["Footer", "returnPolicy"]] as const) {
+  for (const [block, name] of [["Hero", "title"], ["Hero", "subtitle"], ["Text", "title"], ["Text", "body"], ["Footer", "returnPolicy"]] as const) {
     const field = config.components[block]?.fields?.[name as never] as unknown as { renderMenu?: { name: string }; renderInlineMenu?: { name: string } };
+    // Menu du panneau : les quatre styles (le panneau ne sert plus qu'aux réglages de la page).
     expect(field.renderMenu?.name).toBe("FourStylesMenu");
-    expect(field.renderInlineMenu?.name).toBe("FourStylesMenu");
+    expect(field.renderInlineMenu?.name).toBe("TextToolbar");
   }
+});
+
+it("chaque texte règle sa propre taille et sa propre couleur", () => {
+  expect(TEXT_STYLES.Hero.title).toEqual({ size: "titleSize", color: "titleColor", align: true });
+  expect(TEXT_STYLES.Hero.subtitle).toEqual({ size: "textSize", color: "textColor", align: true });
+  expect(TEXT_STYLES.Text.body).toEqual({ size: "textSize", color: "textColor", align: true });
+  expect(TEXT_STYLES.Footer.returnPolicy).toEqual({ size: "textSize", color: "textColor" });
+});
+
+it("la barre d'un texte est la même d'une construction à l'autre (sinon Puck remonte l'aperçu)", () => {
+  const first = buildEditorConfig([]).components.Hero?.fields?.title as unknown as { renderInlineMenu: unknown };
+  const second = buildEditorConfig([{ id: "p1", name: "x" }]).components.Hero?.fields?.title as unknown as { renderInlineMenu: unknown };
+  expect(first.renderInlineMenu).toBe(second.renderInlineMenu);
 });
