@@ -20,3 +20,27 @@ it("garde le titre de la page et branche l'envoi d'images", () => {
   const image = config.components.Hero?.fields?.image;
   expect(image && "render" in image ? image.render.name : "").toBe("MediaField");
 });
+
+it("branche les champs d'édition jusque dans les groupes", () => {
+  const config = buildEditorConfig([]);
+  const style = config.components.Hero?.fields?.style as unknown as { objectFields: Record<string, { render?: { name: string } }> };
+  expect(style.objectFields.backgroundImage.render?.name).toBe("MediaField");
+  expect(style.objectFields.overlay.render?.name).toBe("RangeField");
+  expect(style.objectFields.backgroundColor.render?.name).toBe("ColorField");
+  const width = config.components.Image?.fields?.imageWidth;
+  expect(width && "render" in width ? width.render.name : "").toBe("RangeField");
+  const button = config.components.OrderForm?.fields?.button as unknown as { objectFields: Record<string, { render?: { name: string } }> };
+  expect(button.objectFields.color.render?.name).toBe("ColorField");
+});
+
+it("garde les réglages de chaque champ remplacé", () => {
+  const config = buildEditorConfig([]);
+  const style = config.components.Text?.fields?.style as unknown as { objectFields: Record<string, { label?: string; editorOptions?: unknown }> };
+  expect(style.objectFields.overlay).toMatchObject({ label: "Assombrissement de l'image", editorOptions: { min: 0, max: 80, step: 10, unit: "%" } });
+});
+
+it("propose la langue et les polices de la page", () => {
+  const root = buildEditorConfig([]).root?.fields;
+  expect(root?.lang).toMatchObject({ label: "Langue de la page" });
+  expect(root?.bodyFont).toMatchObject({ label: "Police du texte" });
+});

@@ -6,6 +6,7 @@ import { notFound, redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { env } from "@/lib/env";
 import { siteUrl } from "@/lib/host";
+import { parsePageContent } from "@/lib/page-content";
 import { findOwnedPage } from "@/lib/pages";
 import { toPublicProduct } from "@/lib/product-input";
 import { listActiveProductsWithVariants } from "@/lib/products";
@@ -39,7 +40,9 @@ export default async function EditPage({ params }: { params: Promise<{ pageId: s
     <Editor
       pageId={page.id}
       site={{ name: page.site.name, url, published: page.site.status === "PUBLISHED" }}
-      initialData={page.draft}
+      // Normalisé comme à l'affichage : anciens textes en paragraphes, nouveaux
+      // réglages à leur valeur par défaut — l'éditeur montre la page telle qu'elle s'affiche.
+      initialData={parsePageContent(page.draft) ?? page.draft}
       products={products.map(toPublicProduct)}
       shipping={shipping}
     />

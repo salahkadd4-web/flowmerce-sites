@@ -1,22 +1,43 @@
 // Configuration Puck de l'éditeur : la configuration partagée, plus les champs
-// qui n'existent que côté client (envoi d'images). Importé seulement par Editor.tsx,
-// jamais par une page publique (voir blocks/fields/editor-fields.ts).
+// qui n'existent que côté client (envoi d'images, curseurs, couleurs). Importé
+// seulement par Editor.tsx, jamais par une page publique (voir
+// blocks/fields/editor-fields.ts).
 
 import type { Config, Field } from "@puckeditor/core";
+import { ColorField } from "@/blocks/fields/ColorField";
+import type { EditorFieldKind } from "@/blocks/fields/editor-fields";
 import { MediaField } from "@/blocks/fields/MediaField";
+import { RangeField } from "@/blocks/fields/RangeField";
 import { puckConfig } from "@/blocks/puck.config";
 
-const WITH_IMAGE_FIELD = ["Hero", "Image"] as const;
+const RENDERERS: Record<EditorFieldKind, unknown> = {
+  media: MediaField,
+  range: RangeField,
+  color: ColorField,
+};
 
-function withMediaField(config: Config): Config {
-  const components = { ...config.components };
-  for (const name of WITH_IMAGE_FIELD) {
-    const component = components[name];
-    const image = component?.fields?.image;
-    if (!component || !image || image.type !== "custom") continue;
-    const mediaField = { type: "custom", label: image.label, render: MediaField } as Field;
-    components[name] = { ...component, fields: { ...component.fields, image: mediaField } };
-  }
+type AnyField = Field & { editorKind?: EditorFieldKind; objectFields?: Record<string, AnyField> };
+type Fields = Record<string, AnyField>;
+
+/** Remplace chaque emplacement de champ d'édition par son composant, groupes compris. */
+function withEditorRenderers(fields: Fields | undefined): Fields | undefined {
+  if (!fields) return fields;
+  return Object.fromEntries(
+    Object.entries(fields).map(([name, field]) => {
+      if (field.type === "custom" && field.editorKind) return [name, { ...field, render: RENDERERS[field.editorKind] }];
+      if (field.type === "object" && field.objectFields) return [name, { ...field, objectFields: withEditorRenderers(field.objectFields) }];
+      return [name, field];
+    }),
+  );
+}
+
+function withEditorFields(config: Config): Config {
+  const components = Object.fromEntries(
+    Object.entries(config.components).map(([name, component]) => [
+      name,
+      { ...component, fields: withEditorRenderers(component.fields as Fields | undefined) },
+    ]),
+  ) as Config["components"];
   return { ...config, components };
 }
 
@@ -34,5 +55,5 @@ function withProductField(config: Config, products: { id: string; name: string }
 }
 
 export function buildEditorConfig(products: { id: string; name: string }[]): Config {
-  return withProductField(withMediaField(puckConfig), products);
+  return withProductField(withEditorFields(puckConfig), products);
 }
