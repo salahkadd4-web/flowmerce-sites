@@ -1,17 +1,20 @@
 // lib/auth.ts — authentification provisoire (Phase 0), calquée sur flowmerce-web-app.
 // Remplacée par le SSO Flowmerce en Phase 3.
 //
-// Cookie de session : aucune option `cookies` ici, volontairement. Sans attribut
-// `Domain`, le cookie reste limité à l'hôte vendeur et n'est jamais envoyé aux
-// sites des vendeurs (§7). Le proxy bloque en plus /api/auth sur ces hôtes.
+// Cookies : noms propres, sans attribut `Domain` (lib/session-cookie.ts).
+// Ils restent limités à l'hôte vendeur et ne sont jamais envoyés aux sites des
+// vendeurs (§7). Le proxy bloque en plus /api/auth sur ces hôtes.
 
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { authorizeCredentials } from "@/lib/auth-credentials";
 import { env } from "@/lib/env";
+import { authCookies } from "@/lib/session-cookie";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: env.AUTH_SECRET,
+  // L'espace vendeur est servi avec le même protocole que les sites.
+  cookies: authCookies(env.SITES_PROTOCOL),
   // L'hôte est contrôlé par proxy.ts : /api/auth et les server actions (dont
   // loginAction) ne sont joignables que sur DASHBOARD_HOST (lib/routing.ts).
   trustHost: true,
