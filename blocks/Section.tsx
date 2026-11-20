@@ -25,10 +25,12 @@ type Props = {
   bleed?: boolean;
   /** Classes du conteneur du contenu. */
   inner?: string;
+  /** Image de fond préchargée : section du haut de page (bannière). */
+  preload?: boolean;
   children: ReactNode;
 };
 
-export function Section({ style, defaults, as: Tag = "section", id, bleed = false, inner = "", children }: Props) {
+export function Section({ style, defaults, as: Tag = "section", id, bleed = false, inner = "", preload = false, children }: Props) {
   const image = style.background === "image" ? style.backgroundImage : null;
   const colored = style.background === "color";
   const padding = style.spacing === "normal" ? defaults.padding : SPACING[style.spacing];
@@ -44,7 +46,7 @@ export function Section({ style, defaults, as: Tag = "section", id, bleed = fals
     >
       {image && (
         <>
-          <Image src={image.url} alt="" fill sizes="100vw" className="-z-10 object-cover" />
+          <Image src={image.url} alt="" fill sizes="100vw" preload={preload} className="-z-10 object-cover" />
           {style.overlay > 0 && (
             <div aria-hidden="true" className="absolute inset-0 -z-10 bg-black" style={{ opacity: style.overlay / 100 }} />
           )}

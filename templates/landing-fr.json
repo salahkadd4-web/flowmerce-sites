@@ -1,7 +1,10 @@
 {
   "root": {
     "props": {
-      "title": ""
+      "title": "",
+      "lang": "fr",
+      "headingFont": "system",
+      "bodyFont": "system"
     }
   },
   "content": [
@@ -15,7 +18,10 @@
         "buttonLabel": "Commander maintenant",
         "buttonHref": "#commande",
         "align": "center",
-        "background": "light"
+        "style": {
+          "background": "color",
+          "backgroundColor": "#16265c"
+        }
       }
     },
     {
@@ -31,7 +37,11 @@
         "id": "text-1",
         "title": "Pourquoi choisir notre produit",
         "body": "Premier avantage : dites ce qui le rend unique.\n\nDeuxième avantage : rassurez sur la qualité.\n\nTroisième avantage : livraison partout en Algérie, paiement à la livraison.",
-        "align": "left"
+        "align": "left",
+        "style": {
+          "background": "color",
+          "backgroundColor": "#faf6f0"
+        }
       }
     },
     {

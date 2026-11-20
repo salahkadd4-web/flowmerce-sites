@@ -1,4 +1,4 @@
-import { BLOCK_SCHEMAS } from "@/blocks/schemas";
+import { BLOCK_DESCRIPTIONS, BLOCK_SCHEMAS, BLOCK_TYPES } from "@/blocks/schemas";
 
 const HERO = {
   id: "hero-1",
@@ -134,4 +134,8 @@ describe("Hero — texte alternatif de l'image", () => {
   it("refuse un texte alternatif de plus de 150 caractères", () => {
     expect(BLOCK_SCHEMAS.Hero.safeParse({ ...HERO, imageAlt: "a".repeat(151) }).success).toBe(false);
   });
+});
+
+it("chaque bloc a une description pour la colonne des blocs", () => {
+  for (const type of BLOCK_TYPES) expect(BLOCK_DESCRIPTIONS[type].length).toBeGreaterThan(5);
 });

@@ -6,11 +6,28 @@
 import "@puckeditor/core/puck.css";
 import { Puck, useGetPuck, type Data } from "@puckeditor/core";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { AlertTriangle, ArrowLeft, Eye, Loader2, Save, Send } from "lucide-react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  ClipboardList,
+  Eye,
+  GripVertical,
+  Image as ImageIcon,
+  Loader2,
+  MousePointerClick,
+  PanelBottom,
+  PanelTop,
+  Save,
+  Send,
+  ShoppingBag,
+  Type,
+  type LucideIcon,
+} from "lucide-react";
 import { BTN_GHOST, BTN_PRIMARY, FOCUS, Notice } from "@/components/dashboard/ui";
 import { dictionaryFr } from "@/blocks/dictionary.fr";
 import { isPageLang, type PageLang } from "@/blocks/i18n";
+import { BLOCK_DESCRIPTIONS, BLOCK_LABELS, isBlockType, type BlockType } from "@/blocks/schemas";
 import type { PublicProduct } from "@/lib/product-input";
 import type { ShippingOption } from "@/lib/shipping";
 import type { StorefrontMetadata } from "@/lib/storefront";
@@ -32,6 +49,11 @@ type Props = {
 function langOf(data: unknown): PageLang {
   const value = (data as { root?: { props?: { lang?: unknown } } } | null)?.root?.props?.lang;
   return isPageLang(value) ? value : "fr";
+}
+
+function isEmptyPage(data: unknown): boolean {
+  const content = (data as { content?: unknown } | null)?.content;
+  return !Array.isArray(content) || content.length === 0;
 }
 
 function productIdOf(data: unknown): string | undefined {
@@ -59,6 +81,7 @@ export function Editor({ pageId, site, initialData, products, shipping }: Props)
   // Produit de la page suivi en direct : la fiche et le formulaire s'affichent dès qu'il est choisi.
   const [pageProductId, setPageProductId] = useState(() => productIdOf(initialData));
   const [lang, setLang] = useState(() => langOf(initialData));
+  const [empty, setEmpty] = useState(() => isEmptyPage(initialData));
   const metadata = useMemo<StorefrontMetadata>(
     () => ({
       products: Object.fromEntries(products.map((p) => [p.id, p])),
@@ -88,6 +111,7 @@ export function Editor({ pageId, site, initialData, products, shipping }: Props)
   const onChange = useCallback((data: Data) => {
     setPageProductId(productIdOf(data));
     setLang(langOf(data));
+    setEmpty(isEmptyPage(data));
     setStatus((current) => {
       if (current === "saving" || current === "publishing") return current;
       return JSON.stringify(data) === savedSnapshot.current ? current : "dirty";
@@ -147,31 +171,81 @@ export function Editor({ pageId, site, initialData, products, shipping }: Props)
         </div>
       )}
       <div className="min-h-0 flex-1">
-        <Puck
-          config={config}
-          metadata={metadata}
-          data={initialData as Partial<Data>}
-          dictionary={dictionaryFr}
-          viewports={VIEWPORTS}
-          onChange={onChange}
-          headerTitle={site.name}
-          height="100%"
-          // Aperçu mobile par défaut : la majorité du trafic des landing pages (§2.2).
-          ui={{ viewports: { current: { width: VIEWPORTS[0].width, height: "auto" }, controlsVisible: true, options: VIEWPORTS } }}
-          overrides={{
-            headerActions: () => (
-              <HeaderActions
-                site={site}
-                status={status}
-                isOnline={isOnline}
-                onSave={(data) => void run("save", data)}
-                onPublish={(data) => void run("publish", data)}
-                onPreview={(data) => void preview(data, status === "dirty")}
-              />
-            ),
-          }}
-        />
+        <EmptyPageContext.Provider value={empty}>
+          <Puck
+            config={config}
+            metadata={metadata}
+            data={initialData as Partial<Data>}
+            dictionary={dictionaryFr}
+            viewports={VIEWPORTS}
+            onChange={onChange}
+            headerTitle={site.name}
+            height="100%"
+            // Aperçu mobile par défaut : la majorité du trafic des landing pages (§2.2).
+            ui={{ viewports: { current: { width: VIEWPORTS[0].width, height: "auto" }, controlsVisible: true, options: VIEWPORTS } }}
+            overrides={{
+              // Composants stables (hors du rendu) : une fonction recréée à chaque rendu
+              // ferait remonter l'aperçu par Puck, et le texte en cours de saisie perdrait le focus.
+              drawerItem: DrawerItem,
+              preview: PreviewWithHint,
+              headerActions: () => (
+                <HeaderActions
+                  site={site}
+                  status={status}
+                  isOnline={isOnline}
+                  onSave={(data) => void run("save", data)}
+                  onPublish={(data) => void run("publish", data)}
+                  onPreview={(data) => void preview(data, status === "dirty")}
+                />
+              ),
+            }}
+          />
+        </EmptyPageContext.Provider>
       </div>
+    </div>
+  );
+}
+
+/** Page vide : lu par l'aperçu, qui garde ainsi une identité stable. */
+const EmptyPageContext = createContext(false);
+
+function PreviewWithHint({ children }: { children?: ReactNode }) {
+  const empty = useContext(EmptyPageContext);
+  return (
+    <>
+      {empty && (
+        <div className="mx-auto w-full max-w-md px-4 pt-4">
+          <Notice icon={MousePointerClick} title="Votre page est vide">
+            Glissez un bloc depuis la colonne de gauche pour commencer.
+          </Notice>
+        </div>
+      )}
+      {children}
+    </>
+  );
+}
+
+const BLOCK_ICONS: Record<BlockType, LucideIcon> = {
+  Hero: PanelTop,
+  Product: ShoppingBag,
+  Text: Type,
+  OrderForm: ClipboardList,
+  Image: ImageIcon,
+  Footer: PanelBottom,
+};
+
+/** Bloc de la colonne de gauche : icône, nom et ce qu'il contient. */
+function DrawerItem({ name }: { name: string; children?: ReactNode }) {
+  if (!isBlockType(name)) return <div className="rounded-control border border-line bg-white px-3 py-2.5 text-[13px]">{name}</div>;
+  const Icon = BLOCK_ICONS[name];
+  return (
+    <div className="flex cursor-grab items-center gap-3 rounded-control border border-line bg-white px-3 py-2.5 transition-colors hover:border-brand hover:bg-brand-soft">
+      <Icon size={16} aria-hidden className="shrink-0 text-brand" />
+      <span className="flex min-w-0 flex-1 flex-col">
+        <span className="text-[13px] font-semibold text-ink">{BLOCK_LABELS[name]}</span>
+        <span className="text-[12px] leading-snug text-faint">{BLOCK_DESCRIPTIONS[name]}</span>
+      </span>
+      <GripVertical size={16} aria-hidden className="shrink-0 text-faint" />
     </div>
   );
 }

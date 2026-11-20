@@ -12,6 +12,9 @@ import { isSafeHref } from "@/blocks/shared";
 import {
   buttonProps,
   colorProps,
+  DEFAULT_BUTTON,
+  DEFAULT_SECTION_STYLE,
+  DEFAULT_TYPOGRAPHY,
   HERO_TEXT_SIZES,
   HERO_TITLE_SIZES,
   sectionTone,
@@ -19,7 +22,8 @@ import {
 } from "@/blocks/style";
 import type { HeroProps } from "./schema";
 
-type Props = Omit<HeroProps, "id" | "title" | "subtitle" | "buttonLabel" | "imageAlt"> & {
+type Props = Omit<HeroProps, "id" | "title" | "subtitle" | "buttonLabel" | "imageAlt" | "imageWidth" | "typography" | "button" | "style"> &
+  Partial<Pick<HeroProps, "imageWidth" | "typography" | "button" | "style">> & {
   title: ReactNode;
   subtitle: ReactNode;
   buttonLabel: ReactNode;
@@ -34,13 +38,13 @@ export function Hero({
   subtitle,
   image,
   imageAlt = "",
-  imageWidth,
+  imageWidth = 100,
   buttonLabel,
   buttonHref,
   align,
-  typography,
-  button,
-  style,
+  typography = DEFAULT_TYPOGRAPHY,
+  button = DEFAULT_BUTTON,
+  style = DEFAULT_SECTION_STYLE,
   renderImageBox = defaultImageBox,
 }: Props) {
   const tone = sectionTone(style, DEFAULTS.tone);
@@ -51,7 +55,7 @@ export function Hero({
   const action = buttonProps(button, tone);
 
   return (
-    <Section style={style} defaults={DEFAULTS} inner={`flex flex-col gap-6 ${centered ? "items-center text-center" : "items-start text-start"}`}>
+    <Section style={style} defaults={DEFAULTS} preload inner={`flex flex-col gap-6 ${centered ? "items-center text-center" : "items-start text-start"}`}>
       {hasText(title) && (
         <h1
           dir="auto"

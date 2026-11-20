@@ -6,6 +6,7 @@ import { Render } from "@puckeditor/core/rsc";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { puckConfig } from "@/blocks/puck.config";
+import { PUBLIC_FIELD_TRANSFORMS } from "@/blocks/render-transforms";
 import { auth } from "@/lib/auth";
 import { parsePageContent } from "@/lib/page-content";
 import { findOwnedPage } from "@/lib/pages";
@@ -33,7 +34,7 @@ export default async function PreviewPage({ params }: { params: Promise<{ pageId
         Aperçu — non publié. Les acheteurs ne voient pas encore ces modifications.
       </p>
       <main>
-        <Render config={puckConfig} data={content as Data} metadata={{ ...storefront, lang: content.root.props.lang ?? "fr" }} />
+        <Render config={puckConfig} fieldTransforms={PUBLIC_FIELD_TRANSFORMS} data={content as Data} metadata={{ ...storefront, lang: content.root.props.lang ?? "fr" }} />
       </main>
     </div>
   );

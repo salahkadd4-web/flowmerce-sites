@@ -4,14 +4,23 @@
 import type { ReactNode } from "react";
 import { hasText, RichText } from "@/blocks/rich-text";
 import { Section } from "@/blocks/Section";
-import { colorProps, SECTION_TITLE_SIZES, sectionTone, TEXT_AUTO, TEXT_SIZES } from "@/blocks/style";
+import {
+  colorProps,
+  DEFAULT_SECTION_STYLE,
+  DEFAULT_TYPOGRAPHY,
+  SECTION_TITLE_SIZES,
+  sectionTone,
+  TEXT_AUTO,
+  TEXT_SIZES,
+} from "@/blocks/style";
 import type { TextProps } from "./schema";
 
-type Props = Omit<TextProps, "id" | "title" | "body"> & { title: ReactNode; body: ReactNode };
+type Props = Omit<TextProps, "id" | "title" | "body" | "typography" | "style"> &
+  Partial<Pick<TextProps, "typography" | "style">> & { title: ReactNode; body: ReactNode };
 
 const DEFAULTS = { tone: "light" as const, className: "", padding: "py-10", width: "max-w-3xl" };
 
-export function Text({ title, body, align, typography, style }: Props) {
+export function Text({ title, body, align, typography = DEFAULT_TYPOGRAPHY, style = DEFAULT_SECTION_STYLE }: Props) {
   if (!hasText(title) && !hasText(body)) return null;
   const tone = sectionTone(style, DEFAULTS.tone);
   const titleColor = colorProps(typography.titleColor, TEXT_AUTO[tone].title);

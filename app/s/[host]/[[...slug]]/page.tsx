@@ -8,6 +8,7 @@ import { Render } from "@puckeditor/core/rsc";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { puckConfig } from "@/blocks/puck.config";
+import { PUBLIC_FIELD_TRANSFORMS } from "@/blocks/render-transforms";
 import { pageTitle } from "@/lib/page-title";
 import { getStorefront } from "@/lib/storefront";
 import { getPage, getSiteByHost } from "@/lib/tenant";
@@ -43,7 +44,7 @@ export default async function SitePage({ params }: Props) {
   // Le contenu a déjà été filtré bloc par bloc par parsePageContent.
   return (
     <main className="min-h-dvh">
-      <Render config={puckConfig} data={data.page.content as Data} metadata={{ ...storefront, lang: data.page.content.root.props.lang ?? "fr" }} />
+      <Render config={puckConfig} fieldTransforms={PUBLIC_FIELD_TRANSFORMS} data={data.page.content as Data} metadata={{ ...storefront, lang: data.page.content.root.props.lang ?? "fr" }} />
     </main>
   );
 }

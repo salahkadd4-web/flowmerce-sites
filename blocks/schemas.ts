@@ -32,6 +32,16 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   OrderForm: "Formulaire de commande",
 };
 
+/** Ce que fait chaque bloc, sous son nom dans la colonne des blocs de l'éditeur. */
+export const BLOCK_DESCRIPTIONS: Record<BlockType, string> = {
+  Hero: "Titre, image et bouton d'appel",
+  Product: "Photos, prix et choix du produit",
+  Text: "Titre et paragraphes",
+  OrderForm: "Commande payée à la livraison",
+  Image: "Une photo, sa taille et sa légende",
+  Footer: "Contacts, réseaux et politique de retour",
+};
+
 export const BLOCK_FIELD_LABELS: Record<BlockType, Record<string, string>> = {
   Hero: HERO_FIELD_LABELS,
   Text: TEXT_FIELD_LABELS,

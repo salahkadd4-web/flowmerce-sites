@@ -7,7 +7,7 @@ import { BUYER_TEXT, type PageLang } from "@/blocks/i18n";
 import { hasText, RichText } from "@/blocks/rich-text";
 import { Section } from "@/blocks/Section";
 import { isSafeHref, telHref } from "@/blocks/shared";
-import { colorProps, sectionTone, type Tone } from "@/blocks/style";
+import { colorProps, DEFAULT_SECTION_STYLE, DEFAULT_TYPOGRAPHY, sectionTone, type Tone } from "@/blocks/style";
 import type { FooterProps } from "./schema";
 
 // Logos des réseaux : tracés de Simple Icons (simpleicons.org, licence CC0) —
@@ -46,7 +46,8 @@ const FOOTER_TEXT_SIZES = { s: "text-[13px]", m: "text-[14px]", l: "text-base", 
 
 const DEFAULTS = { tone: "dark" as const, className: "bg-deep", padding: "py-10", width: "max-w-3xl" };
 
-type Props = Omit<FooterProps, "id" | "shopName" | "returnPolicy"> & {
+type Props = Omit<FooterProps, "id" | "shopName" | "returnPolicy" | "typography" | "style"> &
+  Partial<Pick<FooterProps, "typography" | "style">> & {
   shopName: ReactNode;
   returnPolicy: ReactNode;
   lang?: PageLang;
@@ -61,7 +62,7 @@ function BrandIcon({ name }: { name: keyof typeof BRAND_PATHS }) {
 }
 
 export function Footer(props: Props) {
-  const { shopName, phone, email, returnPolicy, typography, style, lang = "fr" } = props;
+  const { shopName, phone, email, returnPolicy, typography = DEFAULT_TYPOGRAPHY, style = DEFAULT_SECTION_STYLE, lang = "fr" } = props;
   const tone = sectionTone(style, DEFAULTS.tone);
   const auto = AUTO[tone];
   const link = LINK[tone];

@@ -64,6 +64,14 @@ export type ButtonStyle = z.infer<typeof buttonStyleSchema>;
 /** Largeur d'une image, en % de sa section, par paliers de 10. */
 export const imageWidthSchema = z.number().int().min(30).max(100).multipleOf(10).default(100);
 
+/**
+ * Réglages par défaut : un contenu enregistré avant ces réglages (ou relu d'un
+ * cache plus ancien que le code) n'en a pas, et chaque bloc s'affiche alors comme avant.
+ */
+export const DEFAULT_SECTION_STYLE: SectionStyle = sectionStyleSchema.parse(undefined);
+export const DEFAULT_TYPOGRAPHY: Typography = typographySchema.parse(undefined);
+export const DEFAULT_BUTTON: ButtonStyle = buttonStyleSchema.parse(undefined);
+
 /** Ton du fond : un fond sombre appelle un texte clair. */
 export type Tone = "light" | "dark";
 

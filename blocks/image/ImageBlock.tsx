@@ -4,7 +4,7 @@
 import Image from "next/image";
 import { renderImageBox as defaultImageBox, type RenderImageBox } from "@/blocks/image-box";
 import { Section } from "@/blocks/Section";
-import { sectionTone, TEXT_AUTO } from "@/blocks/style";
+import { DEFAULT_SECTION_STYLE, sectionTone, TEXT_AUTO } from "@/blocks/style";
 import type { ImageProps } from "./schema";
 
 const ROUNDED: Record<ImageProps["rounded"], string> = {
@@ -13,16 +13,17 @@ const ROUNDED: Record<ImageProps["rounded"], string> = {
   strong: "rounded-3xl",
 };
 
-type Props = Omit<ImageProps, "id"> & { editing?: boolean; renderImageBox?: RenderImageBox };
+type Props = Omit<ImageProps, "id" | "imageWidth" | "rounded" | "style"> &
+  Partial<Pick<ImageProps, "imageWidth" | "rounded" | "style">> & { editing?: boolean; renderImageBox?: RenderImageBox };
 
 export function ImageBlock({
   image,
   alt,
   caption,
   width,
-  imageWidth,
-  rounded,
-  style,
+  imageWidth = 100,
+  rounded = "soft",
+  style = DEFAULT_SECTION_STYLE,
   editing = false,
   renderImageBox = defaultImageBox,
 }: Props) {
