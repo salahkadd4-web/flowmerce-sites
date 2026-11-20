@@ -9,8 +9,8 @@
 import "@puckeditor/core/puck.css";
 import { Puck, useGetPuck, type Data } from "@puckeditor/core";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { AlertTriangle, MousePointerClick } from "lucide-react";
-import { Notice } from "@/components/dashboard/ui";
+import { AlertTriangle, Plus } from "lucide-react";
+import { BTN_PRIMARY, Notice } from "@/components/dashboard/ui";
 import { dictionaryFr } from "@/blocks/dictionary.fr";
 import { isPageLang, type PageLang } from "@/blocks/i18n";
 import type { PublicProduct } from "@/lib/product-input";
@@ -20,7 +20,9 @@ import { buildEditorConfig } from "./editor-config";
 import { publishPage, saveDraft } from "./actions";
 import { installKeyboardEventGuard } from "./keyboard-event-guard";
 import { createAutosave, type AutosaveStatus } from "./shell/autosave";
+import { AddSectionDialog } from "./shell/AddSectionDialog";
 import { PageSettingsDialog } from "./shell/PageSettingsDialog";
+import { SectionsColumn } from "./shell/SectionsColumn";
 import { TopBar, type Device } from "./shell/TopBar";
 
 type Props = {
@@ -73,6 +75,8 @@ export function Editor({ pageId, site, initialData, products, shipping }: Props)
   const [justPublished, setJustPublished] = useState(false);
   const [device, setDevice] = useState<Device>("phone");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const emptyPage = useMemo(() => ({ empty, onAdd: () => setAddOpen(true) }), [empty]);
   const [autosave] = useState(() =>
     createAutosave<Data>({
       // Le premier onChange de Puck (chargement de la page) n'est pas une modification.
@@ -171,7 +175,7 @@ export function Editor({ pageId, site, initialData, products, shipping }: Props)
 
   return (
     <div className="flex h-dvh flex-col bg-page">
-      <EmptyPageContext.Provider value={empty}>
+      <EmptyPageContext.Provider value={emptyPage}>
         <Puck
           config={config}
           metadata={metadata}
@@ -198,6 +202,8 @@ export function Editor({ pageId, site, initialData, products, shipping }: Props)
             onPublish={publish}
             settingsOpen={settingsOpen}
             onSettings={setSettingsOpen}
+            addOpen={addOpen}
+            onAdd={setAddOpen}
           />
         </Puck>
       </EmptyPageContext.Provider>
@@ -218,10 +224,27 @@ type LayoutProps = {
   onPublish: (data: Data) => void;
   settingsOpen: boolean;
   onSettings: (open: boolean) => void;
+  addOpen: boolean;
+  onAdd: (open: boolean) => void;
 };
 
 /** Cadre de l'éditeur, rendu dans Puck (accès à son état et à ses actions). */
-function EditorLayout({ site, status, error, publishing, published, device, onDevice, onRetry, onPreview, onPublish, settingsOpen, onSettings }: LayoutProps) {
+function EditorLayout({
+  site,
+  status,
+  error,
+  publishing,
+  published,
+  device,
+  onDevice,
+  onRetry,
+  onPreview,
+  onPublish,
+  settingsOpen,
+  onSettings,
+  addOpen,
+  onAdd,
+}: LayoutProps) {
   const getPuck = useGetPuck();
   return (
     <div className="flex h-full flex-col">
@@ -245,7 +268,7 @@ function EditorLayout({ site, status, error, publishing, published, device, onDe
         </div>
       )}
       <div className="flex min-h-0 flex-1">
-        <aside aria-label="Sections de la page" className="flex w-64 shrink-0 flex-col border-e border-line bg-surface" id="editor-sections" />
+        <SectionsColumn onAdd={() => onAdd(true)} />
         <main className="flex min-w-0 flex-1 justify-center overflow-hidden p-4">
           <div
             className="editor-canvas h-full overflow-hidden rounded-card border border-line bg-surface shadow-sm transition-[width] duration-200"
@@ -256,22 +279,26 @@ function EditorLayout({ site, status, error, publishing, published, device, onDe
         </main>
       </div>
       <PageSettingsDialog open={settingsOpen} onClose={() => onSettings(false)} />
+      <AddSectionDialog open={addOpen} onClose={() => onAdd(false)} />
     </div>
   );
 }
 
 /** Page vide : lu par l'aperçu, qui garde ainsi une identité stable. */
-const EmptyPageContext = createContext(false);
+const EmptyPageContext = createContext<{ empty: boolean; onAdd: () => void }>({ empty: false, onAdd: () => {} });
 
 function PreviewWithHint({ children }: { children?: ReactNode }) {
-  const empty = useContext(EmptyPageContext);
+  const { empty, onAdd } = useContext(EmptyPageContext);
   return (
     <>
       {empty && (
-        <div className="mx-auto w-full max-w-md px-4 pt-4">
-          <Notice icon={MousePointerClick} title="Votre page est vide">
-            Ajoutez une section depuis la colonne de gauche pour commencer.
-          </Notice>
+        <div className="mx-auto flex w-full max-w-sm flex-col items-center gap-3 px-6 py-16 text-center">
+          <p className="text-[17px] font-bold text-ink">Votre page est vide</p>
+          <p className="text-[14px] text-body">Ajoutez une première section : une bannière, votre produit, le formulaire de commande…</p>
+          <button type="button" onClick={onAdd} className={BTN_PRIMARY}>
+            <Plus size={16} aria-hidden />
+            Ajouter une section
+          </button>
         </div>
       )}
       {children}
