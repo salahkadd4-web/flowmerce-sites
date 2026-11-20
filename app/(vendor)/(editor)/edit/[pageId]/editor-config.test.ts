@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { buildEditorConfig } from "./editor-config";
 
 it("propose « Produit de la page » avec les produits du vendeur", () => {
@@ -43,4 +44,25 @@ it("propose la langue et les polices de la page", () => {
   const root = buildEditorConfig([]).root?.fields;
   expect(root?.lang).toMatchObject({ label: "Langue de la page" });
   expect(root?.bodyFont).toMatchObject({ label: "Police du texte" });
+});
+
+it("l'éditeur donne une poignée aux blocs à image", () => {
+  for (const name of ["Hero", "Image", "Product"] as const) {
+    const component = buildEditorConfig([]).components[name]!;
+    const element = component.render({
+      ...component.defaultProps,
+      id: "b1",
+      puck: { isEditing: true, metadata: {} },
+    } as never) as ReactElement<{ renderImageBox?: unknown }>;
+    expect(typeof element.props.renderImageBox).toBe("function");
+  }
+});
+
+it("la barre de mise en forme propose gras, italique, souligné et barré", () => {
+  const config = buildEditorConfig([]);
+  for (const [block, name] of [["Hero", "title"], ["Text", "body"], ["Footer", "returnPolicy"]] as const) {
+    const field = config.components[block]?.fields?.[name as never] as unknown as { renderMenu?: { name: string }; renderInlineMenu?: { name: string } };
+    expect(field.renderMenu?.name).toBe("FourStylesMenu");
+    expect(field.renderInlineMenu?.name).toBe("FourStylesMenu");
+  }
 });

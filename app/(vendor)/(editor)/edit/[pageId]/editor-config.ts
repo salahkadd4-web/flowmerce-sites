@@ -4,10 +4,14 @@
 // blocks/fields/editor-fields.ts).
 
 import type { Config, Field } from "@puckeditor/core";
+import { createElement } from "react";
+import { ResizableImageBox } from "@/blocks/editor/ResizableImageBox";
 import { ColorField } from "@/blocks/fields/ColorField";
 import type { EditorFieldKind } from "@/blocks/fields/editor-fields";
 import { MediaField } from "@/blocks/fields/MediaField";
 import { RangeField } from "@/blocks/fields/RangeField";
+import { FourStylesMenu } from "@/blocks/fields/RichTextMenus";
+import type { ImageBoxProps } from "@/blocks/image-box";
 import { puckConfig } from "@/blocks/puck.config";
 
 const RENDERERS: Record<EditorFieldKind, unknown> = {
@@ -19,12 +23,14 @@ const RENDERERS: Record<EditorFieldKind, unknown> = {
 type AnyField = Field & { editorKind?: EditorFieldKind; objectFields?: Record<string, AnyField> };
 type Fields = Record<string, AnyField>;
 
-/** Remplace chaque emplacement de champ d'édition par son composant, groupes compris. */
+/** Remplace chaque emplacement de champ d'édition par son composant, groupes compris ; limite la barre de mise en forme. */
 function withEditorRenderers(fields: Fields | undefined): Fields | undefined {
   if (!fields) return fields;
   return Object.fromEntries(
     Object.entries(fields).map(([name, field]) => {
       if (field.type === "custom" && field.editorKind) return [name, { ...field, render: RENDERERS[field.editorKind] }];
+      // Barre de mise en forme limitée aux quatre styles permis, dans la page et le panneau.
+      if (field.type === "richtext") return [name, { ...field, renderMenu: FourStylesMenu, renderInlineMenu: FourStylesMenu }];
       if (field.type === "object" && field.objectFields) return [name, { ...field, objectFields: withEditorRenderers(field.objectFields) }];
       return [name, field];
     }),
@@ -54,6 +60,29 @@ function withProductField(config: Config, products: { id: string; name: string }
   return { ...config, root: { ...config.root, fields: { ...config.root?.fields, productId } } };
 }
 
+/** Blocs dont l'image se règle à la poignée, et le réglage qui porte sa largeur. */
+const RESIZABLE = ["Hero", "Image", "Product"] as const;
+
+/** Donne aux blocs à image une boîte à poignée à la place de la boîte simple. */
+function withResizableImages(config: Config): Config {
+  const components = { ...config.components };
+  for (const name of RESIZABLE) {
+    const component = components[name];
+    if (!component?.render) continue;
+    const render = component.render;
+    components[name] = {
+      ...component,
+      render: (props) =>
+        render({
+          ...props,
+          renderImageBox: (box: ImageBoxProps) =>
+            createElement(ResizableImageBox, { blockId: props.id, prop: "imageWidth", width: box.width }, box.children),
+        }),
+    };
+  }
+  return { ...config, components };
+}
+
 export function buildEditorConfig(products: { id: string; name: string }[]): Config {
-  return withProductField(withEditorFields(puckConfig), products);
+  return withProductField(withResizableImages(withEditorFields(puckConfig)), products);
 }
