@@ -6,6 +6,7 @@ import { Hero } from "@/blocks/hero/Hero";
 import { imageConfig } from "@/blocks/image/config";
 import { ImageBlock } from "@/blocks/image/ImageBlock";
 import { BLOCK_SCHEMAS } from "@/blocks/schemas";
+import { BUYER_TEXT } from "@/blocks/i18n";
 import { textConfig } from "@/blocks/text/config";
 import { Text } from "@/blocks/text/Text";
 
@@ -130,6 +131,34 @@ describe("Footer — icônes", () => {
   it("garde le mot Téléphone / Email pour les lecteurs d'écran", () => {
     expect(link("tel:0555123456")).toMatch(/class="sr-only"[^>]*>Téléphone/);
     expect(link("mailto:contact@boutique.dz")).toMatch(/class="sr-only"[^>]*>Email/);
+  });
+});
+
+describe("Footer — réglages", () => {
+  const footerDefaults = { id: "f", ...footerConfig.defaultProps };
+
+  it("pied de page sur fond clair : liens foncés lisibles", () => {
+    const props = BLOCK_SCHEMAS.Footer.parse({
+      ...footerDefaults,
+      phone: "0555 12 34 56",
+      style: { background: "color", backgroundColor: "#ffffff" },
+    });
+    const html = renderToStaticMarkup(<Footer {...props} lang="fr" />);
+    expect(html).toMatch(/<a[^>]*href="tel:0555123456"[^>]*class="[^"]*text-ink/);
+    expect(html).not.toContain("bg-deep");
+  });
+
+  it("par défaut : fond nuit et liens blancs, comme avant", () => {
+    const html = renderToStaticMarkup(<Footer {...BLOCK_SCHEMAS.Footer.parse({ ...footerDefaults, phone: "0555 12 34 56" })} />);
+    expect(html).toContain("bg-deep");
+    expect(html).toMatch(/<a[^>]*href="tel:0555123456"[^>]*class="[^"]*text-white/);
+  });
+
+  it("politique de retour mise en forme et traduite en arabe", () => {
+    const props = BLOCK_SCHEMAS.Footer.parse({ ...footerDefaults, returnPolicy: "<p><strong>7 jours</strong></p>" });
+    const html = renderToStaticMarkup(<Footer {...props} lang="ar" />);
+    expect(html).toContain("<strong>7 jours</strong>");
+    expect(html).toContain(BUYER_TEXT.ar.returnPolicy);
   });
 });
 

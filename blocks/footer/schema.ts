@@ -1,5 +1,7 @@
 import { z } from "zod";
+import { richTextSchema } from "@/blocks/rich-text";
 import { optionalHrefSchema, phoneSchema, text } from "@/blocks/shared";
+import { sectionStyleSchema, typographySchema } from "@/blocks/style";
 
 export const footerSchema = z.object({
   id: z.string(),
@@ -9,7 +11,9 @@ export const footerSchema = z.object({
   facebook: optionalHrefSchema,
   instagram: optionalHrefSchema,
   tiktok: optionalHrefSchema,
-  returnPolicy: text(1000),
+  returnPolicy: richTextSchema(1000),
+  typography: typographySchema,
+  style: sectionStyleSchema,
 });
 
 export type FooterProps = z.infer<typeof footerSchema>;
@@ -23,4 +27,6 @@ export const FOOTER_FIELD_LABELS: Record<keyof FooterProps, string> = {
   instagram: "Instagram",
   tiktok: "TikTok",
   returnPolicy: "Politique de retour",
+  typography: "Texte",
+  style: "Style",
 };

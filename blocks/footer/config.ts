@@ -1,5 +1,9 @@
 import type { ComponentConfig } from "@puckeditor/core";
 import { createElement } from "react";
+import { styleField, typographyField } from "@/blocks/fields/groups";
+import { RICH_TEXT_OPTIONS } from "@/blocks/rich-text";
+import { sectionStyleSchema, typographySchema } from "@/blocks/style";
+import type { StorefrontMetadata } from "@/lib/storefront";
 import { Footer } from "./Footer";
 import type { FooterProps } from "./schema";
 
@@ -8,13 +12,15 @@ type Props = Omit<FooterProps, "id">;
 export const footerConfig: ComponentConfig<Props> = {
   label: "Pied de page",
   fields: {
-    shopName: { type: "text", label: "Nom de la boutique" },
+    shopName: { type: "text", label: "Nom de la boutique", contentEditable: true },
     phone: { type: "text", label: "Téléphone" },
     email: { type: "text", label: "Email" },
     facebook: { type: "text", label: "Lien Facebook (ex. facebook.com/maboutique)" },
     instagram: { type: "text", label: "Lien Instagram (ex. instagram.com/maboutique)" },
     tiktok: { type: "text", label: "Lien TikTok (ex. tiktok.com/@maboutique)" },
-    returnPolicy: { type: "textarea", label: "Politique de retour" },
+    returnPolicy: { type: "richtext", label: "Politique de retour", contentEditable: true, options: RICH_TEXT_OPTIONS },
+    typography: typographyField(),
+    style: styleField(),
   },
   defaultProps: {
     shopName: "Ma boutique",
@@ -24,6 +30,9 @@ export const footerConfig: ComponentConfig<Props> = {
     instagram: "",
     tiktok: "",
     returnPolicy: "Échange ou remboursement sous 7 jours après la livraison, produit non utilisé.",
+    typography: typographySchema.parse(undefined),
+    style: sectionStyleSchema.parse(undefined),
   },
-  render: ({ puck: _puck, id: _id, ...props }) => createElement(Footer, props),
+  render: ({ puck, id: _id, ...props }) =>
+    createElement(Footer, { ...props, lang: (puck.metadata as Partial<StorefrontMetadata>).lang ?? "fr" }),
 };

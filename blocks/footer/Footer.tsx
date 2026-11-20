@@ -2,7 +2,12 @@
 // Chaque lien repasse par isSafeHref au rendu, même s'il a été validé à l'enregistrement.
 
 import { Mail, Phone } from "lucide-react";
+import type { ReactNode } from "react";
+import { BUYER_TEXT, type PageLang } from "@/blocks/i18n";
+import { hasText, RichText } from "@/blocks/rich-text";
+import { Section } from "@/blocks/Section";
 import { isSafeHref, telHref } from "@/blocks/shared";
+import { colorProps, sectionTone, type Tone } from "@/blocks/style";
 import type { FooterProps } from "./schema";
 
 // Logos des réseaux : tracés de Simple Icons (simpleicons.org, licence CC0) —
@@ -25,8 +30,27 @@ const SOCIALS = [
 // Taille des icônes à côté d'un texte dans le projet : 15 px.
 const ICON_SIZE = 15;
 
-const LINK =
-  "inline-flex items-center gap-2 font-semibold text-white hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white rounded-control";
+const LINK: Record<Tone, string> = {
+  dark: "inline-flex items-center gap-2 font-semibold text-white hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white rounded-control",
+  light: "inline-flex items-center gap-2 font-semibold text-ink hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink rounded-control",
+};
+
+// Couleurs automatiques du pied de page : un peu plus discrètes qu'une section.
+const AUTO: Record<Tone, { title: string; text: string; rule: string; small: string }> = {
+  dark: { title: "text-white", text: "text-white/80", rule: "border-white/15", small: "text-white/60" },
+  light: { title: "text-ink", text: "text-body", rule: "border-line", small: "text-faint" },
+};
+
+const FOOTER_TITLE_SIZES = { s: "text-base", m: "text-lg", l: "text-xl", xl: "text-2xl" } as const;
+const FOOTER_TEXT_SIZES = { s: "text-[13px]", m: "text-[14px]", l: "text-base", xl: "text-lg" } as const;
+
+const DEFAULTS = { tone: "dark" as const, className: "bg-deep", padding: "py-10", width: "max-w-3xl" };
+
+type Props = Omit<FooterProps, "id" | "shopName" | "returnPolicy"> & {
+  shopName: ReactNode;
+  returnPolicy: ReactNode;
+  lang?: PageLang;
+};
 
 function BrandIcon({ name }: { name: keyof typeof BRAND_PATHS }) {
   return (
@@ -36,22 +60,31 @@ function BrandIcon({ name }: { name: keyof typeof BRAND_PATHS }) {
   );
 }
 
-export function Footer(props: Omit<FooterProps, "id">) {
-  const { shopName, phone, email, returnPolicy } = props;
+export function Footer(props: Props) {
+  const { shopName, phone, email, returnPolicy, typography, style, lang = "fr" } = props;
+  const tone = sectionTone(style, DEFAULTS.tone);
+  const auto = AUTO[tone];
+  const link = LINK[tone];
+  const titleColor = colorProps(typography.titleColor, auto.title);
+  const textColor = colorProps(typography.textColor, auto.text);
   const tel = phone ? telHref(phone) : "";
   const mail = email ? `mailto:${email}` : "";
   const socials = SOCIALS.filter(({ key }) => props[key] !== "" && isSafeHref(props[key]));
 
   return (
-    <footer className="bg-deep px-4 py-10 text-white/80">
-      <div className="mx-auto flex max-w-3xl flex-col gap-6 text-[14px]">
-        {shopName && <p className="text-lg font-bold text-white">{shopName}</p>}
+    <Section as="footer" style={style} defaults={DEFAULTS} inner="flex flex-col gap-6">
+      <div className={`flex flex-col gap-6 ${FOOTER_TEXT_SIZES[typography.textSize]} ${textColor.className}`} style={textColor.style}>
+        {hasText(shopName) && (
+          <p dir="auto" className={`font-bold ${FOOTER_TITLE_SIZES[typography.titleSize]} ${titleColor.className}`} style={titleColor.style}>
+            {shopName}
+          </p>
+        )}
 
         {(phone || email) && (
           <ul className="flex flex-col gap-2 list-none p-0 m-0">
             {phone && isSafeHref(tel) && (
               <li>
-                <a href={tel} className={LINK}>
+                <a href={tel} className={link}>
                   <Phone size={ICON_SIZE} aria-hidden className="shrink-0" />
                   <span className="sr-only">Téléphone : </span>
                   {phone}
@@ -60,7 +93,7 @@ export function Footer(props: Omit<FooterProps, "id">) {
             )}
             {email && isSafeHref(mail) && (
               <li>
-                <a href={mail} className={LINK}>
+                <a href={mail} className={link}>
                   <Mail size={ICON_SIZE} aria-hidden className="shrink-0" />
                   <span className="sr-only">Email : </span>
                   {email}
@@ -74,7 +107,7 @@ export function Footer(props: Omit<FooterProps, "id">) {
           <ul className="flex flex-wrap gap-4 list-none p-0 m-0">
             {socials.map(({ key, label }) => (
               <li key={key}>
-                <a href={props[key]} target="_blank" rel="noopener noreferrer" className={LINK}>
+                <a href={props[key]} target="_blank" rel="noopener noreferrer" className={link}>
                   <BrandIcon name={key} />
                   {label}
                 </a>
@@ -83,19 +116,19 @@ export function Footer(props: Omit<FooterProps, "id">) {
           </ul>
         )}
 
-        {returnPolicy && (
-          <div>
-            <p className="mb-1 font-semibold text-white">Politique de retour</p>
-            <p className="whitespace-pre-line leading-relaxed">{returnPolicy}</p>
+        {hasText(returnPolicy) && (
+          <div className="flex flex-col gap-2">
+            <p className={`font-semibold ${auto.title}`}>{BUYER_TEXT[lang].returnPolicy}</p>
+            <RichText value={returnPolicy} className="leading-relaxed" />
           </div>
         )}
 
-        {shopName && (
-          <p className="border-t border-white/15 pt-4 text-[12px] text-white/60">
+        {hasText(shopName) && (
+          <p className={`border-t pt-4 text-[12px] ${auto.rule} ${auto.small}`}>
             © {new Date().getFullYear()} {shopName}
           </p>
         )}
       </div>
-    </footer>
+    </Section>
   );
 }
