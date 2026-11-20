@@ -52,15 +52,14 @@ describe("Hero", () => {
 });
 
 describe("Text", () => {
-  it("échappe le HTML et découpe les paragraphes sur les lignes vides", () => {
-    const html = renderToStaticMarkup(<Text title="" body={"<script>x</script>\n\nDeux"} align="left" />);
-    expect(html).toContain("&lt;script&gt;");
-    expect(html).not.toContain("<script>");
+  it("échappe un texte simple et le découpe sur les lignes vides", () => {
+    const html = renderToStaticMarkup(<Text {...textConfig.defaultProps!} title="" body={"Un\n\nDeux <3"} />);
+    expect(html).toContain("Deux &lt;3");
     expect(html.match(/<p /g)).toHaveLength(2);
   });
 
   it("n'affiche rien sans titre ni texte", () => {
-    expect(renderToStaticMarkup(<Text title="" body="  " align="left" />)).toBe("");
+    expect(renderToStaticMarkup(<Text {...textConfig.defaultProps!} title="" body="  " />)).toBe("");
   });
 });
 
@@ -131,6 +130,53 @@ describe("Footer — icônes", () => {
   it("garde le mot Téléphone / Email pour les lecteurs d'écran", () => {
     expect(link("tel:0555123456")).toMatch(/class="sr-only"[^>]*>Téléphone/);
     expect(link("mailto:contact@boutique.dz")).toMatch(/class="sr-only"[^>]*>Email/);
+  });
+});
+
+describe("Texte et Image — réglages", () => {
+  it("un ancien texte sans balises garde ses paragraphes", () => {
+    const props = BLOCK_SCHEMAS.Text.parse({ id: "t", title: "Titre", body: "Un\n\nDeux", align: "left" });
+    expect(renderToStaticMarkup(<Text {...props} />).match(/<p /g)).toHaveLength(2);
+  });
+
+  it("n'exécute pas de HTML collé dans le texte", () => {
+    const props = BLOCK_SCHEMAS.Text.parse({ id: "t", title: "", body: "<script>x</script><p>ok</p>", align: "left" });
+    const html = renderToStaticMarkup(<Text {...props} />);
+    expect(html).not.toContain("<script");
+    expect(html).toContain("ok");
+  });
+
+  it("fond coloré sombre : texte clair", () => {
+    const props = BLOCK_SCHEMAS.Text.parse({
+      id: "t",
+      title: "T",
+      body: "b",
+      align: "left",
+      style: { background: "color", backgroundColor: "#0f1a3d" },
+    });
+    expect(renderToStaticMarkup(<Text {...props} />)).toContain("text-white");
+  });
+
+  it("image : largeur en pourcentage et coins prononcés", () => {
+    const props = BLOCK_SCHEMAS.Image.parse({
+      id: "i",
+      image: MEDIA,
+      alt: "x",
+      caption: "",
+      width: "contained",
+      imageWidth: 50,
+      rounded: "strong",
+    });
+    const html = renderToStaticMarkup(<ImageBlock {...props} />);
+    expect(html).toContain("max-width:50%");
+    expect(html).toContain("rounded-3xl");
+  });
+
+  it("image pleine largeur : bord à bord, sans arrondi", () => {
+    const props = BLOCK_SCHEMAS.Image.parse({ id: "i", image: MEDIA, alt: "x", caption: "", width: "full" });
+    const html = renderToStaticMarkup(<ImageBlock {...props} />);
+    expect(html).not.toContain("rounded-card");
+    expect(html).not.toContain("px-4");
   });
 });
 

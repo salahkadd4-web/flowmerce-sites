@@ -1,5 +1,8 @@
 import type { ComponentConfig } from "@puckeditor/core";
 import { createElement } from "react";
+import { ALIGN_OPTIONS, styleField, typographyField } from "@/blocks/fields/groups";
+import { RICH_TEXT_OPTIONS } from "@/blocks/rich-text";
+import { sectionStyleSchema, typographySchema } from "@/blocks/style";
 import type { TextProps } from "./schema";
 import { Text } from "./Text";
 
@@ -8,21 +11,18 @@ type Props = Omit<TextProps, "id">;
 export const textConfig: ComponentConfig<Props> = {
   label: "Texte",
   fields: {
-    title: { type: "text", label: "Titre" },
-    body: { type: "textarea", label: "Texte (une ligne vide sépare deux paragraphes)" },
-    align: {
-      type: "radio",
-      label: "Alignement",
-      options: [
-        { label: "À gauche", value: "left" },
-        { label: "Centré", value: "center" },
-      ],
-    },
+    title: { type: "richtext", label: "Titre", contentEditable: true, options: RICH_TEXT_OPTIONS },
+    body: { type: "richtext", label: "Texte", contentEditable: true, options: RICH_TEXT_OPTIONS },
+    align: { type: "radio", label: "Alignement", options: ALIGN_OPTIONS },
+    typography: typographyField(),
+    style: styleField(),
   },
   defaultProps: {
     title: "Pourquoi choisir notre produit",
     body: "Premier avantage : dites ce qui le rend unique.\n\nDeuxième avantage : rassurez sur la qualité.\n\nTroisième avantage : livraison partout en Algérie, paiement à la livraison.",
     align: "left",
+    typography: typographySchema.parse(undefined),
+    style: sectionStyleSchema.parse(undefined),
   },
   render: ({ puck: _puck, id: _id, ...props }) => createElement(Text, props),
 };

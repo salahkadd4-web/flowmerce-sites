@@ -1,22 +1,38 @@
-// Texte libre : un titre facultatif et des paragraphes séparés par une ligne vide.
-// Aucune mise en forme riche : le texte est rendu tel quel, échappé par React.
+// Texte : un titre facultatif et des paragraphes, avec mots en gras, italique,
+// souligné ou barré. Le HTML est relu par RichText, jamais injecté.
 
+import type { ReactNode } from "react";
+import { hasText, RichText } from "@/blocks/rich-text";
+import { Section } from "@/blocks/Section";
+import { colorProps, SECTION_TITLE_SIZES, sectionTone, TEXT_AUTO, TEXT_SIZES } from "@/blocks/style";
 import type { TextProps } from "./schema";
 
-export function Text({ title, body, align }: Omit<TextProps, "id">) {
-  const paragraphs = body.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
-  if (!title && paragraphs.length === 0) return null;
+type Props = Omit<TextProps, "id" | "title" | "body"> & { title: ReactNode; body: ReactNode };
+
+const DEFAULTS = { tone: "light" as const, className: "", padding: "py-10", width: "max-w-3xl" };
+
+export function Text({ title, body, align, typography, style }: Props) {
+  if (!hasText(title) && !hasText(body)) return null;
+  const tone = sectionTone(style, DEFAULTS.tone);
+  const titleColor = colorProps(typography.titleColor, TEXT_AUTO[tone].title);
+  const textColor = colorProps(typography.textColor, TEXT_AUTO[tone].text);
 
   return (
-    <section className="px-4 py-10">
-      <div className={`mx-auto flex max-w-3xl flex-col gap-4 ${align === "center" ? "text-center" : "text-left"}`}>
-        {title && <h2 className="text-2xl font-bold leading-snug text-ink">{title}</h2>}
-        {paragraphs.map((paragraph, i) => (
-          <p key={i} className="whitespace-pre-line text-base leading-relaxed text-body">
-            {paragraph}
-          </p>
-        ))}
-      </div>
-    </section>
+    <Section style={style} defaults={DEFAULTS} inner={`flex flex-col gap-4 ${align === "center" ? "text-center" : "text-start"}`}>
+      {hasText(title) && (
+        <h2
+          dir="auto"
+          className={`font-bold leading-snug ${SECTION_TITLE_SIZES[typography.titleSize]} ${titleColor.className}`}
+          style={titleColor.style}
+        >
+          <RichText value={title} inline />
+        </h2>
+      )}
+      <RichText
+        value={body}
+        className={`leading-relaxed ${TEXT_SIZES[typography.textSize]} ${textColor.className}`.trim()}
+        style={textColor.style}
+      />
+    </Section>
   );
 }

@@ -1,11 +1,15 @@
 import { z } from "zod";
-import { alignSchema, text } from "@/blocks/shared";
+import { richTextSchema } from "@/blocks/rich-text";
+import { alignSchema } from "@/blocks/shared";
+import { sectionStyleSchema, typographySchema } from "@/blocks/style";
 
 export const textSchema = z.object({
   id: z.string(),
-  title: text(120),
-  body: text(3000),
+  title: richTextSchema(120),
+  body: richTextSchema(3000),
   align: alignSchema,
+  typography: typographySchema,
+  style: sectionStyleSchema,
 });
 
 export type TextProps = z.infer<typeof textSchema>;
@@ -15,4 +19,6 @@ export const TEXT_FIELD_LABELS: Record<keyof TextProps, string> = {
   title: "Titre",
   body: "Texte",
   align: "Alignement",
+  typography: "Texte",
+  style: "Style",
 };
