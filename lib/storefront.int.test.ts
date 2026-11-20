@@ -44,7 +44,7 @@ it("donne le produit de la page et les frais du site", async () => {
   expect(Object.keys(data.products)).toEqual([mine]);
   expect(data.products[mine]).toMatchObject({ name: "Mien", price: 1000 });
   expect(data.products[mine].variants[0]).toEqual(expect.objectContaining({ inStock: true }));
-  expect(data.shipping).toEqual([{ wilayaCode: 16, name: "Alger", home: 400, office: null }]);
+  expect(data.shipping).toEqual([{ wilayaCode: 16, name: "Alger", nameAr: "الجزائر", home: 400, office: null }]);
 });
 
 it("n'expose ni un produit inactif ni celui d'un autre vendeur", async () => {

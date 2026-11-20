@@ -33,7 +33,7 @@ it("une wilaya sans prix domicile n'est plus desservie", async () => {
   const options = await shippingOptions(siteA);
   expect(options).toHaveLength(68);
   expect(options.find((o) => o.wilayaCode === 11)).toBeUndefined();
-  expect(options[0]).toEqual({ wilayaCode: 1, name: "Adrar", home: 600, office: null });
+  expect(options[0]).toEqual({ wilayaCode: 1, name: "Adrar", nameAr: "أدرار", home: 600, office: null });
   expect((await getShippingTable(A.id, siteA))?.[10]).toEqual({ wilayaCode: 11, name: "Tamanrasset", home: null, office: null });
 });
 

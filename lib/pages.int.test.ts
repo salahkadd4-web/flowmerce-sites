@@ -49,7 +49,7 @@ describe("saveDraftForUser", () => {
   it("enregistre le brouillon du propriétaire sans publier", async () => {
     expect(await saveDraftForUser(A.id, pageA, EDITED)).toEqual({ ok: true });
     const page = await prisma.page.findUniqueOrThrow({ where: { id: pageA } });
-    expect((page.draft as typeof EDITED).content[0].props.title).toBe("Titre modifié");
+    expect((page.draft as typeof EDITED).content[0].props.title).toBe("<p>Titre modifié</p>");
     expect(page.published).toBeNull();
   });
 
@@ -75,7 +75,7 @@ describe("publishPageForUser", () => {
     expect(result).toEqual({ ok: true, siteId: siteA, subdomain: "site-a" });
 
     const page = await prisma.page.findUniqueOrThrow({ where: { id: pageA } });
-    expect((page.published as typeof EDITED).content[0].props.title).toBe("Titre modifié");
+    expect((page.published as typeof EDITED).content[0].props.title).toBe("<p>Titre modifié</p>");
     expect(page.draft).toEqual(page.published);
     expect(await prisma.pageVersion.count({ where: { pageId: pageA } })).toBe(1);
     expect((await prisma.site.findUniqueOrThrow({ where: { id: siteA } })).status).toBe("PUBLISHED");
