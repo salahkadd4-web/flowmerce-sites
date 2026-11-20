@@ -5,6 +5,7 @@ import { orderFormConfig } from "@/blocks/order-form/config";
 import { ProductBlock } from "@/blocks/product/ProductBlock";
 import { productConfig } from "@/blocks/product/config";
 import { BLOCK_SCHEMAS } from "@/blocks/schemas";
+import { BUYER_TEXT, fill } from "@/blocks/i18n";
 import { formatDA } from "@/lib/money";
 import type { PublicProduct } from "@/lib/product-input";
 import type { ShippingOption } from "@/lib/shipping";
@@ -60,6 +61,42 @@ describe("Fiche produit", () => {
     expect(renderToStaticMarkup(<ProductBlock product={null} buttonLabel="Commander" editing />)).toContain(
       "Choisissez le produit de la page dans les réglages de la page",
     );
+  });
+});
+
+describe("Fiche produit — galerie et réglages", () => {
+  const productDefaults = { ...productConfig.defaultProps! };
+  const images = Array.from({ length: 8 }, (_, i) => ({ url: `/media/${String(i).repeat(32)}.png`, width: 800, height: 800 }));
+
+  it("affiche au plus 6 photos et des miniatures vers chacune", () => {
+    const html = renderToStaticMarkup(<ProductBlock {...productDefaults} blockId="Product-1" lang="fr" product={{ ...PRODUCT, images }} />);
+    expect(html.match(/id="photo-Product-1-/g)).toHaveLength(6);
+    expect(html).toContain('href="#photo-Product-1-2"');
+    expect(html).not.toContain("photo-Product-1-7");
+  });
+
+  it("une seule photo : pas de miniatures", () => {
+    const html = renderToStaticMarkup(<ProductBlock {...productDefaults} blockId="p" lang="fr" product={PRODUCT} />);
+    expect(html).not.toContain('href="#photo-');
+  });
+
+  it("nettoie l'identifiant du bloc dans les ancres", () => {
+    const html = renderToStaticMarkup(<ProductBlock {...productDefaults} blockId={'a"b<c'} lang="fr" product={{ ...PRODUCT, images }} />);
+    expect(html).toContain('id="photo-abc-1"');
+  });
+
+  it("en arabe : textes de l'acheteur traduits", () => {
+    const html = renderToStaticMarkup(<ProductBlock {...productDefaults} blockId="p" lang="ar" product={PRODUCT} />);
+    expect(text(html)).toContain(text(fill(BUYER_TEXT.ar.save, { amount: formatDA(500) })));
+    expect(text(html)).not.toContain("Économisez");
+  });
+
+  it("applique la largeur de la photo principale et la couleur du bouton", () => {
+    const html = renderToStaticMarkup(
+      <ProductBlock {...productDefaults} imageWidth={70} button={{ color: "#16265c", textColor: "auto", size: "l" }} blockId="p" lang="fr" product={PRODUCT} />,
+    );
+    expect(html).toContain("max-width:70%");
+    expect(html).toContain("background-color:#16265c");
   });
 });
 

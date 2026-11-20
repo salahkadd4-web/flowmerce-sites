@@ -8,7 +8,7 @@ import { AlertTriangle, Loader2, Plus, Trash2 } from "lucide-react";
 import { BTN_GHOST, BTN_PRIMARY, FIELD, FIELD_ERROR, HINT, LABEL, Notice } from "@/components/dashboard/ui";
 import { ImageUploader } from "@/components/media/ImageUploader";
 import type { MediaValue } from "@/blocks/shared";
-import { buildVariants, parseOptionValues, variantKey } from "@/lib/product-input";
+import { buildVariants, MAX_PRODUCT_IMAGES, parseOptionValues, variantKey } from "@/lib/product-input";
 import { saveProduct } from "./actions";
 
 export type ProductFormValues = {
@@ -110,7 +110,8 @@ export function ProductForm({ productId, initial }: { productId: string | null; 
 
       <div>
         <p className={LABEL}>Photos</p>
-        <ImageUploader id="product-images" value={images} onChange={setImages} max={8} disabled={pending} />
+        <p id="product-images-hint" className={HINT}>La première photo est l&apos;image principale ; 5 autres au plus.</p>
+        <ImageUploader id="product-images" value={images} onChange={setImages} max={MAX_PRODUCT_IMAGES} disabled={pending} />
         {errorFor("images")}
       </div>
 

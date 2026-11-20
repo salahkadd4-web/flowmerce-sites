@@ -88,3 +88,19 @@ describe("parseOptionValues", () => {
     expect(parseOptionValues("  ,  ")).toEqual([]);
   });
 });
+
+describe("photos du produit", () => {
+  const MEDIA = { url: "/media/" + "b".repeat(32) + ".png", width: 800, height: 800 };
+  const ROW = { id: "p", name: "x", description: "", price: 1, comparePrice: null, optionAxes: [], variants: [] };
+
+  it("accepte l'image principale et 5 autres, refuse une 7e photo", () => {
+    expect(productInputSchema.safeParse({ ...VALID, images: Array(6).fill(MEDIA) }).success).toBe(true);
+    const result = productInputSchema.safeParse({ ...VALID, images: Array(7).fill(MEDIA) });
+    expect(result.success).toBe(false);
+    expect(result.success ? "" : result.error.issues[0].message).toBe("6 photos au plus : la première est l'image principale");
+  });
+
+  it("un ancien produit à 8 photos n'en montre que 6", () => {
+    expect(toPublicProduct({ ...ROW, images: Array(8).fill(MEDIA) }).images).toHaveLength(6);
+  });
+});

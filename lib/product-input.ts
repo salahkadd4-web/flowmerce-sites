@@ -6,6 +6,9 @@ import { mediaSchema, type MediaValue } from "@/blocks/shared";
 
 export type OptionAxis = { name: string; values: string[] };
 
+/** Photos d'un produit : l'image principale et 5 autres au plus. */
+export const MAX_PRODUCT_IMAGES = 6;
+
 const axisSchema = z
   .object({
     name: z.string().trim().min(1, "Nom d'option manquant").max(30),
@@ -19,7 +22,7 @@ export const productInputSchema = z
     description: z.string().max(3000, "3 000 caractères maximum"),
     price: z.number().int("Prix en dinars entiers").min(1, "Prix obligatoire").max(10_000_000),
     comparePrice: z.number().int().max(10_000_000).nullable(),
-    images: z.array(mediaSchema).max(8, "8 photos au plus"),
+    images: z.array(mediaSchema).max(MAX_PRODUCT_IMAGES, "6 photos au plus : la première est l'image principale"),
     optionAxes: z
       .array(axisSchema)
       .max(2, "Deux options au plus")
@@ -88,7 +91,7 @@ export function toPublicProduct(product: {
     description: product.description,
     price: product.price,
     comparePrice: product.comparePrice,
-    images: images.success ? images.data : [],
+    images: images.success ? images.data.slice(0, MAX_PRODUCT_IMAGES) : [],
     optionAxes: axes.success ? axes.data : [],
     variants: product.variants.map((v) => ({
       id: v.id,
