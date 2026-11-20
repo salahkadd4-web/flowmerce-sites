@@ -26,7 +26,7 @@ const PRODUCT: PublicProduct = {
 };
 const SOLD_OUT = { ...PRODUCT, variants: PRODUCT.variants.map((v) => ({ ...v, inStock: false })) };
 const SHIPPING: ShippingOption[] = [
-  { wilayaCode: 16, name: "Alger", home: 400, office: 250 },
+  { wilayaCode: 16, name: "Alger", nameAr: "الجزائر", home: 400, office: 250 },
   { wilayaCode: 31, name: "Oran", home: 600, office: null },
 ];
 const text = (html: string) => html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
@@ -124,7 +124,7 @@ describe("Formulaire de commande", () => {
 
   it("propose les champs de la commande COD", () => {
     const html = renderToStaticMarkup(<OrderForm product={PRODUCT} shipping={SHIPPING} title="Commander" submitLabel="Confirmer la commande" />);
-    for (const name of ["customerName", "phone", "wilayaCode", "commune", "address", "quantity"]) {
+    for (const name of ["customerName", "phone", "wilayaCode", "commune", "address"]) {
       expect(html).toContain(`name="${name}"`);
     }
     expect(html).toMatch(/autoComplete="name"|autocomplete="name"/i);
@@ -143,6 +143,47 @@ describe("Formulaire de commande", () => {
   it("cache un champ piège aux humains", () => {
     const html = renderToStaticMarkup(<OrderForm product={PRODUCT} shipping={SHIPPING} title="" submitLabel="Confirmer" />);
     expect(html).toMatch(/<input[^>]*name="website"[^>]*tabindex="-1"|<input[^>]*tabindex="-1"[^>]*name="website"/i);
+  });
+
+  const FORM_PROPS = {
+    product: PRODUCT,
+    shipping: SHIPPING,
+    title: "Commander",
+    submitLabel: "Confirmer",
+    lang: "fr" as const,
+    titleClass: { className: "text-ink" },
+    buttonClass: { className: "bg-brand" },
+  };
+
+  it("compteur − 1 + : moins grisé au départ, plus actif", () => {
+    const html = renderToStaticMarkup(<OrderForm {...FORM_PROPS} />);
+    expect(html).toMatch(/<button[^>]*aria-label="Diminuer la quantité"[^>]*disabled=""/);
+    expect(html).not.toMatch(/<button[^>]*aria-label="Augmenter la quantité"[^>]*disabled=""/);
+    expect(html).toContain('<output id="commande-quantity" aria-live="polite"');
+    expect(html).toMatch(/<output[^>]*>1<\/output>/);
+    expect(html).not.toContain('<select id="commande-quantity"');
+  });
+
+  it("en arabe : libellés et wilayas en arabe", () => {
+    const html = renderToStaticMarkup(<OrderForm {...FORM_PROPS} lang="ar" />);
+    expect(html).toContain(BUYER_TEXT.ar.fullName);
+    expect(html).toContain(">الجزائر<");
+    expect(html).not.toContain("Nom complet");
+  });
+
+  it("applique le style du bouton et du titre choisis", () => {
+    const html = renderToStaticMarkup(
+      <OrderForm {...FORM_PROPS} buttonClass={{ className: "x-btn", style: { backgroundColor: "#16265c" } }} titleClass={{ className: "", style: { color: "#ff0000" } }} />,
+    );
+    expect(html).toContain("background-color:#16265c");
+    expect(html).toContain("color:#ff0000");
+  });
+
+  it("le bloc place le formulaire dans une section réglable", () => {
+    const props = BLOCK_SCHEMAS.OrderForm.parse({ id: "f", ...orderFormConfig.defaultProps, style: { background: "color", backgroundColor: "#16265c" } });
+    const html = renderToStaticMarkup(<OrderFormBlock {...props} product={PRODUCT} shipping={SHIPPING} />);
+    expect(html).toContain('id="commande"');
+    expect(html).toContain("background-color:#16265c");
   });
 
   it("annonce la rupture au lieu du formulaire", () => {

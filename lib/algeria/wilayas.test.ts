@@ -29,3 +29,9 @@ it("vérifie qu'une commune appartient à sa wilaya (listes FR et AR)", () => {
   expect(isCommuneOf(16, "Reggane")).toBe(false);
   expect(isCommuneOf(1, "")).toBe(false);
 });
+
+it("donne les communes en arabe sur demande", () => {
+  expect(communesOf(1, "ar")).toContain("أدرار");
+  expect(communesOf(1, "fr")).toContain("Adrar");
+  expect(communesOf(1)).toContain("Adrar");
+});

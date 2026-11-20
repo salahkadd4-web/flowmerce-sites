@@ -5,13 +5,27 @@
 // Le total affiché est indicatif : le serveur recalcule tout (lib/orders/intake.ts).
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { BUYER_TEXT, type PageLang } from "@/blocks/i18n";
 import { formatDA } from "@/lib/money";
 import type { PublicProduct } from "@/lib/product-input";
 import type { ShippingOption } from "@/lib/shipping";
-import { computeTotals, MAX_QUANTITY } from "./totals";
+import { computeTotals, MAX_QUANTITY, stepQuantity } from "./totals";
 
-type Props = { product: PublicProduct; shipping: ShippingOption[]; title: string; submitLabel: string };
+type ClassAndStyle = { className: string; style?: CSSProperties };
+
+type Props = {
+  product: PublicProduct;
+  shipping: ShippingOption[];
+  /** Chaîne sur le site ; élément d'édition de Puck dans l'éditeur. */
+  title: ReactNode;
+  submitLabel: ReactNode;
+  lang?: PageLang;
+  /** Couleur et taille du titre (sur la carte blanche du formulaire). */
+  titleClass?: ClassAndStyle;
+  /** Couleur et taille du bouton de commande. */
+  buttonClass?: ClassAndStyle;
+};
 type Field = "variantId" | "quantity" | "customerName" | "phone" | "wilayaCode" | "commune" | "address" | "deliveryType";
 
 // 16 px minimum : sous iOS, un champ plus petit fait zoomer la page à la saisie.
@@ -19,6 +33,10 @@ const LABEL = "mb-1.5 block text-[15px] font-semibold text-ink";
 const INPUT =
   "w-full rounded-control border border-line bg-white px-3.5 py-3 text-base text-ink placeholder:text-faint focus-visible:border-brand focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-brand disabled:opacity-60";
 const ERROR = "mt-1.5 text-[14px] font-medium text-red-700";
+const STEP =
+  "flex size-11 items-center justify-center rounded-control border border-line bg-white text-xl font-bold text-ink transition-colors hover:bg-page focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-40";
+const DEFAULT_TITLE: ClassAndStyle = { className: "text-2xl text-ink" };
+const DEFAULT_BUTTON: ClassAndStyle = { className: "bg-brand px-6 py-4 text-lg text-on-brand hover:bg-brand-dark" };
 
 const UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"] as const;
 
@@ -27,7 +45,16 @@ function firstAvailable(product: PublicProduct): Record<string, string> {
   return { ...(variant?.options ?? {}) };
 }
 
-export function OrderForm({ product, shipping, title, submitLabel }: Props) {
+export function OrderForm({
+  product,
+  shipping,
+  title,
+  submitLabel,
+  lang = "fr",
+  titleClass = DEFAULT_TITLE,
+  buttonClass = DEFAULT_BUTTON,
+}: Props) {
+  const t = BUYER_TEXT[lang];
   const router = useRouter();
   const [selection, setSelection] = useState<Record<string, string>>(() => firstAvailable(product));
   const [quantity, setQuantity] = useState(1);
@@ -80,7 +107,7 @@ export function OrderForm({ product, shipping, title, submitLabel }: Props) {
     if (code === "") return;
     setCommunesState("loading");
     try {
-      const response = await fetch(`/api/orders/communes?wilaya=${code}`);
+      const response = await fetch(`/api/orders/communes?wilaya=${code}&lang=${lang}`);
       const json = (await response.json()) as { communes?: string[] };
       setCommunes(json.communes ?? []);
       setCommunesState(response.ok ? "idle" : "error");
@@ -94,7 +121,7 @@ export function OrderForm({ product, shipping, title, submitLabel }: Props) {
     setFormError("");
     setErrors({});
     if (!variant || !variant.inStock) {
-      setErrors({ variantId: "Ce choix est épuisé. Choisissez une autre option." });
+      setErrors({ variantId: t.errors.variantId });
       return;
     }
 
@@ -123,14 +150,16 @@ export function OrderForm({ product, shipping, title, submitLabel }: Props) {
       });
       const json = (await response.json().catch(() => ({}))) as { reference?: string; error?: string; field?: Field };
       if (response.ok && json.reference) {
-        router.push(`/merci?ref=${encodeURIComponent(json.reference)}`);
+        router.push(`/merci?ref=${encodeURIComponent(json.reference)}${lang === "fr" ? "" : `&lang=${lang}`}`);
         return;
       }
-      const message = json.error ?? "La commande n'a pas pu être envoyée. Réessayez.";
+      // Le serveur répond en français ; en arabe, le message vient du dictionnaire.
+      const message =
+        lang === "fr" ? (json.error ?? t.errors.generic) : json.field ? (t.errors[json.field] ?? t.errors.generic) : t.errors.generic;
       if (json.field) setErrors({ [json.field]: message });
       else setFormError(message);
     } catch {
-      setFormError("Connexion impossible. Vérifiez votre réseau et réessayez : votre commande ne sera pas envoyée deux fois.");
+      setFormError(t.errors.network);
     } finally {
       setSending(false);
     }
@@ -147,15 +176,23 @@ export function OrderForm({ product, shipping, title, submitLabel }: Props) {
   if (soldOut) {
     return (
       <div className="rounded-card bg-white p-6 text-center">
-        {title && <h2 className="mb-2 text-2xl font-bold text-ink">{title}</h2>}
-        <p className="text-[15px] font-semibold text-red-800">Rupture de stock : ce produit n&apos;est plus disponible pour le moment.</p>
+        {title && (
+          <h2 dir="auto" className={`mb-2 font-bold ${titleClass.className}`} style={titleClass.style}>
+            {title}
+          </h2>
+        )}
+        <p className="text-[15px] font-semibold text-red-800">{t.soldOutForm}</p>
       </div>
     );
   }
 
   return (
     <form onSubmit={submit} noValidate className="flex flex-col gap-5 rounded-card bg-white p-5 shadow-sm shadow-ink/5 sm:p-7">
-      {title && <h2 className="text-2xl font-bold text-ink">{title}</h2>}
+      {title && (
+        <h2 dir="auto" className={`font-bold ${titleClass.className}`} style={titleClass.style}>
+          {title}
+        </h2>
+      )}
 
       {product.optionAxes.map((axis) => (
         <div key={axis.name}>
@@ -175,7 +212,7 @@ export function OrderForm({ product, shipping, title, submitLabel }: Props) {
               const available = availableByAxis[axis.name]?.has(value);
               return (
                 <option key={value} value={value} disabled={!available}>
-                  {available ? value : `${value} (épuisé)`}
+                  {available ? value : `${value} (${t.unavailable})`}
                 </option>
               );
             })}
@@ -184,31 +221,39 @@ export function OrderForm({ product, shipping, title, submitLabel }: Props) {
       ))}
       {fieldError("variantId")}
 
-      <div>
-        <label htmlFor="commande-quantity" className={LABEL}>
-          Quantité
-        </label>
-        <select
-          id="commande-quantity"
-          name="quantity"
-          value={quantity}
-          disabled={sending}
-          onChange={(e) => setQuantity(Number(e.target.value))}
-          aria-describedby={describedBy("quantity")}
-          className={INPUT}
-        >
-          {Array.from({ length: MAX_QUANTITY }, (_, i) => i + 1).map((n) => (
-            <option key={n} value={n}>
-              {n}
-            </option>
-          ))}
-        </select>
+      <div role="group" aria-labelledby="commande-quantity-label">
+        <span id="commande-quantity-label" className={LABEL}>
+          {t.quantity}
+        </span>
+        <div className="flex items-center gap-3" dir="ltr">
+          <button
+            type="button"
+            className={STEP}
+            aria-label={t.decrease}
+            disabled={sending || quantity <= 1}
+            onClick={() => setQuantity((q) => stepQuantity(q, -1))}
+          >
+            <span aria-hidden="true">−</span>
+          </button>
+          <output id="commande-quantity" aria-live="polite" className="min-w-10 text-center text-xl font-bold text-ink">
+            {quantity}
+          </output>
+          <button
+            type="button"
+            className={STEP}
+            aria-label={t.increase}
+            disabled={sending || quantity >= MAX_QUANTITY}
+            onClick={() => setQuantity((q) => stepQuantity(q, 1))}
+          >
+            <span aria-hidden="true">+</span>
+          </button>
+        </div>
         {fieldError("quantity")}
       </div>
 
       <div>
         <label htmlFor="commande-name" className={LABEL}>
-          Nom complet
+          {t.fullName}
         </label>
         <input
           id="commande-name"
@@ -228,7 +273,7 @@ export function OrderForm({ product, shipping, title, submitLabel }: Props) {
 
       <div>
         <label htmlFor="commande-phone" className={LABEL}>
-          Téléphone
+          {t.phone}
         </label>
         <input
           id="commande-phone"
@@ -236,7 +281,8 @@ export function OrderForm({ product, shipping, title, submitLabel }: Props) {
           type="tel"
           inputMode="tel"
           autoComplete="tel"
-          placeholder="05 55 12 34 56"
+          placeholder={t.phonePlaceholder}
+          dir="ltr"
           required
           maxLength={30}
           disabled={sending}
@@ -251,7 +297,7 @@ export function OrderForm({ product, shipping, title, submitLabel }: Props) {
 
       <div>
         <label htmlFor="commande-wilaya" className={LABEL}>
-          Wilaya
+          {t.wilaya}
         </label>
         <select
           id="commande-wilaya"
@@ -264,10 +310,10 @@ export function OrderForm({ product, shipping, title, submitLabel }: Props) {
           aria-describedby={describedBy("wilayaCode")}
           className={INPUT}
         >
-          <option value="">Choisissez votre wilaya</option>
+          <option value="">{t.chooseWilaya}</option>
           {shipping.map((s) => (
             <option key={s.wilayaCode} value={s.wilayaCode}>
-              {s.name}
+              {lang === "ar" ? (s.nameAr ?? s.name) : s.name}
             </option>
           ))}
         </select>
@@ -276,7 +322,7 @@ export function OrderForm({ product, shipping, title, submitLabel }: Props) {
 
       <div>
         <label htmlFor="commande-commune" className={LABEL}>
-          Commune
+          {t.commune}
         </label>
         <select
           id="commande-commune"
@@ -290,7 +336,7 @@ export function OrderForm({ product, shipping, title, submitLabel }: Props) {
           className={INPUT}
         >
           <option value="">
-            {wilayaCode === "" ? "Choisissez d'abord la wilaya" : communesState === "loading" ? "Chargement…" : "Choisissez votre commune"}
+            {wilayaCode === "" ? t.chooseWilayaFirst : communesState === "loading" ? t.loadingCommunes : t.chooseCommune}
           </option>
           {communes.map((c) => (
             <option key={c} value={c}>
@@ -298,13 +344,13 @@ export function OrderForm({ product, shipping, title, submitLabel }: Props) {
             </option>
           ))}
         </select>
-        {communesState === "error" && <p className={ERROR}>Impossible de charger les communes. Réessayez.</p>}
+        {communesState === "error" && <p className={ERROR}>{t.communesError}</p>}
         {fieldError("commune")}
       </div>
 
       <div>
         <label htmlFor="commande-address" className={LABEL}>
-          Adresse
+          {t.address}
         </label>
         <input
           id="commande-address"
@@ -324,7 +370,7 @@ export function OrderForm({ product, shipping, title, submitLabel }: Props) {
 
       {rate && (
         <fieldset>
-          <legend className={LABEL}>Livraison</legend>
+          <legend className={LABEL}>{t.deliveryType}</legend>
           <div className="flex flex-col gap-2">
             {(["HOME", "OFFICE"] as const)
               .filter((type) => type === "HOME" || rate.office !== null)
@@ -339,7 +385,7 @@ export function OrderForm({ product, shipping, title, submitLabel }: Props) {
                     onChange={() => setDeliveryType(type)}
                     className="size-4 accent-brand"
                   />
-                  <span className="flex-1">{type === "HOME" ? "À domicile" : "Au bureau de livraison"}</span>
+                  <span className="flex-1">{type === "HOME" ? t.home : t.office}</span>
                   <span className="font-semibold">{formatDA(type === "HOME" ? rate.home : rate.office!)}</span>
                 </label>
               ))}
@@ -364,14 +410,14 @@ export function OrderForm({ product, shipping, title, submitLabel }: Props) {
           <dd className="font-semibold text-ink">{formatDA(subtotal)}</dd>
         </div>
         <div className="flex justify-between gap-4">
-          <dt className="text-body">Livraison</dt>
+          <dt className="text-body">{t.shipping}</dt>
           <dd className="font-semibold text-ink">{rate ? formatDA(shippingFee) : "—"}</dd>
         </div>
         <div className="mt-1 flex justify-between gap-4 border-t border-line pt-2 text-lg">
-          <dt className="font-bold text-ink">Total</dt>
+          <dt className="font-bold text-ink">{t.total}</dt>
           <dd className="font-extrabold text-ink">{formatDA(total)}</dd>
         </div>
-        <p className="mt-1 text-[13px] text-body">Paiement à la livraison.</p>
+        <p className="mt-1 text-[13px] text-body">{t.cod}</p>
       </dl>
 
       {formError && (
@@ -383,9 +429,10 @@ export function OrderForm({ product, shipping, title, submitLabel }: Props) {
       <button
         type="submit"
         disabled={sending}
-        className="inline-flex items-center justify-center rounded-control bg-brand px-6 py-4 text-lg font-bold text-on-brand transition-colors hover:bg-brand-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-60"
+        className={`inline-flex items-center justify-center rounded-control font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-60 ${buttonClass.className}`}
+        style={buttonClass.style}
       >
-        {sending ? "Envoi en cours…" : submitLabel}
+        {sending ? t.sending : submitLabel}
       </button>
     </form>
   );

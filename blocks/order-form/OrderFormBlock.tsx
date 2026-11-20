@@ -1,22 +1,46 @@
 // Enveloppe serveur du formulaire de commande : porte l'ancre #commande visée par
-// les boutons « Commander » ; le formulaire lui-même est le seul composant client
-// des pages publiques (OrderForm).
+// les boutons « Commander » et le fond de la section ; le formulaire lui-même est
+// le seul composant client des pages publiques (OrderForm).
 
+import type { ReactNode } from "react";
+import type { PageLang } from "@/blocks/i18n";
+import { Section } from "@/blocks/Section";
+import {
+  buttonProps,
+  buttonStyleSchema,
+  colorProps,
+  SECTION_TITLE_SIZES,
+  sectionStyleSchema,
+  typographySchema,
+  type ButtonStyle,
+  type SectionStyle,
+  type Typography,
+} from "@/blocks/style";
 import type { PublicProduct } from "@/lib/product-input";
 import type { ShippingOption } from "@/lib/shipping";
 import { OrderForm } from "./OrderForm";
+
+const DEFAULTS = { tone: "light" as const, className: "bg-page", padding: "py-10", width: "max-w-xl" };
 
 export function OrderFormBlock({
   product,
   shipping,
   title,
   submitLabel,
+  lang = "fr",
+  typography = typographySchema.parse(undefined),
+  button = buttonStyleSchema.parse({ size: "l" }),
+  style = sectionStyleSchema.parse(undefined),
   editing = false,
 }: {
   product: PublicProduct | null;
   shipping: ShippingOption[];
-  title: string;
-  submitLabel: string;
+  title: ReactNode;
+  submitLabel: ReactNode;
+  lang?: PageLang;
+  typography?: Typography;
+  button?: ButtonStyle;
+  style?: SectionStyle;
   editing?: boolean;
 }) {
   const missing = !product
@@ -36,11 +60,26 @@ export function OrderFormBlock({
     );
   }
 
+  // Titre et bouton sont sur la carte blanche du formulaire : leurs couleurs
+  // automatiques ne dépendent pas du fond de la section.
+  const titleColor = colorProps(typography.titleColor, "text-ink");
+  const titleClass = {
+    className: `${SECTION_TITLE_SIZES[typography.titleSize]} ${titleColor.className}`.trim(),
+    ...(titleColor.style ? { style: titleColor.style } : {}),
+  };
+  const action = buttonProps(button, "light");
+
   return (
-    <section id="commande" className="scroll-mt-4 bg-page px-4 py-10">
-      <div className="mx-auto max-w-xl">
-        <OrderForm product={product!} shipping={shipping} title={title} submitLabel={submitLabel} />
-      </div>
-    </section>
+    <Section id="commande" style={style} defaults={DEFAULTS}>
+      <OrderForm
+        product={product!}
+        shipping={shipping}
+        title={title}
+        submitLabel={submitLabel}
+        lang={lang}
+        titleClass={titleClass}
+        buttonClass={action}
+      />
+    </Section>
   );
 }

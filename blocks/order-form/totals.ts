@@ -15,3 +15,8 @@ export function computeTotals({
 }
 
 export const MAX_QUANTITY = 10;
+
+/** Quantité après un appui sur − ou +, toujours entre 1 et MAX_QUANTITY. */
+export function stepQuantity(quantity: number, delta: 1 | -1): number {
+  return Math.min(MAX_QUANTITY, Math.max(1, quantity + delta));
+}

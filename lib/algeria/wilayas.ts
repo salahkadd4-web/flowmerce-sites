@@ -27,6 +27,7 @@ export const WILAYAS: readonly Wilaya[] = FR.map((w) => ({
 
 const byCode = new Map(WILAYAS.map((w) => [w.code, w]));
 const frCommunes = new Map(FR.map((w) => [Number(w.code), w.communes.map((c) => c.trim())]));
+const arCommunes = new Map(AR.map((w) => [Number(w.code), w.communes.map((c) => c.trim())]));
 const allCommunes = new Map<number, Set<string>>();
 for (const list of [FR, AR]) {
   for (const w of list) {
@@ -40,9 +41,14 @@ export function wilayaName(code: number): string | null {
   return byCode.get(code)?.fr ?? null;
 }
 
-/** Communes de la wilaya, en français (liste affichée à l'acheteur). */
-export function communesOf(code: number): readonly string[] {
-  return frCommunes.get(code) ?? [];
+/** Nom arabe de la wilaya. */
+export function wilayaNameAr(code: number): string | null {
+  return byCode.get(code)?.ar ?? null;
+}
+
+/** Communes de la wilaya affichées à l'acheteur, dans la langue de la page. */
+export function communesOf(code: number, lang: "fr" | "ar" = "fr"): readonly string[] {
+  return (lang === "ar" ? arCommunes : frCommunes).get(code) ?? [];
 }
 
 export function isCommuneOf(code: number, commune: string): boolean {

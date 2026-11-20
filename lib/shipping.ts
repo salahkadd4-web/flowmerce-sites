@@ -2,7 +2,7 @@
 // Une wilaya sans ligne n'est pas desservie : le formulaire ne la propose pas.
 
 import { z } from "zod";
-import { WILAYAS, wilayaName } from "@/lib/algeria/wilayas";
+import { WILAYAS, wilayaName, wilayaNameAr } from "@/lib/algeria/wilayas";
 import { prisma } from "@/lib/prisma";
 
 const price = z.number().int().min(0).max(100_000);
@@ -17,7 +17,7 @@ export const shippingInputSchema = z
   .refine((rows) => new Set(rows.map((r) => r.wilayaCode)).size === rows.length, "Wilaya en double");
 
 export type ShippingRow = { wilayaCode: number; name: string; home: number | null; office: number | null };
-export type ShippingOption = { wilayaCode: number; name: string; home: number; office: number | null };
+export type ShippingOption = { wilayaCode: number; name: string; nameAr?: string; home: number; office: number | null };
 
 export function shippingTag(siteId: string): string {
   return "site-shipping:" + siteId;
@@ -69,6 +69,7 @@ export async function shippingOptions(siteId: string): Promise<ShippingOption[]>
   const rates = await prisma.shippingRate.findMany({ where: { siteId }, orderBy: { wilayaCode: "asc" } });
   return rates.flatMap((r) => {
     const name = wilayaName(r.wilayaCode);
-    return name ? [{ wilayaCode: r.wilayaCode, name, home: r.home, office: r.office }] : [];
+    const nameAr = wilayaNameAr(r.wilayaCode) ?? name;
+    return name ? [{ wilayaCode: r.wilayaCode, name, ...(nameAr ? { nameAr } : {}), home: r.home, office: r.office }] : [];
   });
 }
