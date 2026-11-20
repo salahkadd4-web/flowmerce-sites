@@ -3,21 +3,28 @@ import { richTextSchema } from "@/blocks/rich-text";
 import { alignSchema, mediaSchema, optionalHrefSchema, text } from "@/blocks/shared";
 import { buttonStyleSchema, imageWidthSchema, sectionStyleSchema, typographySchema } from "@/blocks/style";
 
-/** Anciens fonds de la bannière (avant les réglages de style) → couleur équivalente. */
-const LEGACY_BACKGROUNDS: Record<string, string | null> = {
+/** Anciens fonds de la bannière (avant les réglages de style) → fond et bouton équivalents. */
+const LEGACY_BACKGROUNDS: Record<string, { color: string; button?: Record<string, string> } | null> = {
   light: null,
-  dark: "#16265c",
-  indigo: "#4f46e5",
-  sand: "#faf6f0",
+  dark: { color: "#16265c" },
+  // Bouton blanc au texte indigo foncé, comme avant.
+  indigo: { color: "#4f46e5", button: { textColor: "#4338ca" } },
+  // Bouton nuit, comme avant.
+  sand: { color: "#faf6f0", button: { color: "#16265c" } },
 };
 
-/** Une bannière enregistrée avant les réglages de style garde son fond. */
+/** Une bannière enregistrée avant les réglages de style garde son fond et son bouton. */
 function legacyHeroStyle(raw: unknown): unknown {
   if (!raw || typeof raw !== "object") return raw;
   const { background, ...props } = raw as Record<string, unknown>;
   if (props.style !== undefined || typeof background !== "string") return props;
-  const color = LEGACY_BACKGROUNDS[background];
-  return color ? { ...props, style: { background: "color", backgroundColor: color } } : props;
+  const legacy = LEGACY_BACKGROUNDS[background];
+  if (!legacy) return props;
+  return {
+    ...props,
+    style: { background: "color", backgroundColor: legacy.color },
+    ...(legacy.button && props.button === undefined ? { button: legacy.button } : {}),
+  };
 }
 
 export const heroSchema = z.preprocess(

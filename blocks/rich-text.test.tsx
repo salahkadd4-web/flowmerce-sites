@@ -58,3 +58,7 @@ it("compte la longueur visible, pas les balises", () => {
   expect(hasText("<p>x</p>")).toBe(true);
   expect(hasText(<span />)).toBe(true);
 });
+
+it("garde les retours à la ligne que l'éditeur enregistre dans un paragraphe", () => {
+  expect(renderToStaticMarkup(<RichText value={"<p>Un\nDeux</p>"} />)).toBe('<p dir="auto">Un<br/>Deux</p>');
+});

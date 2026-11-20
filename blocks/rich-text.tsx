@@ -123,7 +123,13 @@ function readParagraphs(html: string): ReactNode[][] {
     if (text === "") return;
     if (stack.length === 0 && text.trim() === "") return;
     ensureParagraph();
-    stack[stack.length - 1].children.push(decodeEntities(text));
+    // L'éditeur garde les retours à la ligne tapés dans un paragraphe : on les montre.
+    decodeEntities(text)
+      .split("\n")
+      .forEach((line, i) => {
+        if (i > 0) stack[stack.length - 1].children.push(createElement("br", { key: key++ }));
+        if (line !== "") stack[stack.length - 1].children.push(line);
+      });
   };
 
   for (const match of html.matchAll(tokens)) {

@@ -19,7 +19,9 @@ export const textConfig: ComponentConfig<Props> = {
   },
   defaultProps: {
     title: "Pourquoi choisir notre produit",
-    body: "Premier avantage : dites ce qui le rend unique.\n\nDeuxième avantage : rassurez sur la qualité.\n\nTroisième avantage : livraison partout en Algérie, paiement à la livraison.",
+    // Déjà en paragraphes : l'éditeur enregistre ce qu'il charge, et un texte simple
+    // y deviendrait un seul paragraphe aux lignes collées sur le site.
+    body: "<p>Premier avantage : dites ce qui le rend unique.</p><p>Deuxième avantage : rassurez sur la qualité.</p><p>Troisième avantage : livraison partout en Algérie, paiement à la livraison.</p>",
     align: "left",
     typography: typographySchema.parse(undefined),
     style: sectionStyleSchema.parse(undefined),

@@ -268,3 +268,23 @@ describe("Hero — image", () => {
     expect(html).toContain('alt="Chaussure noire en cuir"');
   });
 });
+
+describe("Réglages par défaut des nouveaux blocs", () => {
+  it("le texte d'un nouveau bloc Texte est déjà découpé en paragraphes", () => {
+    expect(textConfig.defaultProps!.body).toMatch(/^<p>[^<]+<\/p><p>/);
+    expect(textConfig.defaultProps!.body).not.toContain("\n");
+  });
+});
+
+describe("Hero — anciens boutons", () => {
+  const legacy = (background: string) =>
+    BLOCK_SCHEMAS.Hero.parse({ id: "h", title: "T", subtitle: "", image: null, buttonLabel: "Go", buttonHref: "#commande", align: "center", background });
+
+  it("fond « Sable » : le bouton reste nuit", () => {
+    expect(legacy("sand").button).toMatchObject({ color: "#16265c" });
+  });
+
+  it("fond « Indigo » : le texte du bouton reste indigo foncé", () => {
+    expect(legacy("indigo").button).toMatchObject({ color: "auto", textColor: "#4338ca" });
+  });
+});
