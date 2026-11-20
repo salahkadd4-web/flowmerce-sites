@@ -22,6 +22,7 @@ import { installKeyboardEventGuard } from "./keyboard-event-guard";
 import { createAutosave, type AutosaveStatus } from "./shell/autosave";
 import { AddSectionDialog } from "./shell/AddSectionDialog";
 import { PageSettingsDialog } from "./shell/PageSettingsDialog";
+import { SectionBar } from "./shell/SectionBar";
 import { SectionsColumn } from "./shell/SectionsColumn";
 import { TopBar, type Device } from "./shell/TopBar";
 
@@ -187,6 +188,7 @@ export function Editor({ pageId, site, initialData, products, shipping }: Props)
             // Composants stables (hors du rendu) : une fonction recréée à chaque rendu
             // ferait remonter l'aperçu par Puck, et le texte en cours de saisie perdrait le focus.
             preview: PreviewWithHint,
+            actionBar: SectionBar,
           }}
         >
           <EditorLayout

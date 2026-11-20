@@ -47,8 +47,16 @@ export function Popover({ label, icon: Icon, text, align = "start", width = 264,
     if (!open) return;
     const doc = button.current?.ownerDocument;
     if (!doc) return;
+    // Fenêtre gardée dans la page (aperçu téléphone étroit) : décalée si elle déborde.
+    const element = panel.current;
+    if (element) {
+      const width = doc.documentElement.clientWidth;
+      const rect = element.getBoundingClientRect();
+      const shift = rect.right > width - 8 ? width - 8 - rect.right : rect.left < 8 ? 8 - rect.left : 0;
+      element.style.translate = `${shift}px 0`;
+    }
     // Premier contrôle de la fenêtre : le clavier y arrive directement.
-    panel.current?.querySelector<HTMLElement>("button, input, select, textarea, [tabindex]")?.focus();
+    element?.querySelector<HTMLElement>("button, input, select, textarea, [tabindex]")?.focus();
 
     const onPointerDown = (event: PointerEvent) => {
       const target = event.target as Node;
@@ -83,7 +91,8 @@ export function Popover({ label, icon: Icon, text, align = "start", width = 264,
         className={`${TOOL} ${open ? "bg-brand-soft text-brand-ink" : ""}`}
       >
         {Icon && <Icon size={16} aria-hidden />}
-        {text}
+        {/* Aperçu téléphone (étroit) : l'icône seule, son nom reste dans l'infobulle. */}
+        {text && <span className="max-sm:hidden">{text}</span>}
         <ChevronDown size={12} aria-hidden className="opacity-60" />
       </button>
       {open && (
@@ -92,7 +101,7 @@ export function Popover({ label, icon: Icon, text, align = "start", width = 264,
           id={id}
           role="dialog"
           aria-label={label}
-          style={{ width }}
+          style={{ width: `min(${width}px, calc(100vw - 16px))` }}
           className={`absolute top-full z-50 mt-2 flex flex-col gap-3 rounded-card border border-line bg-white p-3 text-start text-[13px] text-ink shadow-xl ${
             align === "end" ? "end-0" : "start-0"
           }`}
