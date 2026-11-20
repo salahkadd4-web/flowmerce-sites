@@ -1,6 +1,6 @@
 // Configuration Puck de l'éditeur : la configuration partagée, plus les champs
 // qui n'existent que côté client (envoi d'images). Importé seulement par Editor.tsx,
-// jamais par une page publique (voir blocks/fields/image-field.ts).
+// jamais par une page publique (voir blocks/fields/editor-fields.ts).
 
 import type { Config, Field } from "@puckeditor/core";
 import { MediaField } from "@/blocks/fields/MediaField";

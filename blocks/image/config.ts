@@ -1,6 +1,6 @@
 import type { ComponentConfig } from "@puckeditor/core";
 import { createElement } from "react";
-import { imageField } from "@/blocks/fields/image-field";
+import { imageField } from "@/blocks/fields/editor-fields";
 import { ImageBlock } from "./ImageBlock";
 import type { ImageProps } from "./schema";
 

@@ -25,10 +25,13 @@ export const rootConfig: NonNullable<Config["root"]> = {
   },
   defaultProps: { title: "", lang: "fr", headingFont: "system", bodyFont: "system" },
   render: ({ children, lang, headingFont, bodyFont }: { children?: ReactNode; lang?: unknown; headingFont?: unknown; bodyFont?: unknown }) =>
-    createElement(PageRoot, {
-      lang: isPageLang(lang) ? lang : "fr",
-      headingFont: isFontId(headingFont) ? headingFont : "system",
-      bodyFont: isFontId(bodyFont) ? bodyFont : "system",
+    createElement(
+      PageRoot,
+      {
+        lang: isPageLang(lang) ? lang : "fr",
+        headingFont: isFontId(headingFont) ? headingFont : "system",
+        bodyFont: isFontId(bodyFont) ? bodyFont : "system",
+      },
       children,
-    }),
+    ),
 };

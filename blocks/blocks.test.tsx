@@ -134,6 +134,59 @@ describe("Footer — icônes", () => {
   });
 });
 
+describe("Hero — réglages", () => {
+  const defaults = BLOCK_SCHEMAS.Hero.parse({ id: "h", ...heroConfig.defaultProps });
+
+  it("une ancienne bannière « Sombre » garde son fond nuit et un texte clair", () => {
+    const props = BLOCK_SCHEMAS.Hero.parse({
+      id: "h",
+      title: "T",
+      subtitle: "",
+      image: null,
+      buttonLabel: "",
+      buttonHref: "",
+      align: "center",
+      background: "dark",
+    });
+    expect(props.style).toMatchObject({ background: "color", backgroundColor: "#16265c" });
+    expect(renderToStaticMarkup(<Hero {...props} />)).toContain("text-white");
+  });
+
+  it("une ancienne bannière « Claire » garde le fond par défaut", () => {
+    const props = BLOCK_SCHEMAS.Hero.parse({ ...defaults, style: undefined, background: "light" });
+    expect(props.style.background).toBe("default");
+  });
+
+  it("met en forme des mots du titre", () => {
+    const html = renderToStaticMarkup(<Hero {...defaults} title="<p>Prix <s>3900</s> <strong>2900</strong></p>" />);
+    expect(html).toContain("<s>3900</s>");
+    expect(html).toContain("<strong>2900</strong>");
+  });
+
+  it("applique taille et couleur du titre et la largeur d'image", () => {
+    const html = renderToStaticMarkup(
+      <Hero {...defaults} image={MEDIA} imageWidth={60} typography={{ ...defaults.typography, titleSize: "xl", titleColor: "#ff0000" }} />,
+    );
+    expect(html).toContain("text-5xl");
+    expect(html).toContain("color:#ff0000");
+    expect(html).toContain("max-width:60%");
+  });
+
+  it("les réglages par défaut reproduisent l'ancienne bannière claire", () => {
+    const html = renderToStaticMarkup(<Hero {...defaults} />);
+    expect(html).toContain("bg-white");
+    expect(html).toContain("bg-brand");
+  });
+
+  it("le panneau range les réglages en groupes Texte, Bouton, Style", () => {
+    expect(heroConfig.fields?.typography).toMatchObject({ type: "object", label: "Texte" });
+    expect(heroConfig.fields?.button).toMatchObject({ type: "object", label: "Bouton" });
+    expect(heroConfig.fields?.style).toMatchObject({ type: "object", label: "Style" });
+    expect(heroConfig.fields?.title).toMatchObject({ type: "richtext", contentEditable: true });
+    expect(heroConfig.fields?.buttonLabel).toMatchObject({ type: "text", contentEditable: true });
+  });
+});
+
 describe("Hero — image", () => {
   it("rend le texte alternatif de l'image", () => {
     const html = renderToStaticMarkup(<Hero {...heroConfig.defaultProps!} image={MEDIA} imageAlt="Chaussure noire en cuir" />);

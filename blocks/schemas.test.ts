@@ -27,8 +27,10 @@ describe("Hero", () => {
   it("refuse un titre de 121 caractères", () => {
     expect(BLOCK_SCHEMAS.Hero.safeParse({ ...HERO, title: "a".repeat(121) }).success).toBe(false);
   });
-  it("refuse un fond hors de la palette", () => {
-    expect(BLOCK_SCHEMAS.Hero.safeParse({ ...HERO, background: "#ff0000" }).success).toBe(false);
+  it("ignore un ancien fond inconnu et refuse un fond ou une couleur hors des listes", () => {
+    expect(BLOCK_SCHEMAS.Hero.parse({ ...HERO, background: "#ff0000" }).style.background).toBe("default");
+    expect(BLOCK_SCHEMAS.Hero.safeParse({ ...HERO, style: { background: "neon" } }).success).toBe(false);
+    expect(BLOCK_SCHEMAS.Hero.safeParse({ ...HERO, style: { background: "color", backgroundColor: "red" } }).success).toBe(false);
   });
   it("refuse une image qui ne vient pas de /media", () => {
     const image = { ...MEDIA, url: "https://evil.com/x.png" };
