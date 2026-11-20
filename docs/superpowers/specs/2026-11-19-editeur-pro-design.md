@@ -55,9 +55,22 @@ Commun à toutes les sections (Bannière, Fiche produit, Texte, Image, Formulair
 - Page vide ou section supprimée par erreur : rappel « Glissez un bloc depuis la colonne de gauche » ; annuler (Ctrl+Z / bouton) déjà présent.
 - Libellés en français, vocabulaire du vendeur (pas de « padding », « opacity »…).
 
+### G. Pages en arabe (ajout de Salah, 19 nov.)
+- Réglage de la page **« Langue de la page » : Français / العربية**. En arabe, la page s'écrit de droite à gauche (`dir="rtl"`, `lang="ar"`).
+- Chaque texte porte `dir="auto"` : un paragraphe arabe dans une page française (ou l'inverse) s'aligne seul du bon côté. « À gauche » devient « Au début de la ligne » (à droite en arabe).
+- Les textes fixes vus par l'acheteur sont traduits : formulaire (libellés, choix, erreurs, total), fiche produit (« Économisez », « Rupture de stock », « épuisé »), page de remerciement. Wilayas et communes en arabe.
+
+### H. Polices (ajout de Salah)
+- Réglages de la page : **police des titres** et **police du texte**, dans une liste de polices lisibles en français **et** en arabe : Système (actuelle, par défaut), Cairo, Tajawal, Almarai, IBM Plex Sans Arabic, Noto Kufi Arabic, Amiri (avec empattements).
+- Polices servies par le site lui-même (aucune requête vers Google chez l'acheteur) ; une police non choisie n'est pas téléchargée.
+
+### I. Mise en forme de mots sélectionnés (ajout de Salah)
+- Dans les titres et paragraphes (bannière, texte, politique de retour), le vendeur sélectionne des mots et applique **gras, italique, souligné, barré** depuis une petite barre, comme dans Slides.
+- Rien d'autre : ni liens, ni couleurs, ni titres, ni listes dans le texte.
+
 ## Non-objectifs
 
-Placement libre (option 2), colonnes côte à côte, texte enrichi (gras, liens dans les paragraphes), polices au choix et thème global du site (Phase 3), animations, modèles supplémentaires, arabe / RTL.
+Placement libre (option 2), colonnes côte à côte, liens ou couleurs à l'intérieur d'un texte, thème global du site (Phase 3), animations, modèles supplémentaires, traduction de l'espace vendeur en arabe, une page bilingue (deux langues côte à côte).
 
 ## Anti-objectifs
 
@@ -81,13 +94,24 @@ Placement libre (option 2), colonnes côte à côte, texte enrichi (gras, liens 
 ### Fonds
 - Image de fond : `next/image` en `fill` + `object-cover`, `sizes` adaptés au mobile, calque d'assombrissement noir à `overlay %` ; texte « auto » en clair dès que l'assombrissement ≥ 40 % ou que la couleur de fond est sombre.
 
+### Texte mis en forme
+- Champs `richtext` de Puck 0.24, avec seulement les extensions gras, italique, souligné, barré (et paragraphe / retour à la ligne). Valeur enregistrée : HTML produit par l'éditeur.
+- **Nettoyé à l'enregistrement** : seules les balises `p`, `br`, `strong`, `em`, `u`, `s` survivent, sans aucun attribut ; le reste est retiré en gardant son texte.
+- **Jamais injecté tel quel** : le rendu public transforme ce HTML en éléments React par notre propre lecture (même liste fermée), sans `dangerouslySetInnerHTML`. Un contenu altéré en base ne peut donc rien exécuter.
+- Anciens textes sans balises : lus comme du texte simple (une ligne vide = un nouveau paragraphe), comme aujourd'hui.
+
+### Langue et polices
+- Racine de la page : `lang: "fr" | "ar"` (défaut `fr`), `headingFont`, `bodyFont` (liste fermée, défaut `system`). Le rendu de la racine enveloppe la page avec `lang`, `dir`, et les polices.
+- Polices chargées par `next/font/google` (auto-hébergées, `preload: false`).
+- Textes de l'acheteur dans un dictionnaire `fr` / `ar` ; la page de remerciement reçoit la langue de la page.
+
 ### Compatibilité
 - Les schémas acceptent les anciens contenus (valeurs par défaut = rendu actuel) ; l'ancien `background` du Hero (`light | dark | indigo | sand`) est lu comme la couleur de palette correspondante.
 - Le modèle `landing-fr.json` est mis à jour avec un rendu plus soigné (bannière sur image de fond assombrie, sections alternées).
 
 ## Tests attendus
 
-Schémas (couleur invalide refusée, `#ff0000` accepté, `overlay` 85 refusé, anciens contenus valides) ; rendu (assombrissement appliqué, couleur personnalisée présente, texte auto clair sur fond sombre, largeur d'image en %) ; compteur de quantité (bornes, grisage, valeur envoyée) ; galerie (6 photos max, ancres) ; garde du graphe serveur ; parcours navigateur (écrire un titre dans la page, tirer une poignée → largeur changée et publiée, fond image + assombrissement visibles sur le site public en 390 px).
+Schémas (couleur invalide refusée, `#ff0000` accepté, `overlay` 85 refusé, anciens contenus valides) ; rendu (assombrissement appliqué, couleur personnalisée présente, texte auto clair sur fond sombre, largeur d'image en %) ; compteur de quantité (bornes, grisage, valeur envoyée) ; galerie (6 photos max, ancres) ; garde du graphe serveur ; texte mis en forme (`<script>`, `onclick=`, `<a href>` retirés ; gras/italique/souligné/barré gardés ; ancien texte simple → paragraphes) ; page arabe (`dir="rtl"`, libellés du formulaire en arabe) ; police choisie appliquée ; parcours navigateur (écrire un titre dans la page, tirer une poignée → largeur changée et publiée, fond image + assombrissement visibles sur le site public en 390 px).
 
 ## Décisions prises par Claude (à corriger si besoin)
 
@@ -97,7 +121,10 @@ Schémas (couleur invalide refusée, `#ff0000` accepté, `overlay` 85 refusé, a
 4. Assombrissement de 0 à 80 % (au-delà l'image ne se voit plus).
 5. Produit : 1 image principale + 5 (catalogue limité à 6 photos au lieu de 8).
 6. Miniatures cliquables sans JavaScript (ancres CSS).
-7. Pas de texte enrichi : il produirait du HTML, contraire au §7.
+7. Texte mis en forme limité à 4 styles, nettoyé à l'enregistrement et relu sans injection de HTML (§7 respecté).
+11. La langue est un réglage **de la page** (et non du site) : elle suit le brouillon et la publication comme le reste de la page.
+12. Traductions arabes des textes de l'acheteur rédigées par Claude : à relire par Salah.
+13. Le titre du produit et sa description viennent du catalogue : texte simple, sans mise en forme.
 8. Produit déjà enregistré avec 7 ou 8 photos : la page n'en affiche que 6 ; le formulaire produit demande d'en retirer avant d'enregistrer (message « 6 photos au plus : la première est l'image principale »).
 9. Compteur borné par `MAX_QUANTITY` (10) déjà utilisé par le serveur : une seule source pour la limite.
 10. La poignée modifie le bloc par l'API de Puck (`usePuck` / `dispatch`), depuis un composant de l'éditeur ; si l'aperçu en iframe empêche d'y accéder, repli : poignée dans le panneau seulement (curseur), signalé avant de continuer.
