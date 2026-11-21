@@ -13,7 +13,7 @@ export const imageConfig: ComponentConfig<Props> = {
   fields: {
     image: imageField("Image"),
     alt: { type: "text", label: "Texte alternatif (décrit l'image)" },
-    caption: { type: "text", label: "Légende" },
+    caption: { type: "text", label: "Légende", contentEditable: true },
     width: {
       type: "radio",
       label: "Largeur",

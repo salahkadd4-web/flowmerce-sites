@@ -2,9 +2,11 @@
 // Sans image choisie : rien sur le site public, un emplacement dans l'éditeur.
 
 import Image from "next/image";
+import type { ReactNode } from "react";
 import { EMPTY_MESSAGES, renderEmpty as defaultEmpty, type RenderEmpty } from "@/blocks/empty-box";
 import { renderImageBox as defaultImageBox, type RenderImageBox } from "@/blocks/image-box";
 import { Section } from "@/blocks/Section";
+import { hasText } from "@/blocks/rich-text";
 import { DEFAULT_SECTION_STYLE, sectionTone, TEXT_AUTO } from "@/blocks/style";
 import type { ImageProps } from "./schema";
 
@@ -14,7 +16,8 @@ const ROUNDED: Record<ImageProps["rounded"], string> = {
   strong: "rounded-3xl",
 };
 
-type Props = Omit<ImageProps, "id" | "imageWidth" | "rounded" | "style"> &
+// La légende s'écrit dans la page : dans l'éditeur, elle arrive en élément d'édition de Puck.
+type Props = Omit<ImageProps, "id" | "imageWidth" | "rounded" | "style" | "caption"> & { caption: ReactNode } &
   Partial<Pick<ImageProps, "imageWidth" | "rounded" | "style">> & { editing?: boolean; renderImageBox?: RenderImageBox; renderEmpty?: RenderEmpty };
 
 export function ImageBlock({
@@ -60,7 +63,7 @@ export function ImageBlock({
             />
           ),
         })}
-        {caption && (
+        {hasText(caption) && (
           <figcaption dir="auto" className={`mt-2 px-4 text-center text-[14px] ${TEXT_AUTO[tone].text}`}>
             {caption}
           </figcaption>

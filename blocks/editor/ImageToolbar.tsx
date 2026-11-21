@@ -5,7 +5,7 @@
 // Image ses coins. La largeur se règle à la poignée (ResizableImageBox).
 
 import { createUsePuck, registerOverlayPortal } from "@puckeditor/core";
-import { ImageUp, SquareRoundCorner, Text } from "lucide-react";
+import { ImageUp, MoveHorizontal, SquareRoundCorner, Text } from "lucide-react";
 import { useEffect, useRef } from "react";
 import type { MediaValue } from "@/blocks/shared";
 import { ImageUploader } from "@/components/media/ImageUploader";
@@ -16,9 +16,9 @@ import { useBlockSetter, type BlockProps } from "./use-block";
 
 const usePuck = createUsePuck();
 
-export type ImageToolbarProps = { blockId: string; imageProp: string; altProp: string; roundedProp?: string };
+export type ImageToolbarProps = { blockId: string; imageProp: string; altProp: string; roundedProp?: string; widthProp?: string };
 
-export function ImageToolbar({ blockId, imageProp, altProp, roundedProp }: ImageToolbarProps) {
+export function ImageToolbar({ blockId, imageProp, altProp, roundedProp, widthProp }: ImageToolbarProps) {
   const props = usePuck((s) => ((s.selectedItem?.props as BlockProps | undefined)?.id === blockId ? (s.selectedItem!.props as BlockProps) : null));
   const set = useBlockSetter(blockId);
   const bar = useRef<HTMLDivElement>(null);
@@ -50,6 +50,19 @@ export function ImageToolbar({ blockId, imageProp, altProp, roundedProp }: Image
           onCommit={(value) => set(altProp, value)}
         />
       </Popover>
+      {widthProp && (
+        <Popover label="Largeur de l'image" icon={MoveHorizontal} text="Largeur">
+          <SegmentedChoice
+            label="Largeur"
+            value={(props[widthProp] as "contained" | "full" | undefined) ?? "contained"}
+            onChange={(value) => set(widthProp, value)}
+            options={[
+              { value: "contained", label: "Dans la page" },
+              { value: "full", label: "Bord à bord" },
+            ]}
+          />
+        </Popover>
+      )}
       {roundedProp && (
         <Popover label="Coins de l'image" icon={SquareRoundCorner} text="Coins">
           <SegmentedChoice

@@ -120,6 +120,9 @@ export function SectionBar({ label, children, dragHandle }: Props) {
           <Popover label="Photos du produit" icon={Images} text="Photos">
             <PhotosPanel {...panel} />
           </Popover>
+          <Popover label="Texte de la fiche produit" icon={Type} text="Texte">
+            <TextStylePanel {...panel} />
+          </Popover>
         </>
       )}
       {type === "OrderForm" && (

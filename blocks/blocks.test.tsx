@@ -288,3 +288,16 @@ describe("Hero — anciens boutons", () => {
     expect(legacy("indigo").button).toMatchObject({ color: "auto", textColor: "#4338ca" });
   });
 });
+
+describe("tout se règle dans la page (plus de panneau)", () => {
+  it("la légende d'une image s'écrit sur l'image même", () => {
+    expect(imageConfig.fields?.caption).toMatchObject({ type: "text", contentEditable: true });
+  });
+
+  it("dans l'éditeur, la légende reçue en élément d'édition s'affiche sous l'image", () => {
+    const html = renderToStaticMarkup(
+      <ImageBlock {...imageConfig.defaultProps!} image={{ url: `/media/${"a".repeat(32)}.png`, width: 10, height: 10 }} caption={<span data-edition="">Légende</span>} />,
+    );
+    expect(html).toMatch(/<figcaption[^>]*><span data-edition="">Légende<\/span><\/figcaption>/);
+  });
+});

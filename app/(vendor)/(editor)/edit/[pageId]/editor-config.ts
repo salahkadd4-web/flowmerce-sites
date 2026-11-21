@@ -92,7 +92,7 @@ function withProductField(config: Config, products: { id: string; name: string }
  * produit, dont les photos sont celles du produit). */
 const RESIZABLE: Record<string, ImageToolbarSetup | undefined> = {
   Hero: { imageProp: "image", altProp: "imageAlt" },
-  Image: { imageProp: "image", altProp: "alt", roundedProp: "rounded" },
+  Image: { imageProp: "image", altProp: "alt", roundedProp: "rounded", widthProp: "width" },
   Product: undefined,
 };
 
