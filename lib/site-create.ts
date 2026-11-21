@@ -14,7 +14,7 @@ type CreateResult =
 
 export async function createSiteForUser(
   user: { id: string; name: string | null; email: string },
-  input: { name: string; subdomain: string; templateId?: string },
+  input: { name: string; subdomain: string; templateId?: string; aiTrainingConsent?: boolean },
 ): Promise<CreateResult> {
   const name = input.name.trim();
   if (!name) return { ok: false, field: "name", error: "Donnez un nom à votre site" };
@@ -33,8 +33,13 @@ export async function createSiteForUser(
       // upsert : un seul tenant par utilisateur (Tenant.ownerUserId unique).
       const tenant = await tx.tenant.upsert({
         where: { ownerUserId: user.id },
-        update: {},
-        create: { ownerUserId: user.id, name: user.name ?? user.email },
+        // Accord pour l'IA : seule une case cochée le donne ; laissée vide, rien ne change.
+        update: input.aiTrainingConsent ? { aiTrainingConsent: true, aiTrainingConsentAt: new Date() } : {},
+        create: {
+          ownerUserId: user.id,
+          name: user.name ?? user.email,
+          ...(input.aiTrainingConsent ? { aiTrainingConsent: true, aiTrainingConsentAt: new Date() } : {}),
+        },
       });
 
       const site = await tx.site.create({

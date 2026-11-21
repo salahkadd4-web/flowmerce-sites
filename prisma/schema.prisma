@@ -37,6 +37,11 @@ model Tenant {
   media             Media[]
   products          Product[]
   orders            Order[]
+  customTemplates   CustomTemplate[]
+  // Accord du vendeur : ses modèles de pages peuvent servir à entraîner le générateur
+  // de modèles (IA). Faux par défaut ; daté quand il est donné, effacé quand il est retiré.
+  aiTrainingConsent   Boolean   @default(false)
+  aiTrainingConsentAt DateTime?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 }
@@ -257,4 +262,20 @@ enum OrderStatus {
   DELIVERED
   RETURNED
   CANCELLED
+}
+
+// ───────── Modèles personnels ─────────
+
+// Page enregistrée par le vendeur comme modèle, réutilisable dans l'éditeur et à la
+// création d'un site. Contenu validé par les schémas des blocs (lib/custom-templates.ts).
+model CustomTemplate {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name      String
+  category  String   @default("Autre")
+  data      Json
+  createdAt DateTime @default(now())
+
+  @@index([tenantId])
 }

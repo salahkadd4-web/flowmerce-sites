@@ -21,6 +21,8 @@ export async function createSite(_previous: CreateSiteState, formData: FormData)
       name: String(formData.get("name") ?? ""),
       subdomain: String(formData.get("subdomain") ?? ""),
       templateId: String(formData.get("template") ?? ""),
+      // Seule une case cochée vaut accord (valeur « on ») ; décochée, rien ne change.
+      aiTrainingConsent: formData.get("aiTrainingConsent") === "on",
     },
   );
   if (!result.ok) return { field: result.field, error: result.error };

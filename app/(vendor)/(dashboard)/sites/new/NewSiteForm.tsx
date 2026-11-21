@@ -153,6 +153,27 @@ export function NewSiteForm({ rootDomain, protocol, port, templates }: Props) {
         )}
       </fieldset>
 
+      <div className="flex items-start gap-3 rounded-card border border-line bg-page p-4">
+        <input
+          id="site-ai-consent"
+          name="aiTrainingConsent"
+          type="checkbox"
+          disabled={pending}
+          aria-describedby="site-ai-consent-hint"
+          className="mt-0.5 size-4 shrink-0 cursor-pointer accent-brand"
+        />
+        <div>
+          <label htmlFor="site-ai-consent" className="cursor-pointer text-[14px] font-semibold text-ink">
+            J&apos;accepte que mes modèles de pages servent à améliorer le générateur de modèles de Flowmerce
+          </label>
+          <p id="site-ai-consent-hint" className={HINT}>
+            Facultatif. Vos pages et vos modèles pourront servir à entraîner un modèle d&apos;intelligence artificielle qui propose des
+            modèles. Vos commandes et les coordonnées de vos clients n&apos;en font jamais partie. Vous pouvez retirer cet accord à tout
+            moment, depuis la fenêtre « Modèles » de l&apos;éditeur.
+          </p>
+        </div>
+      </div>
+
       <div>
         <button type="submit" disabled={pending} className={BTN_PRIMARY}>
           {pending && <Loader2 size={15} className="animate-spin" aria-hidden />}
