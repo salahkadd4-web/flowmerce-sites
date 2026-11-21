@@ -114,16 +114,9 @@ export function Editor({ pageId, site, initialData, products, shipping }: Props)
   }, [status]);
 
   // Ctrl+S (ou Cmd+S) : enregistrer tout de suite plutôt que d'ouvrir « Enregistrer sous ».
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
-        event.preventDefault();
-        void autosave.flush();
-      }
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [autosave]);
+  // Ici pour l'éditeur ; dans l'aperçu (iframe), par SaveShortcutFrame.
+  const flush = useCallback(() => void autosave.flush(), [autosave]);
+  useEffect(() => listenSaveShortcut(window.document, flush), [flush]);
 
   const onChange = useCallback(
     (data: Data) => {
@@ -176,6 +169,7 @@ export function Editor({ pageId, site, initialData, products, shipping }: Props)
 
   return (
     <div className="flex h-dvh flex-col bg-page">
+      <FlushContext.Provider value={flush}>
       <EmptyPageContext.Provider value={emptyPage}>
         <Puck
           config={config}
@@ -189,6 +183,7 @@ export function Editor({ pageId, site, initialData, products, shipping }: Props)
             // ferait remonter l'aperçu par Puck, et le texte en cours de saisie perdrait le focus.
             preview: PreviewWithHint,
             actionBar: SectionBar,
+            iframe: SaveShortcutFrame,
           }}
         >
           <EditorLayout
@@ -209,6 +204,7 @@ export function Editor({ pageId, site, initialData, products, shipping }: Props)
           />
         </Puck>
       </EmptyPageContext.Provider>
+      </FlushContext.Provider>
     </div>
   );
 }
@@ -284,6 +280,28 @@ function EditorLayout({
       <AddSectionDialog open={addOpen} onClose={() => onAdd(false)} />
     </div>
   );
+}
+
+/** Ctrl+S / Cmd+S sur un document : enregistrer tout de suite. */
+function listenSaveShortcut(doc: Document, flush: () => void): () => void {
+  const onKeyDown = (event: KeyboardEvent) => {
+    if ((event.ctrlKey || event.metaKey) && event.key?.toLowerCase() === "s") {
+      event.preventDefault();
+      flush();
+    }
+  };
+  doc.addEventListener("keydown", onKeyDown);
+  return () => doc.removeEventListener("keydown", onKeyDown);
+}
+
+/** Enregistrement immédiat, lu par l'aperçu. */
+const FlushContext = createContext<() => void>(() => {});
+
+/** Document de l'aperçu (iframe) : y écoute Ctrl+S, car ses touches ne remontent pas à l'éditeur. */
+function SaveShortcutFrame({ children, document: doc }: { children?: ReactNode; document?: Document }) {
+  const flush = useContext(FlushContext);
+  useEffect(() => (doc ? listenSaveShortcut(doc, flush) : undefined), [doc, flush]);
+  return <>{children}</>;
 }
 
 /** Page vide : lu par l'aperçu, qui garde ainsi une identité stable. */

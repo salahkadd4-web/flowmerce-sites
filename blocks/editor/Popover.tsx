@@ -78,10 +78,21 @@ export function Popover({ label, icon: Icon, text, align = "start", width = 264,
     };
   }, [doc, align, width]);
 
+  // Premier contrôle de la fenêtre : le clavier y arrive directement — une fois la
+  // fenêtre placée et visible (un élément masqué ne peut pas prendre le focus).
+  const focused = useRef(false);
+  useEffect(() => {
+    if (!doc) {
+      focused.current = false;
+      return;
+    }
+    if (focused.current || position.visibility === "hidden") return;
+    focused.current = true;
+    panel.current?.querySelector<HTMLElement>(":is(button, input, select, textarea, [tabindex]):not([tabindex=\"-1\"]):not(:disabled)")?.focus();
+  }, [doc, position]);
+
   useEffect(() => {
     if (!doc) return;
-    // Premier contrôle de la fenêtre : le clavier y arrive directement.
-    panel.current?.querySelector<HTMLElement>("button, input, select, textarea, [tabindex]")?.focus();
 
     const onPointerDown = (event: PointerEvent) => {
       const target = event.target as Node;

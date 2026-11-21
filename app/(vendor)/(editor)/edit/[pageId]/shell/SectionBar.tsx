@@ -8,7 +8,7 @@
 
 import { createUsePuck } from "@puckeditor/core";
 import { ArrowDown, ArrowUp, Contact, Copy, Image as ImageIcon, Package, PaintBucket, Share2, StretchVertical, Trash2, Type, Images } from "lucide-react";
-import { Children, Fragment, isValidElement, type ReactElement, type ReactNode } from "react";
+import { Children, Fragment, isValidElement, useEffect, useRef, useState, type ReactElement, type ReactNode } from "react";
 import { Popover } from "@/blocks/editor/Popover";
 import { ToolbarButton } from "@/blocks/editor/ToolbarButton";
 import {
@@ -37,6 +37,42 @@ function textMenuOf(children: ReactNode): ReactNode | null {
 }
 
 // Jamais plus large que la page : sur l'aperçu téléphone, elle passe sur deux lignes.
+/**
+ * Un texte est en cours d'écriture si le focus est dans un texte modifiable de la
+ * page, ou dans sa barre et ses fenêtres. Puck garde le texte « actif » après un clic
+ * hors de l'aperçu (colonne des sections) : sans ce contrôle, la barre de mise en
+ * forme resterait à la place de celle de la section.
+ */
+function useTyping(anchor: React.RefObject<HTMLElement | null>): boolean {
+  const [typing, setTyping] = useState(true);
+  useEffect(() => {
+    const doc = anchor.current?.ownerDocument;
+    const win = doc?.defaultView;
+    if (!doc || !win) return;
+    let frame = 0;
+    const check = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const active = doc.activeElement;
+        setTyping(doc.hasFocus() && !!active?.closest('[contenteditable="true"], [data-puck-rte-menu]'));
+      });
+    };
+    check();
+    doc.addEventListener("focusin", check);
+    doc.addEventListener("focusout", check);
+    win.addEventListener("blur", check);
+    win.addEventListener("focus", check);
+    return () => {
+      cancelAnimationFrame(frame);
+      doc.removeEventListener("focusin", check);
+      doc.removeEventListener("focusout", check);
+      win.removeEventListener("blur", check);
+      win.removeEventListener("focus", check);
+    };
+  }, [anchor]);
+  return typing;
+}
+
 const BAR = "flex max-w-[calc(100vw-16px)] flex-wrap items-center justify-end gap-0.5 rounded-control border border-line bg-white p-1 text-ink shadow-lg";
 const SEP = <span aria-hidden className="mx-1 h-5 w-px bg-line" />;
 
@@ -45,16 +81,18 @@ export function SectionBar({ label, children, dragHandle }: Props) {
   const dispatch = usePuck((s) => s.dispatch);
   const selector = usePuck((s) => s.appState.ui.itemSelector);
   const count = usePuck((s) => s.appState.data.content.length);
+  const anchor = useRef<HTMLDivElement>(null);
+  const typing = useTyping(anchor);
   const textMenu = textMenuOf(children);
 
-  if (textMenu) {
+  if (textMenu && typing) {
     return (
-      <div className={BAR} onClick={(e) => e.stopPropagation()} role="toolbar" aria-label="Mise en forme du texte">
+      <div ref={anchor} className={BAR} onClick={(e) => e.stopPropagation()} role="toolbar" aria-label="Mise en forme du texte">
         {textMenu}
       </div>
     );
   }
-  if (!id || !selector) return <></>;
+  if (!id || !selector) return <span ref={anchor} hidden />;
 
   const index = selector.index;
   const zone = selector.zone ?? ROOT_ZONE;
@@ -65,7 +103,7 @@ export function SectionBar({ label, children, dragHandle }: Props) {
   const panel = { props, set };
 
   return (
-    <div className={BAR} onClick={(e) => e.stopPropagation()} role="toolbar" aria-label={`Section ${label ?? ""}`}>
+    <div ref={anchor} className={BAR} onClick={(e) => e.stopPropagation()} role="toolbar" aria-label={`Section ${label ?? ""}`}>
       {dragHandle}
       <span className="px-1.5 text-[12px] font-bold text-ink max-sm:hidden">{label}</span>
       <span className="max-sm:hidden">{SEP}</span>
