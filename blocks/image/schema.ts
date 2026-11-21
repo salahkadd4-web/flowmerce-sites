@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { mediaSchema, text } from "@/blocks/shared";
-import { imageWidthSchema, sectionStyleSchema } from "@/blocks/style";
+import { imageHeightSchema, imageWidthSchema, sectionStyleSchema } from "@/blocks/style";
 
 export const IMAGE_ROUNDED = ["none", "soft", "strong"] as const;
 
@@ -11,6 +11,7 @@ export const imageSchema = z.object({
   caption: text(200),
   width: z.enum(["full", "contained"]),
   imageWidth: imageWidthSchema,
+  imageHeight: imageHeightSchema,
   rounded: z.enum(IMAGE_ROUNDED).default("soft"),
   style: sectionStyleSchema,
 });
@@ -24,6 +25,7 @@ export const IMAGE_FIELD_LABELS: Record<keyof ImageProps, string> = {
   caption: "Légende",
   width: "Largeur",
   imageWidth: "Taille de l'image",
+  imageHeight: "Hauteur du cadre de l\'image",
   rounded: "Coins arrondis",
   style: "Style",
 };

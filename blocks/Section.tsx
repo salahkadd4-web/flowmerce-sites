@@ -35,14 +35,19 @@ export function Section({ style, defaults, as: Tag = "section", id, bleed = fals
   const colored = style.background === "color";
   const padding = style.spacing === "normal" ? defaults.padding : SPACING[style.spacing];
   const width = style.width === "normal" ? defaults.width : WIDTHS[style.width];
-  const frameStyle: CSSProperties | undefined = colored ? { backgroundColor: style.backgroundColor } : undefined;
+  // Section haute (poignée du bas) : hauteur en % de l'écran, contenu centré verticalement.
+  const tall = (style.minHeight ?? 0) > 0;
+  const frameStyle: CSSProperties | undefined =
+    colored || tall
+      ? { ...(colored ? { backgroundColor: style.backgroundColor } : {}), ...(tall ? { minHeight: `${style.minHeight}svh` } : {}) }
+      : undefined;
   const background = colored || image ? "" : defaults.className;
 
   return (
     <Tag
       id={id}
       style={frameStyle}
-      className={`relative isolate ${bleed ? "" : "px-4"} ${padding} ${background} ${id ? "scroll-mt-4" : ""}`.replace(/\s+/g, " ").trim()}
+      className={`relative isolate ${tall ? "flex flex-col justify-center" : ""} ${bleed ? "" : "px-4"} ${padding} ${background} ${id ? "scroll-mt-4" : ""}`.replace(/\s+/g, " ").trim()}
     >
       {image && (
         <>
@@ -52,7 +57,7 @@ export function Section({ style, defaults, as: Tag = "section", id, bleed = fals
           )}
         </>
       )}
-      <div className={`relative mx-auto ${width} ${inner}`.trim()}>{children}</div>
+      <div className={`relative mx-auto ${tall ? "w-full" : ""} ${width} ${inner}`.replace(/\s+/g, " ").trim()}>{children}</div>
     </Tag>
   );
 }

@@ -6,7 +6,7 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { renderButton as defaultButton, type RenderButton } from "@/blocks/button-box";
-import { renderImageBox as defaultImageBox, type RenderImageBox } from "@/blocks/image-box";
+import { frameStyle, renderImageBox as defaultImageBox, type RenderImageBox } from "@/blocks/image-box";
 import { hasText, RichText } from "@/blocks/rich-text";
 import { Section } from "@/blocks/Section";
 import { isSafeHref } from "@/blocks/shared";
@@ -23,8 +23,8 @@ import {
 } from "@/blocks/style";
 import type { HeroProps } from "./schema";
 
-type Props = Omit<HeroProps, "id" | "title" | "subtitle" | "buttonLabel" | "imageAlt" | "imageWidth" | "typography" | "button" | "style"> &
-  Partial<Pick<HeroProps, "imageWidth" | "typography" | "button" | "style">> & {
+type Props = Omit<HeroProps, "id" | "title" | "subtitle" | "buttonLabel" | "imageAlt" | "imageWidth" | "imageHeight" | "typography" | "button" | "style"> &
+  Partial<Pick<HeroProps, "imageWidth" | "imageHeight" | "typography" | "button" | "style">> & {
   title: ReactNode;
   subtitle: ReactNode;
   buttonLabel: ReactNode;
@@ -43,6 +43,7 @@ export function Hero({
   image,
   imageAlt = "",
   imageWidth = 100,
+  imageHeight = null,
   buttonLabel,
   buttonHref,
   align,
@@ -80,6 +81,7 @@ export function Hero({
       {image &&
         renderImageBox({
           width: imageWidth,
+          height: imageHeight,
           children: (
             <Image
               src={image.url}
@@ -90,6 +92,7 @@ export function Hero({
               // Image du haut de page : préchargée (Next 16 : `preload` remplace `priority`).
               preload
               className="h-auto w-full rounded-card"
+              style={frameStyle(imageHeight)}
             />
           ),
         })}

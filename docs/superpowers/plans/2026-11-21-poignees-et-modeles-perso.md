@@ -174,6 +174,18 @@
 - [ ] RED → migration + implementation → GREEN (`npm run test:int`).
 - [ ] Commit `feat(templates): modèles personnels du vendeur`.
 
+### Task 5b: Consent to train the AI model (added by the user)
+
+**Files:** `prisma/schema.prisma` (Tenant: `aiTrainingConsent Boolean @default(false)`, `aiTrainingConsentAt DateTime?`), migration, `lib/ai-consent.ts` (+ int test), `lib/site-create.ts`, `sites/new/NewSiteForm.tsx` + `actions.ts`, and the "Modèles" window (Task 6).
+
+**Interfaces — Produces:** `setAiTrainingConsent(userId, value: boolean): Promise<void>` (date written when the value changes to true, cleared when it changes to false); `aiTrainingConsentOf(userId): Promise<boolean>`.
+
+- Checkbox in "Créer un site", **unchecked by default**: « J'accepte que mes modèles de pages servent à améliorer le générateur de modèles de Flowmerce (entraînement d'un modèle d'IA). Je peux retirer cet accord à tout moment. »
+- Only an explicit `"on"` counts as consent; when the box is left unchecked, nothing changes (a consent already given is not withdrawn without the seller asking).
+- Withdrawal: the same box in the editor's "Modèles" window (Task 6), with the date of the consent.
+- [ ] Integration tests: default false; consent at creation → true + date; creation without the box after consent → still true; withdrawal → false and date cleared; another user unaffected.
+- [ ] Commit `feat(ia): accord du vendeur pour l'entraînement sur ses modèles`.
+
 ### Task 6: "Modèles" window in the editor, and creation from a personal template
 
 **Files:**

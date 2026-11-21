@@ -301,3 +301,20 @@ describe("tout se règle dans la page (plus de panneau)", () => {
     expect(html).toMatch(/<figcaption[^>]*><span data-edition="">Légende<\/span><\/figcaption>/);
   });
 });
+
+describe("cadre d'image (poignées haut et bas)", () => {
+  const MEDIA = { url: `/media/${"a".repeat(32)}.png`, width: 800, height: 600 };
+  it("sans cadre, l'image garde ses proportions naturelles", () => {
+    const html = renderToStaticMarkup(<ImageBlock {...imageConfig.defaultProps!} image={MEDIA} />);
+    expect(html).not.toContain("aspect-ratio");
+  });
+  it("avec un cadre, la photo le remplit sans être déformée", () => {
+    const html = renderToStaticMarkup(<ImageBlock {...imageConfig.defaultProps!} image={MEDIA} imageHeight={50} />);
+    expect(html).toContain("aspect-ratio:100 / 50");
+    expect(html).toContain("object-fit:cover");
+  });
+  it("la bannière aussi", () => {
+    const html = renderToStaticMarkup(<Hero {...heroConfig.defaultProps!} image={MEDIA} imageHeight={120} />);
+    expect(html).toContain("aspect-ratio:100 / 120");
+  });
+});

@@ -7,7 +7,7 @@ import type { ReactNode } from "react";
 import { BUYER_TEXT, fill, type PageLang } from "@/blocks/i18n";
 import { renderButton as defaultButton, type RenderButton } from "@/blocks/button-box";
 import { EMPTY_MESSAGES, renderEmpty as defaultEmpty, type RenderEmpty } from "@/blocks/empty-box";
-import { renderImageBox as defaultImageBox, type RenderImageBox } from "@/blocks/image-box";
+import { frameStyle, renderImageBox as defaultImageBox, type RenderImageBox } from "@/blocks/image-box";
 import { hasText } from "@/blocks/rich-text";
 import { Section } from "@/blocks/Section";
 import {
@@ -61,6 +61,7 @@ export function ProductBlock({
   blockId = "produit",
   lang = "fr",
   imageWidth = 100,
+  imageHeight = null,
   thumbSize = "m",
   typography = typographySchema.parse(undefined),
   button = buttonStyleSchema.parse(undefined),
@@ -98,6 +99,7 @@ export function ProductBlock({
         <div className="flex flex-col gap-3">
           {renderImageBox({
             width: imageWidth,
+            height: imageHeight,
             children: (
               <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2" aria-label={t.photos}>
                 {images.map((image, i) => (
@@ -111,6 +113,7 @@ export function ProductBlock({
                     sizes="(max-width: 768px) 100vw, 768px"
                     preload={i === 0}
                     className="h-auto w-full shrink-0 scroll-mt-4 snap-center rounded-card object-cover"
+                    style={frameStyle(imageHeight)}
                   />
                 ))}
               </div>

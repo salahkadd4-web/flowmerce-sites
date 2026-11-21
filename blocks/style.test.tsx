@@ -1,5 +1,5 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { ImageBox } from "@/blocks/image-box";
+import { frameStyle, ImageBox } from "@/blocks/image-box";
 import { Section } from "@/blocks/Section";
 import {
   buttonProps,
@@ -7,6 +7,7 @@ import {
   colorOrAutoSchema,
   colorProps,
   hexColorSchema,
+  imageHeightSchema,
   imageWidthSchema,
   isDarkColor,
   PALETTE,
@@ -33,6 +34,7 @@ it("borne l'assombrissement à 0–80 par paliers de 10", () => {
     backgroundColor: "#ffffff",
     backgroundImage: null,
     overlay: 40,
+    minHeight: 0,
     spacing: "normal",
     width: "normal",
   });
@@ -107,6 +109,53 @@ it("couleur personnalisée : appliquée en style, auto : en classe", () => {
 it("la largeur d'image s'écrit en pourcentage", () => {
   expect(renderToStaticMarkup(<ImageBox width={70}>i</ImageBox>)).toContain("max-width:70%");
   expect(imageWidthSchema.safeParse(25).success).toBe(false);
-  expect(imageWidthSchema.safeParse(75).success).toBe(false);
+  expect(imageWidthSchema.safeParse(72).success).toBe(false);
   expect(imageWidthSchema.parse(undefined)).toBe(100);
+});
+
+describe("tailles proportionnelles (poignées)", () => {
+  it("la largeur d'une image va de 30 à 100 % par pas de 5", () => {
+    expect(imageWidthSchema.safeParse(35).success).toBe(true);
+    expect(imageWidthSchema.safeParse(25).success).toBe(false);
+    expect(imageWidthSchema.safeParse(33).success).toBe(false);
+  });
+
+  it("le cadre d'une image : naturel (null) ou de 30 à 200 % de sa largeur, par pas de 5", () => {
+    expect(imageHeightSchema.parse(undefined)).toBeNull();
+    for (const ok of [30, 55, 200, null]) expect(imageHeightSchema.safeParse(ok).success).toBe(true);
+    for (const ko of [25, 205, 52]) expect(imageHeightSchema.safeParse(ko).success).toBe(false);
+  });
+
+  it("la largeur d'un bouton : automatique, ou de 20 à 100 % par pas de 10", () => {
+    expect(buttonStyleSchema.parse(undefined).width).toBe("auto");
+    expect(buttonStyleSchema.safeParse({ width: 60 }).success).toBe(true);
+    for (const ko of [10, 110, 55]) expect(buttonStyleSchema.safeParse({ width: ko }).success).toBe(false);
+  });
+
+  it("la hauteur d'une section : automatique (0) ou de 20 à 100 % de l'écran, par pas de 10", () => {
+    expect(sectionStyleSchema.parse(undefined).minHeight).toBe(0);
+    for (const ok of [0, 20, 100]) expect(sectionStyleSchema.safeParse({ minHeight: ok }).success).toBe(true);
+    for (const ko of [10, 110, 45]) expect(sectionStyleSchema.safeParse({ minHeight: ko }).success).toBe(false);
+  });
+
+  it("un bouton élargi prend sa largeur en % du contenu ; automatique, rien ne change", () => {
+    const base = buttonStyleSchema.parse(undefined);
+    expect(buttonProps(base, "light").style?.width).toBeUndefined();
+    expect(buttonProps({ ...base, width: 60 }, "light").style).toMatchObject({ width: "60%" });
+  });
+
+  it("une section haute prend sa hauteur en % de l'écran et centre son contenu", () => {
+    const html = renderToStaticMarkup(
+      <Section style={sectionStyleSchema.parse({ minHeight: 80 })} defaults={DEFAULTS}>
+        <p>x</p>
+      </Section>,
+    );
+    expect(html).toContain("min-height:80svh");
+    expect(renderToStaticMarkup(<Section style={sectionStyleSchema.parse(undefined)} defaults={DEFAULTS}><p>x</p></Section>)).not.toContain("min-height");
+  });
+
+  it("un cadre d'image : la photo le remplit, rognée, jamais déformée", () => {
+    expect(frameStyle(null)).toBeUndefined();
+    expect(frameStyle(50)).toEqual({ aspectRatio: "100 / 50", objectFit: "cover" });
+  });
 });

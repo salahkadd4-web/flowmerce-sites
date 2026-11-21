@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { text } from "@/blocks/shared";
-import { buttonStyleSchema, imageWidthSchema, sectionStyleSchema, typographySchema } from "@/blocks/style";
+import { buttonStyleSchema, imageHeightSchema, imageWidthSchema, sectionStyleSchema, typographySchema } from "@/blocks/style";
 
 export const THUMB_SIZES = ["s", "m", "l"] as const;
 
@@ -10,6 +10,7 @@ export const productSchema = z.object({
   id: z.string(),
   buttonLabel: text(40),
   imageWidth: imageWidthSchema,
+  imageHeight: imageHeightSchema,
   thumbSize: z.enum(THUMB_SIZES).default("m"),
   typography: typographySchema,
   button: buttonStyleSchema,
@@ -22,6 +23,7 @@ export const PRODUCT_FIELD_LABELS: Record<keyof ProductProps, string> = {
   id: "Identifiant",
   buttonLabel: "Texte du bouton",
   imageWidth: "Largeur de la photo principale",
+  imageHeight: "Hauteur du cadre de l\'image",
   thumbSize: "Taille des miniatures",
   typography: "Texte",
   button: "Bouton",

@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { richTextSchema } from "@/blocks/rich-text";
 import { alignSchema, mediaSchema, optionalHrefSchema, text } from "@/blocks/shared";
-import { buttonStyleSchema, imageWidthSchema, sectionStyleSchema, typographySchema } from "@/blocks/style";
+import { buttonStyleSchema, imageHeightSchema, imageWidthSchema, sectionStyleSchema, typographySchema } from "@/blocks/style";
 
 /** Anciens fonds de la bannière (avant les réglages de style) → fond et bouton équivalents. */
 const LEGACY_BACKGROUNDS: Record<string, { color: string; button?: Record<string, string> } | null> = {
@@ -37,6 +37,7 @@ export const heroSchema = z.preprocess(
     // Ajouté en 1C : absent des anciens contenus, d'où la valeur par défaut.
     imageAlt: text(150).default(""),
     imageWidth: imageWidthSchema,
+    imageHeight: imageHeightSchema,
     buttonLabel: text(40),
     buttonHref: optionalHrefSchema,
     align: alignSchema,
@@ -55,6 +56,7 @@ export const HERO_FIELD_LABELS: Record<keyof HeroProps, string> = {
   image: "Image",
   imageAlt: "Description de l'image",
   imageWidth: "Largeur de l'image",
+  imageHeight: "Hauteur du cadre de l\'image",
   buttonLabel: "Texte du bouton",
   buttonHref: "Lien du bouton",
   align: "Alignement",

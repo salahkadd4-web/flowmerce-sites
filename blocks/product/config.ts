@@ -13,7 +13,9 @@ export const productConfig: ComponentConfig<Props> = {
   label: "Fiche produit",
   fields: {
     buttonLabel: { type: "text", label: "Texte du bouton (vers le formulaire)", contentEditable: true },
-    imageWidth: rangeField("Largeur de la photo principale", { min: 30, max: 100, step: 10, unit: "%" }),
+    imageWidth: rangeField("Largeur de la photo principale", { min: 30, max: 100, step: 5, unit: "%" }),
+    // Réglé aux poignées du haut et du bas de l'image (éditeur) ; null : proportions naturelles.
+    imageHeight: { type: "number", label: "Hauteur du cadre de l'image (% de sa largeur)", min: 30, max: 200, step: 5 },
     thumbSize: {
       type: "radio",
       label: "Taille des miniatures",
@@ -30,6 +32,7 @@ export const productConfig: ComponentConfig<Props> = {
   defaultProps: {
     buttonLabel: "Commander maintenant",
     imageWidth: 100,
+    imageHeight: null,
     thumbSize: "m",
     typography: typographySchema.parse(undefined),
     button: buttonStyleSchema.parse(undefined),

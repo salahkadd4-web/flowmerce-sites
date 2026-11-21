@@ -4,7 +4,7 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { EMPTY_MESSAGES, renderEmpty as defaultEmpty, type RenderEmpty } from "@/blocks/empty-box";
-import { renderImageBox as defaultImageBox, type RenderImageBox } from "@/blocks/image-box";
+import { frameStyle, renderImageBox as defaultImageBox, type RenderImageBox } from "@/blocks/image-box";
 import { Section } from "@/blocks/Section";
 import { hasText } from "@/blocks/rich-text";
 import { DEFAULT_SECTION_STYLE, sectionTone, TEXT_AUTO } from "@/blocks/style";
@@ -17,8 +17,8 @@ const ROUNDED: Record<ImageProps["rounded"], string> = {
 };
 
 // La légende s'écrit dans la page : dans l'éditeur, elle arrive en élément d'édition de Puck.
-type Props = Omit<ImageProps, "id" | "imageWidth" | "rounded" | "style" | "caption"> & { caption: ReactNode } &
-  Partial<Pick<ImageProps, "imageWidth" | "rounded" | "style">> & { editing?: boolean; renderImageBox?: RenderImageBox; renderEmpty?: RenderEmpty };
+type Props = Omit<ImageProps, "id" | "imageWidth" | "imageHeight" | "rounded" | "style" | "caption"> & { caption: ReactNode } &
+  Partial<Pick<ImageProps, "imageWidth" | "imageHeight" | "rounded" | "style">> & { editing?: boolean; renderImageBox?: RenderImageBox; renderEmpty?: RenderEmpty };
 
 export function ImageBlock({
   image,
@@ -26,6 +26,7 @@ export function ImageBlock({
   caption,
   width,
   imageWidth = 100,
+  imageHeight = null,
   rounded = "soft",
   style = DEFAULT_SECTION_STYLE,
   editing = false,
@@ -52,6 +53,7 @@ export function ImageBlock({
       <figure>
         {renderImageBox({
           width: imageWidth,
+          height: imageHeight,
           children: (
             <Image
               src={image.url}
@@ -60,6 +62,7 @@ export function ImageBlock({
               height={image.height}
               sizes={full ? "100vw" : "(max-width: 768px) 100vw, 768px"}
               className={`h-auto w-full ${full ? "" : ROUNDED[rounded]}`.trim()}
+              style={frameStyle(imageHeight)}
             />
           ),
         })}

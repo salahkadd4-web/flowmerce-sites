@@ -31,6 +31,15 @@ export const sectionStyleSchema = z
     backgroundColor: hexColorSchema.default("#ffffff"),
     backgroundImage: mediaSchema.nullable().default(null),
     overlay: z.number().int().min(0).max(80).multipleOf(10).default(40),
+    // Hauteur minimale, en % de la hauteur de l'écran (0 : selon le contenu). Poignée du bas.
+    minHeight: z
+      .number()
+      .int()
+      .min(0)
+      .max(100)
+      .multipleOf(10)
+      .refine((value) => value === 0 || value >= 20)
+      .default(0),
     spacing: z.enum(["compact", "normal", "airy"]).default("normal"),
     width: z.enum(["narrow", "normal", "wide"]).default("normal"),
   })
@@ -57,12 +66,20 @@ export const buttonStyleSchema = z
     color: colorOrAutoSchema.default("auto"),
     textColor: colorOrAutoSchema.default("auto"),
     size: z.enum(BUTTON_SIZE_IDS).default("m"),
+    // Largeur : ajustée au texte, ou en % du contenu de la section. Poignées des côtés.
+    width: z.union([z.literal("auto"), z.number().int().min(20).max(100).multipleOf(10)]).default("auto"),
   })
   .default({});
 export type ButtonStyle = z.infer<typeof buttonStyleSchema>;
 
-/** Largeur d'une image, en % de sa section, par paliers de 10. */
-export const imageWidthSchema = z.number().int().min(30).max(100).multipleOf(10).default(100);
+/** Largeur d'une image, en % de sa section, par paliers de 5 (poignées des côtés). */
+export const imageWidthSchema = z.number().int().min(30).max(100).multipleOf(5).default(100);
+
+/**
+ * Cadre d'une image : sa hauteur en % de sa largeur (poignées du haut et du bas), ou
+ * null pour ses proportions naturelles. La photo remplit le cadre, rognée, jamais déformée.
+ */
+export const imageHeightSchema = z.number().int().min(30).max(200).multipleOf(5).nullable().default(null);
 
 /**
  * Réglages par défaut : un contenu enregistré avant ces réglages (ou relu d'un
@@ -168,6 +185,7 @@ export function buttonProps(button: ButtonStyle, tone: Tone): { className: strin
     colors = button.textColor === "auto" ? `${isDarkColor(button.color) ? "text-white" : "text-ink"} hover:opacity-90` : "hover:opacity-90";
   }
   if (button.textColor !== "auto") style.color = button.textColor;
+  if (button.width !== undefined && button.width !== "auto") style.width = `${button.width}%`;
   const className = `${BUTTON_BASE} ${size} ${colors}`.replace(/\s+/g, " ").trim();
   return Object.keys(style).length > 0 ? { className, style } : { className };
 }

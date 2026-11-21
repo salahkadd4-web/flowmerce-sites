@@ -22,7 +22,9 @@ export const imageConfig: ComponentConfig<Props> = {
         { label: "Pleine largeur", value: "full" },
       ],
     },
-    imageWidth: rangeField("Taille de l'image", { min: 30, max: 100, step: 10, unit: "%" }),
+    imageWidth: rangeField("Taille de l'image", { min: 30, max: 100, step: 5, unit: "%" }),
+    // Réglé aux poignées du haut et du bas de l'image (éditeur) ; null : proportions naturelles.
+    imageHeight: { type: "number", label: "Hauteur du cadre de l'image (% de sa largeur)", min: 30, max: 200, step: 5 },
     rounded: {
       type: "radio",
       label: "Coins arrondis",
@@ -40,6 +42,7 @@ export const imageConfig: ComponentConfig<Props> = {
     caption: "",
     width: "contained",
     imageWidth: 100,
+    imageHeight: null,
     rounded: "soft",
     style: sectionStyleSchema.parse(undefined),
   },

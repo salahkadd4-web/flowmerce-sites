@@ -16,7 +16,9 @@ export const heroConfig: ComponentConfig<Props> = {
     subtitle: { type: "richtext", label: "Sous-titre", contentEditable: true, options: RICH_TEXT_OPTIONS },
     image: imageField("Image"),
     imageAlt: { type: "text", label: "Description de l'image (pour les lecteurs d'écran)" },
-    imageWidth: rangeField("Largeur de l'image", { min: 30, max: 100, step: 10, unit: "%" }),
+    imageWidth: rangeField("Largeur de l'image", { min: 30, max: 100, step: 5, unit: "%" }),
+    // Réglé aux poignées du haut et du bas de l'image (éditeur) ; null : proportions naturelles.
+    imageHeight: { type: "number", label: "Hauteur du cadre de l'image (% de sa largeur)", min: 30, max: 200, step: 5 },
     buttonLabel: { type: "text", label: "Texte du bouton", contentEditable: true },
     buttonHref: { type: "text", label: "Lien du bouton" },
     align: { type: "radio", label: "Alignement", options: ALIGN_OPTIONS },
@@ -30,6 +32,7 @@ export const heroConfig: ComponentConfig<Props> = {
     image: null,
     imageAlt: "",
     imageWidth: 100,
+    imageHeight: null,
     buttonLabel: "Commander maintenant",
     buttonHref: "#commande",
     align: "center",

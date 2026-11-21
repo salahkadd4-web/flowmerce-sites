@@ -100,7 +100,7 @@ describe("Fiche produit — galerie et réglages", () => {
 
   it("applique la largeur de la photo principale et la couleur du bouton", () => {
     const html = renderToStaticMarkup(
-      <ProductBlock {...productDefaults} imageWidth={70} button={{ color: "#16265c", textColor: "auto", size: "l" }} blockId="p" lang="fr" product={PRODUCT} />,
+      <ProductBlock {...productDefaults} imageWidth={70} button={{ color: "#16265c", textColor: "auto", size: "l", width: "auto" }} blockId="p" lang="fr" product={PRODUCT} />,
     );
     expect(html).toContain("max-width:70%");
     expect(html).toContain("background-color:#16265c");
