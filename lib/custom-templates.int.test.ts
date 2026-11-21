@@ -56,3 +56,13 @@ it("le modèle d'un autre vendeur n'est ni visible, ni lisible, ni supprimable",
   expect(await deleteCustomTemplate(AMINA.id, saved.id)).toBe(true);
   expect(await listCustomTemplates(AMINA.id)).toEqual([]);
 });
+
+it("un modèle n'emporte ni le titre d'onglet ni le produit de la page d'origine", async () => {
+  const page = structuredClone(PAGE) as { root: { props: Record<string, unknown> } };
+  page.root.props = { ...page.root.props, title: "Boutique Amina — soldes", productId: "p-amina" };
+  const saved = await saveCustomTemplate(AMINA.id, "Soldes", "Autre", page);
+  if (!saved.ok) throw new Error(saved.error);
+  const data = (await customTemplateForUser(AMINA.id, saved.id)) as { root: { props: Record<string, unknown> } };
+  expect(data.root.props.title).toBe("");
+  expect(data.root.props).not.toHaveProperty("productId");
+});

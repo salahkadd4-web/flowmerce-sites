@@ -132,10 +132,14 @@ function HandleButton({
       const dy = event.type === "lostpointercapture" ? last.dy : event.clientY - origin.y;
       origin = null;
       latest.current.onBubble(null);
-      if (commit) latest.current.onCommit(handle, dx, dy);
+      // Un simple clic (sans déplacement) ne change rien : la valeur affichée est
+      // mesurée à l'écran et remplacerait sinon « automatique » ou les proportions.
+      const moved = Math.abs(dx) >= 3 || Math.abs(dy) >= 3;
+      if (commit && moved) latest.current.onCommit(handle, dx, dy);
       else latest.current.onCancel();
     };
     const down = (event: PointerEvent) => {
+      if (event.button !== 0) return; // clic droit ou molette : pas de geste
       event.preventDefault();
       event.stopPropagation();
       element.setPointerCapture(event.pointerId);
@@ -168,14 +172,16 @@ function HandleButton({
       ["lostpointercapture", up],
     ] as const;
     for (const [type, listener] of listeners) element.addEventListener(type, listener as EventListener, { capture: true });
+    // Échap arrive au document qui a le focus : l'aperçu (iframe) ou l'éditeur autour.
     const doc = element.ownerDocument;
-    doc.addEventListener("keydown", escape, true);
+    const parentDoc = doc.defaultView && doc.defaultView.parent !== doc.defaultView ? doc.defaultView.parent.document : null;
+    for (const d of [doc, parentDoc]) d?.addEventListener("keydown", escape, true);
     const unregister = registerOverlayPortal(element, { disableDrag: true });
 
     return () => {
       unregister?.();
       for (const [type, listener] of listeners) element.removeEventListener(type, listener as EventListener, { capture: true });
-      doc.removeEventListener("keydown", escape, true);
+      for (const d of [doc, parentDoc]) d?.removeEventListener("keydown", escape, true);
     };
   }, [handle]);
 

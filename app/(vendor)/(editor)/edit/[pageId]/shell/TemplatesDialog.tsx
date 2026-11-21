@@ -259,6 +259,7 @@ function SaveForm({ onSaved }: { onSaved: () => Promise<void> }) {
 
 function ConsentBox({ consent, onChange }: { consent: TemplatesState["consent"]; onChange: () => Promise<void> }) {
   const [pending, setPending] = useState(false);
+  const [error, setError] = useState("");
   // La case suit le clic tout de suite ; l'état du serveur la confirme ensuite.
   const [checked, setChecked] = useState(consent.consent);
   const [shown, setShown] = useState(consent.consent);
@@ -273,13 +274,23 @@ function ConsentBox({ consent, onChange }: { consent: TemplatesState["consent"];
         type="checkbox"
         checked={checked}
         disabled={pending}
-        aria-describedby="templates-ai-consent-hint"
+        aria-describedby={error ? "templates-ai-consent-hint templates-ai-consent-error" : "templates-ai-consent-hint"}
         onChange={async (e) => {
-          setChecked(e.target.checked);
+          const wanted = e.target.checked;
+          setChecked(wanted);
+          setError("");
           setPending(true);
-          await setTemplateConsent(e.target.checked);
-          await onChange();
-          setPending(false);
+          try {
+            const result = await setTemplateConsent(wanted);
+            if (!result.ok) throw new Error();
+            await onChange();
+          } catch {
+            // Échec : la case revient à ce qui est réellement enregistré, et le vendeur le sait.
+            setChecked(consent.consent);
+            setError(wanted ? "L'accord n'a pas pu être enregistré. Réessayez." : "Le retrait n'a pas pu être enregistré : votre accord est toujours actif. Réessayez.");
+          } finally {
+            setPending(false);
+          }
         }}
         className="mt-0.5 size-4 shrink-0 cursor-pointer accent-brand"
       />
@@ -292,6 +303,11 @@ function ConsentBox({ consent, onChange }: { consent: TemplatesState["consent"];
             ? `Accord donné le ${DATE.format(new Date(consent.at))}. Décochez pour le retirer.`
             : "Facultatif. Vos commandes et les coordonnées de vos clients n'en font jamais partie. Vous pouvez retirer cet accord à tout moment."}
         </p>
+        {error && (
+          <p id="templates-ai-consent-error" role="alert" className={FIELD_ERROR}>
+            {error}
+          </p>
+        )}
       </div>
     </div>
   );

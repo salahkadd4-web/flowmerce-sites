@@ -51,7 +51,8 @@ export function SectionOverlay({ children, isSelected, componentId, componentTyp
       <span ref={anchor} hidden />
       {/* Pendant le geste, la hauteur suit la poignée. */}
       {draft !== null && (
-        <style>{`[data-puck-component="${CSS.escape(componentId)}"] { min-height: ${draft === 0 ? "auto" : `${draft}svh`} !important; }`}</style>
+        // Puck enveloppe la section : l'aperçu agit sur la section elle-même (premier enfant).
+        <style>{`[data-puck-component="${CSS.escape(componentId)}"] > * { min-height: ${draft === 0 ? "0" : `${draft}svh`} !important; display: flex !important; flex-direction: column !important; justify-content: center !important; }`}</style>
       )}
       {isSelected && isBlockType(componentType) && (
         <ResizeHandles

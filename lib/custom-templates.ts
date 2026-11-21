@@ -46,6 +46,10 @@ export async function saveCustomTemplate(userId: string, name: unknown, category
 
   const content = validatePageContent(data);
   if (!content.ok) return { ok: false, error: "Contenu de page invalide" };
+  // Un modèle est un design : sans le titre d'onglet ni le produit de la page d'origine,
+  // qui appartiennent à son site (un nouveau site prendrait sinon le titre de l'ancien).
+  const { title: _title, productId: _productId, ...design } = (content.content.root?.props ?? {}) as Record<string, unknown>;
+  const stored = { ...content.content, root: { ...content.content.root, props: { ...design, title: "" } } };
 
   const tenant = await prisma.tenant.findUnique({ where: { ownerUserId: userId }, select: { id: true } });
   if (!tenant) return { ok: false, error: "Créez d'abord un site" };
@@ -56,7 +60,7 @@ export async function saveCustomTemplate(userId: string, name: unknown, category
     const count = await tx.customTemplate.count({ where: { tenantId: tenant.id } });
     if (count >= MAX_CUSTOM_TEMPLATES) return { ok: false as const, error: `${MAX_CUSTOM_TEMPLATES} modèles au plus : supprimez-en un` };
     const created = await tx.customTemplate.create({
-      data: { tenantId: tenant.id, name: cleanName, category: cleanCategory, data: content.content as unknown as Prisma.InputJsonValue },
+      data: { tenantId: tenant.id, name: cleanName, category: cleanCategory, data: stored as unknown as Prisma.InputJsonValue },
       select: { id: true },
     });
     return { ok: true as const, id: created.id };
