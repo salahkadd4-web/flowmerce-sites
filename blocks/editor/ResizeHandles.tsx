@@ -26,6 +26,8 @@ type Props = {
   onCancel: () => void;
   /** Flèches du clavier sur une poignée : un pas dans un sens. */
   onKey: (handle: Handle, direction: 1 | -1) => void;
+  /** Poignées des bords posées à l'intérieur du cadre (section pleine largeur : rien ne dépasse de la page). */
+  inset?: boolean;
 };
 
 const NAMES: Record<Handle, string> = {
@@ -37,6 +39,14 @@ const NAMES: Record<Handle, string> = {
   nw: "coin en haut à gauche",
   se: "coin en bas à droite",
   sw: "coin en bas à gauche",
+};
+
+/** Poignées des bords à l'intérieur du cadre. */
+const INSET: Partial<Record<Handle, string>> = {
+  n: "left-1/2 top-1 h-2.5 w-8 -translate-x-1/2 cursor-ns-resize rounded-full",
+  s: "left-1/2 bottom-1 h-2.5 w-8 -translate-x-1/2 cursor-ns-resize rounded-full",
+  e: "right-1 top-1/2 h-8 w-2.5 -translate-y-1/2 cursor-ew-resize rounded-full",
+  w: "left-1 top-1/2 h-8 w-2.5 -translate-y-1/2 cursor-ew-resize rounded-full",
 };
 
 const PLACE: Record<Handle, string> = {
@@ -98,6 +108,7 @@ function HandleButton({
   onCancel,
   onKey,
   onBubble,
+  inset = false,
 }: Props & { handle: Handle; onBubble: (text: string | null) => void }) {
   const ref = useRef<HTMLButtonElement>(null);
   // Dernières fonctions, lues par les écouteurs natifs posés une seule fois.
@@ -110,12 +121,15 @@ function HandleButton({
     const element = ref.current;
     if (!element) return;
     let origin: { x: number; y: number } | null = null;
+    // Dernière position vue : un relâchement hors de l'aperçu (iframe) n'y arrive pas ;
+    // le navigateur signale alors la perte du pointeur, et le geste s'arrête là.
+    let last = { dx: 0, dy: 0 };
 
     const end = (event: PointerEvent, commit: boolean) => {
       if (!origin) return;
       event.stopPropagation();
-      const dx = event.clientX - origin.x;
-      const dy = event.clientY - origin.y;
+      const dx = event.type === "lostpointercapture" ? last.dx : event.clientX - origin.x;
+      const dy = event.type === "lostpointercapture" ? last.dy : event.clientY - origin.y;
       origin = null;
       latest.current.onBubble(null);
       if (commit) latest.current.onCommit(handle, dx, dy);
@@ -126,12 +140,14 @@ function HandleButton({
       event.stopPropagation();
       element.setPointerCapture(event.pointerId);
       origin = { x: event.clientX, y: event.clientY };
+      last = { dx: 0, dy: 0 };
       latest.current.onBubble(latest.current.onPreview(handle, 0, 0));
     };
     const move = (event: PointerEvent) => {
       if (!origin) return;
       event.stopPropagation();
-      latest.current.onBubble(latest.current.onPreview(handle, event.clientX - origin.x, event.clientY - origin.y));
+      last = { dx: event.clientX - origin.x, dy: event.clientY - origin.y };
+      latest.current.onBubble(latest.current.onPreview(handle, last.dx, last.dy));
     };
     const up = (event: PointerEvent) => end(event, true);
     const cancel = (event: PointerEvent) => end(event, false);
@@ -149,6 +165,7 @@ function HandleButton({
       ["pointermove", move],
       ["pointerup", up],
       ["pointercancel", cancel],
+      ["lostpointercapture", up],
     ] as const;
     for (const [type, listener] of listeners) element.addEventListener(type, listener as EventListener, { capture: true });
     const doc = element.ownerDocument;
@@ -177,7 +194,7 @@ function HandleButton({
         event.stopPropagation();
         onKey(handle, direction);
       }}
-      className={`absolute z-30 touch-none border-2 border-brand bg-white shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${PLACE[handle]}`}
+      className={`absolute z-30 touch-none border-2 border-brand bg-white shadow-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${(inset && INSET[handle]) || PLACE[handle]}`}
     />
   );
 }

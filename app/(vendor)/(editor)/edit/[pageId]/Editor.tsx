@@ -23,6 +23,7 @@ import { createAutosave, type AutosaveStatus } from "./shell/autosave";
 import { AddSectionDialog } from "./shell/AddSectionDialog";
 import { PageSettingsDialog } from "./shell/PageSettingsDialog";
 import { SectionBar } from "./shell/SectionBar";
+import { SectionOverlay } from "./shell/SectionOverlay";
 import { SectionsColumn } from "./shell/SectionsColumn";
 import { TopBar, type Device } from "./shell/TopBar";
 
@@ -184,6 +185,7 @@ export function Editor({ pageId, site, initialData, products, shipping }: Props)
             preview: PreviewWithHint,
             actionBar: SectionBar,
             iframe: SaveShortcutFrame,
+            componentOverlay: SectionOverlay,
           }}
         >
           <EditorLayout

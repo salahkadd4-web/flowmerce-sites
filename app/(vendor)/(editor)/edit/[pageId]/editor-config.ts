@@ -135,7 +135,17 @@ function withEditableButtons(config: Config): Config {
       render: (props) =>
         render({
           ...props,
-          renderButton: ({ children }: { children: ReactNode }) => createElement(EditableButton, { blockId: props.id, linkable }, children),
+          renderButton: ({ children }: { children: ReactNode }) =>
+            createElement(
+              EditableButton,
+              {
+                blockId: props.id,
+                linkable,
+                // La bannière centre son bouton ou l'aligne au début ; ailleurs, il occupe la largeur.
+                align: name === "Hero" ? ((props as { align?: string }).align === "center" ? "center" : "start") : "stretch",
+              },
+              children,
+            ),
         }),
     };
   }
