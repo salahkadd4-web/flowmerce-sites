@@ -24,6 +24,23 @@ it("crée le tenant, le site en brouillon et sa page au premier site", async () 
   expect(validatePageContent(page?.draft).ok).toBe(true);
 });
 
+it("crée la page à partir du modèle choisi", async () => {
+  const result = await createSiteForUser(USER, { name: "Simple", subdomain: "simple", templateId: "landing-fr" });
+  expect(result.ok).toBe(true);
+  if (!result.ok) return;
+  const page = await prisma.page.findUniqueOrThrow({ where: { id: result.pageId } });
+  expect(validatePageContent(page.draft).ok).toBe(true);
+});
+
+it("refuse un modèle inconnu sans rien créer", async () => {
+  expect(await createSiteForUser(USER, { name: "X", subdomain: "inconnu", templateId: "inconnu" })).toEqual({
+    ok: false,
+    field: "template",
+    error: "Choisissez un modèle",
+  });
+  expect(await prisma.site.count()).toBe(0);
+});
+
 it("réutilise le même tenant pour un deuxième site", async () => {
   await createSiteForUser(USER, { name: "Premier", subdomain: "premier" });
   await createSiteForUser(USER, { name: "Second", subdomain: "second" });

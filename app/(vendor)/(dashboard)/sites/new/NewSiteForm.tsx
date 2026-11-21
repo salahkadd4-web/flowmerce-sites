@@ -3,6 +3,7 @@
 // Formulaire de création de site — champs écrits comme le formulaire « Créer une
 // clé » de flowmerce-web-app (libellé au-dessus, aide et erreur en dessous).
 
+import Image from "next/image";
 import { useActionState, useState } from "react";
 import { Check, Loader2 } from "lucide-react";
 import { BTN_PRIMARY, FIELD, FIELD_ERROR, HINT, LABEL } from "@/components/dashboard/ui";
@@ -10,17 +11,22 @@ import { siteUrl } from "@/lib/host";
 import { slugifySubdomain } from "@/lib/subdomain";
 import { createSite, type CreateSiteState } from "./actions";
 
-type Props = { rootDomain: string; protocol: "http" | "https"; port?: string };
+/** Ce que le formulaire montre d'un modèle (sans son contenu). */
+export type TemplateCard = { id: string; name: string; category: string; description: string; preview: string | null };
 
-export function NewSiteForm({ rootDomain, protocol, port }: Props) {
+type Props = { rootDomain: string; protocol: "http" | "https"; port?: string; templates: TemplateCard[] };
+
+export function NewSiteForm({ rootDomain, protocol, port, templates }: Props) {
   const [state, action, pending] = useActionState<CreateSiteState, FormData>(createSite, {});
   const [name, setName] = useState("");
   const [subdomain, setSubdomain] = useState("");
   // Le sous-domaine suit le nom tant que le vendeur ne l'a pas modifié lui-même.
   const [subdomainEdited, setSubdomainEdited] = useState(false);
+  const [templateId, setTemplateId] = useState(templates[0]?.id ?? "");
 
   const nameError = state.field === "name" ? state.error : undefined;
   const subdomainError = state.field === "subdomain" ? state.error : undefined;
+  const templateError = state.field === "template" ? state.error : undefined;
   const address = siteUrl(subdomain || "votre-boutique", { rootDomain, protocol, port }).replace(/^https?:\/\//, "");
 
   return (
@@ -86,23 +92,65 @@ export function NewSiteForm({ rootDomain, protocol, port }: Props) {
         )}
       </div>
 
-      <fieldset>
+      <fieldset aria-describedby={templateError ? "site-template-error" : undefined}>
         <legend className={LABEL}>Modèle</legend>
-        <label className="flex cursor-pointer items-start gap-3 rounded-card border-2 border-brand bg-brand-soft p-4">
-          <input type="radio" name="template" value="landing-fr" defaultChecked className="sr-only" />
-          <span
-            aria-hidden
-            className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-brand text-on-brand"
-          >
-            <Check size={12} strokeWidth={3} />
-          </span>
-          <span className="min-w-0">
-            <span className="block text-[14px] font-bold text-ink">Landing page — produit unique</span>
-            <span className="mt-0.5 block text-[12px] text-body">
-              Bannière, avantages, photo et pied de page, en français. Le formulaire de commande arrive bientôt.
-            </span>
-          </span>
-        </label>
+        <p className={`${HINT} -mt-1 mb-3`}>Un point de départ complet : vous changerez textes, photos et couleurs dans l&apos;éditeur.</p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {templates.map((template) => {
+            const checked = template.id === templateId;
+            return (
+              <label
+                key={template.id}
+                className={`group flex cursor-pointer flex-col overflow-hidden rounded-card border-2 bg-surface transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand ${
+                  checked ? "border-brand" : "border-line hover:border-brand/40"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="template"
+                  value={template.id}
+                  checked={checked}
+                  disabled={pending}
+                  onChange={() => setTemplateId(template.id)}
+                  className="sr-only"
+                />
+                <span className="relative block aspect-[4/5] overflow-hidden bg-page">
+                  {template.preview ? (
+                    <Image
+                      src={template.preview}
+                      alt=""
+                      fill
+                      sizes="(max-width: 640px) 100vw, 240px"
+                      className="object-cover object-top transition-transform duration-300 group-hover:scale-[1.02]"
+                    />
+                  ) : (
+                    <span aria-hidden className="flex h-full flex-col gap-2 p-4">
+                      <span className="h-1/3 rounded-md bg-deep" />
+                      <span className="h-3 w-2/3 rounded bg-line" />
+                      <span className="h-3 w-1/2 rounded bg-line" />
+                      <span className="mt-auto h-8 rounded-md bg-brand/70" />
+                    </span>
+                  )}
+                  {checked && (
+                    <span aria-hidden className="absolute end-2 top-2 flex size-6 items-center justify-center rounded-full bg-brand text-on-brand shadow">
+                      <Check size={14} strokeWidth={3} />
+                    </span>
+                  )}
+                </span>
+                <span className="flex flex-col gap-0.5 p-3">
+                  <span className="text-[11px] font-bold tracking-wide text-brand-ink uppercase">{template.category}</span>
+                  <span className="text-[14px] font-bold text-ink">{template.name}</span>
+                  <span className="text-[12px] leading-snug text-body">{template.description}</span>
+                </span>
+              </label>
+            );
+          })}
+        </div>
+        {templateError && (
+          <p id="site-template-error" role="alert" className={FIELD_ERROR}>
+            {templateError}
+          </p>
+        )}
       </fieldset>
 
       <div>

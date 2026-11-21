@@ -5,9 +5,9 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
 
   images: {
-    // Images des vendeurs (/media/<clé>) et logos de l'espace vendeur. Chemins
-    // relatifs : optimisés sur n'importe quel hôte, sans IP locale.
-    localPatterns: [{ pathname: "/media/**" }, { pathname: "/logos/**" }],
+    // Images des vendeurs (/media/<clé>), photos des modèles (/templates/…) et logos
+    // de l'espace vendeur. Chemins relatifs : optimisés sur n'importe quel hôte, sans IP locale.
+    localPatterns: [{ pathname: "/media/**" }, { pathname: "/templates/**" }, { pathname: "/logos/**" }],
   },
 
   experimental: {

@@ -57,9 +57,12 @@ export function telHref(phone: string): string {
   return `tel:${phone.replace(/[^+0-9]/g, "")}`;
 }
 
-/** Image envoyée par le vendeur (lib/media.ts) : chemin /media/<clé>. */
+/**
+ * Image d'une page : envoyée par le vendeur (lib/media.ts, chemin /media/<clé>),
+ * ou photo d'un modèle servie par le site (public/templates/<modèle>/<nom>).
+ */
 export const mediaSchema = z.object({
-  url: z.string().regex(/^\/media\/[a-f0-9]{32}\.(jpg|png|webp|avif)$/),
+  url: z.string().regex(/^\/(media\/[a-f0-9]{32}|templates\/[a-z0-9-]+\/[a-z0-9-]+)\.(jpg|png|webp|avif)$/),
   width: z.number().int().positive(),
   height: z.number().int().positive(),
 });
