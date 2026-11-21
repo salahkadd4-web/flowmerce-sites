@@ -71,7 +71,7 @@ describe("Image", () => {
 
   it("montre un emplacement dans l'éditeur sans image choisie", () => {
     expect(renderToStaticMarkup(<ImageBlock {...imageConfig.defaultProps!} image={null} editing />)).toContain(
-      "Choisissez une image",
+      "Aucune image pour l&#x27;instant",
     );
   });
 

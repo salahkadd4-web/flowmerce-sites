@@ -56,3 +56,15 @@ describe("renderButton (barre d'outils du bouton, éditeur seulement)", () => {
     expect(html).toContain('id="produit-Product-1"');
   });
 });
+
+describe("emplacement vide de l'image (éditeur)", () => {
+  it("dit qu'il n'y a pas d'image, sans renvoi à un panneau, et reçoit le bouton de l'éditeur", async () => {
+    const { ImageBlock } = await import("@/blocks/image/ImageBlock");
+    const base = { image: null, alt: "", caption: "", width: "contained" as const };
+    const html = renderToStaticMarkup(<ImageBlock {...base} editing />);
+    expect(html).toContain("Aucune image pour l&#x27;instant");
+    expect(html).not.toMatch(/panneau|réglages/);
+    const withAction = renderToStaticMarkup(<ImageBlock {...base} editing renderEmpty={({ kind }) => <i data-vide={kind} />} />);
+    expect(withAction).toContain('data-vide="image"');
+  });
+});

@@ -6,6 +6,8 @@
 import type { Config, Field } from "@puckeditor/core";
 import { createElement, type ReactNode } from "react";
 import { EditableButton } from "@/blocks/editor/EditableButton";
+import { EmptyAction } from "@/blocks/editor/EmptyAction";
+import type { ImageToolbarProps } from "@/blocks/editor/ImageToolbar";
 import { ResizableImageBox } from "@/blocks/editor/ResizableImageBox";
 import { textToolbar, type TextStyle } from "@/blocks/editor/TextToolbar";
 import { ColorField } from "@/blocks/fields/ColorField";
@@ -13,6 +15,7 @@ import type { EditorFieldKind } from "@/blocks/fields/editor-fields";
 import { MediaField } from "@/blocks/fields/MediaField";
 import { RangeField } from "@/blocks/fields/RangeField";
 import { FourStylesMenu } from "@/blocks/fields/RichTextMenus";
+import type { EmptyKind } from "@/blocks/empty-box";
 import type { ImageBoxProps } from "@/blocks/image-box";
 import { puckConfig } from "@/blocks/puck.config";
 
@@ -21,6 +24,8 @@ const RENDERERS: Record<EditorFieldKind, unknown> = {
   range: RangeField,
   color: ColorField,
 };
+
+type ImageToolbarSetup = Omit<ImageToolbarProps, "blockId">;
 
 type AnyField = Field & { editorKind?: EditorFieldKind; objectFields?: Record<string, AnyField> };
 type Fields = Record<string, AnyField>;
@@ -83,13 +88,18 @@ function withProductField(config: Config, products: { id: string; name: string }
   return { ...config, root: { ...config.root, fields: { ...config.root?.fields, productId } } };
 }
 
-/** Blocs dont l'image se règle à la poignée, et le réglage qui porte sa largeur. */
-const RESIZABLE = ["Hero", "Image", "Product"] as const;
+/** Blocs dont l'image se règle à la poignée, et la barre de l'image (absente pour la fiche
+ * produit, dont les photos sont celles du produit). */
+const RESIZABLE: Record<string, ImageToolbarSetup | undefined> = {
+  Hero: { imageProp: "image", altProp: "imageAlt" },
+  Image: { imageProp: "image", altProp: "alt", roundedProp: "rounded" },
+  Product: undefined,
+};
 
 /** Donne aux blocs à image une boîte à poignée à la place de la boîte simple. */
 function withResizableImages(config: Config): Config {
   const components = { ...config.components };
-  for (const name of RESIZABLE) {
+  for (const [name, toolbar] of Object.entries(RESIZABLE)) {
     const component = components[name];
     if (!component?.render) continue;
     const render = component.render;
@@ -99,7 +109,7 @@ function withResizableImages(config: Config): Config {
         render({
           ...props,
           renderImageBox: (box: ImageBoxProps) =>
-            createElement(ResizableImageBox, { blockId: props.id, prop: "imageWidth", width: box.width }, box.children),
+            createElement(ResizableImageBox, { blockId: props.id, prop: "imageWidth", width: box.width, toolbar }, box.children),
         }),
     };
   }
@@ -132,6 +142,27 @@ function withEditableButtons(config: Config): Config {
   return { ...config, components };
 }
 
+/** Sections qui peuvent être vides (image, produit) : le bouton qui règle le manque, sur place. */
+const WITH_EMPTY = ["Image", "Product", "OrderForm"] as const;
+
+function withEmptyActions(config: Config): Config {
+  const components = { ...config.components };
+  for (const name of WITH_EMPTY) {
+    const component = components[name];
+    if (!component?.render) continue;
+    const render = component.render;
+    components[name] = {
+      ...component,
+      render: (props) =>
+        render({
+          ...props,
+          renderEmpty: (box: { kind: EmptyKind; message: string }) => createElement(EmptyAction, { blockId: props.id, ...box }),
+        }),
+    };
+  }
+  return { ...config, components };
+}
+
 export function buildEditorConfig(products: { id: string; name: string }[]): Config {
-  return withProductField(withEditableButtons(withResizableImages(withEditorFields(puckConfig))), products);
+  return withProductField(withEmptyActions(withEditableButtons(withResizableImages(withEditorFields(puckConfig)))), products);
 }

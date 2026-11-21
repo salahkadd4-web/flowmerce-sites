@@ -8,6 +8,7 @@
 
 import { registerOverlayPortal, useGetPuck } from "@puckeditor/core";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { ImageToolbar, type ImageToolbarProps } from "./ImageToolbar";
 import { snapWidth, WIDTH_MAX, WIDTH_MIN, WIDTH_STEP } from "./snap";
 
 type Props = {
@@ -16,10 +17,12 @@ type Props = {
   /** Réglage du bloc qui porte la largeur (imageWidth). */
   prop: string;
   width: number;
+  /** Barre de l'image (remplacer, description, coins) ; absente pour la fiche produit. */
+  toolbar?: Omit<ImageToolbarProps, "blockId">;
   children?: ReactNode;
 };
 
-export function ResizableImageBox({ blockId, prop, width, children }: Props) {
+export function ResizableImageBox({ blockId, prop, width, toolbar, children }: Props) {
   const getPuck = useGetPuck();
   const box = useRef<HTMLDivElement>(null);
   const handle = useRef<HTMLButtonElement>(null);
@@ -117,6 +120,7 @@ export function ResizableImageBox({ blockId, prop, width, children }: Props) {
   return (
     <div ref={box} className="group/resize relative mx-auto w-full" style={{ maxWidth: `${shown}%` }}>
       {children}
+      {toolbar && <ImageToolbar blockId={blockId} {...toolbar} />}
       <button
         ref={handle}
         type="button"

@@ -56,11 +56,18 @@ describe("Fiche produit", () => {
     expect(text(renderToStaticMarkup(<ProductBlock product={SOLD_OUT} buttonLabel="Commander" />))).toContain("Rupture de stock");
   });
 
-  it("sans produit : rien sur le site, un message dans l'éditeur", () => {
+  it("sans produit : rien sur le site, un message dans l'éditeur (sans renvoi à un panneau disparu)", () => {
     expect(renderToStaticMarkup(<ProductBlock product={null} buttonLabel="Commander" />)).toBe("");
-    expect(renderToStaticMarkup(<ProductBlock product={null} buttonLabel="Commander" editing />)).toContain(
-      "Choisissez le produit de la page dans les réglages de la page",
+    const html = renderToStaticMarkup(<ProductBlock product={null} buttonLabel="Commander" editing />);
+    expect(html).toContain("Aucun produit choisi pour cette page");
+    expect(html).not.toMatch(/panneau|réglages/);
+  });
+
+  it("sans produit, l'éditeur y place son bouton « Choisir le produit »", () => {
+    const html = renderToStaticMarkup(
+      <ProductBlock product={null} buttonLabel="Commander" editing renderEmpty={({ kind, message }) => <i data-vide={kind}>{message}</i>} />,
     );
+    expect(html).toContain('<i data-vide="product">Aucun produit choisi pour cette page');
   });
 });
 
@@ -119,7 +126,11 @@ describe("Formulaire de commande", () => {
   it("sans produit : un message au vendeur dans l'éditeur, rien en public", () => {
     const props = { product: null, shipping: SHIPPING, title: "Commander", submitLabel: "Confirmer" };
     expect(renderToStaticMarkup(<OrderFormBlock {...props} />)).toBe("");
-    expect(renderToStaticMarkup(<OrderFormBlock {...props} editing />)).toContain("produit de la page");
+    const html = renderToStaticMarkup(<OrderFormBlock {...props} editing />);
+    expect(html).toContain("produit de la page");
+    expect(html).not.toMatch(/panneau|réglages/);
+    const withAction = renderToStaticMarkup(<OrderFormBlock {...props} editing renderEmpty={({ kind }) => <i data-vide={kind} />} />);
+    expect(withAction).toContain('data-vide="product"');
   });
 
   it("propose les champs de la commande COD", () => {

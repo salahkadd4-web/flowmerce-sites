@@ -4,6 +4,7 @@
 
 import type { ReactNode } from "react";
 import type { RenderButton } from "@/blocks/button-box";
+import { renderEmpty as defaultEmpty, type RenderEmpty } from "@/blocks/empty-box";
 import type { PageLang } from "@/blocks/i18n";
 import { Section } from "@/blocks/Section";
 import {
@@ -34,6 +35,7 @@ export function OrderFormBlock({
   style = sectionStyleSchema.parse(undefined),
   editing = false,
   renderButton,
+  renderEmpty = defaultEmpty,
 }: {
   product: PublicProduct | null;
   shipping: ShippingOption[];
@@ -45,19 +47,16 @@ export function OrderFormBlock({
   style?: SectionStyle;
   editing?: boolean;
   renderButton?: RenderButton;
+  renderEmpty?: RenderEmpty;
 }) {
-  const missing = !product
-    ? "Choisissez le produit de la page dans les réglages de la page pour afficher le formulaire de commande."
-    : shipping.length === 0
-      ? "Indiquez vos frais de livraison (Mes sites → Livraison) pour que les acheteurs puissent commander."
-      : null;
-
-  if (missing) {
+  if (!product || shipping.length === 0) {
     if (!editing) return null;
     return (
       <section id="commande" className="px-4 py-8">
-        <div className="mx-auto max-w-xl rounded-card border-2 border-dashed border-line bg-page p-8 text-center text-[14px] text-faint">
-          {missing}
+        <div className="mx-auto flex max-w-xl flex-col items-center gap-3 rounded-card border-2 border-dashed border-line bg-page p-8 text-center text-[14px] text-faint">
+          {!product
+            ? renderEmpty({ kind: "product", message: "Choisissez le produit de la page pour afficher le formulaire de commande." })
+            : "Indiquez vos frais de livraison (Mes sites → Livraison) pour que les acheteurs puissent commander."}
         </div>
       </section>
     );
@@ -75,7 +74,7 @@ export function OrderFormBlock({
   return (
     <Section id="commande" style={style} defaults={DEFAULTS}>
       <OrderForm
-        product={product!}
+        product={product}
         shipping={shipping}
         title={title}
         submitLabel={submitLabel}

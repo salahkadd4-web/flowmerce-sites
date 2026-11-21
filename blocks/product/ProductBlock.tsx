@@ -6,6 +6,7 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import { BUYER_TEXT, fill, type PageLang } from "@/blocks/i18n";
 import { renderButton as defaultButton, type RenderButton } from "@/blocks/button-box";
+import { EMPTY_MESSAGES, renderEmpty as defaultEmpty, type RenderEmpty } from "@/blocks/empty-box";
 import { renderImageBox as defaultImageBox, type RenderImageBox } from "@/blocks/image-box";
 import { hasText } from "@/blocks/rich-text";
 import { Section } from "@/blocks/Section";
@@ -51,6 +52,7 @@ type Props = Partial<Omit<ProductProps, "id" | "buttonLabel">> & {
   editing?: boolean;
   renderImageBox?: RenderImageBox;
   renderButton?: RenderButton;
+  renderEmpty?: RenderEmpty;
 };
 
 export function ProductBlock({
@@ -66,13 +68,14 @@ export function ProductBlock({
   editing = false,
   renderImageBox = defaultImageBox,
   renderButton = defaultButton,
+  renderEmpty = defaultEmpty,
 }: Props) {
   if (!product) {
     if (!editing) return null;
     return (
       <section className="px-4 py-8">
-        <div className="mx-auto max-w-3xl rounded-card border-2 border-dashed border-line bg-page p-8 text-center text-[14px] text-faint">
-          Choisissez le produit de la page dans les réglages de la page (panneau de droite, onglet « Page »).
+        <div className="mx-auto flex max-w-3xl flex-col items-center gap-3 rounded-card border-2 border-dashed border-line bg-page p-8 text-center text-[14px] text-faint">
+          {renderEmpty({ kind: "product", message: EMPTY_MESSAGES.product })}
         </div>
       </section>
     );
