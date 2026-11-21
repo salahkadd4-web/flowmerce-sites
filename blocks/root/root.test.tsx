@@ -42,3 +42,12 @@ it("propose langue et polices dans les réglages de la page", () => {
   expect(rootConfig.fields?.headingFont).toMatchObject({ label: "Police des titres" });
   expect(rootConfig.fields?.bodyFont).toMatchObject({ label: "Police du texte" });
 });
+
+it("propose trois polices latines élégantes pour les modèles", async () => {
+  const { FONT_IDS, FONT_LABELS, fontFamily: family } = await import("@/blocks/fonts");
+  expect(FONT_IDS).toEqual(expect.arrayContaining(["playfair", "cormorant", "montserrat"]));
+  expect(family("playfair")).toMatch(/^'Playfair Display', system-ui/);
+  expect(family("cormorant")).toMatch(/^'Cormorant Garamond', system-ui/);
+  expect(family("montserrat")).toMatch(/^'Montserrat', system-ui/);
+  expect(FONT_LABELS.playfair).toBe("Playfair Display (élégante)");
+});

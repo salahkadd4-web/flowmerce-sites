@@ -11,4 +11,7 @@ export const Almarai = font("Almarai");
 export const IBM_Plex_Sans_Arabic = font("IBM Plex Sans Arabic");
 export const Noto_Kufi_Arabic = font("Noto Kufi Arabic");
 export const Amiri = font("Amiri");
+export const Playfair_Display = font("Playfair Display");
+export const Cormorant_Garamond = font("Cormorant Garamond");
+export const Montserrat = font("Montserrat");
 export const Plus_Jakarta_Sans = font("Plus Jakarta Sans");
