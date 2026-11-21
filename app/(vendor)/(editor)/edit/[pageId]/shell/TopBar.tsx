@@ -6,7 +6,7 @@
 
 import { createUsePuck } from "@puckeditor/core";
 import Link from "next/link";
-import { ArrowLeft, Check, CloudOff, Eye, LayoutTemplate, Loader2, Monitor, Redo2, Send, Settings2, Smartphone, Undo2 } from "lucide-react";
+import { ArrowLeft, Check, CloudOff, Eye, LayoutTemplate, Loader2, Monitor, PanelRight, Redo2, Send, Settings2, Smartphone, Undo2 } from "lucide-react";
 import { BTN_GHOST, BTN_PRIMARY, FOCUS } from "@/components/dashboard/ui";
 import type { AutosaveStatus } from "./autosave";
 
@@ -24,13 +24,15 @@ type Props = {
   onRetry: () => void;
   onOpenSettings: () => void;
   onOpenTemplates: () => void;
+  panelOpen: boolean;
+  onTogglePanel: () => void;
   onPreview: () => void;
   onPublish: () => void;
 };
 
 const ICON_BUTTON = `inline-flex size-9 items-center justify-center rounded-control text-body transition-colors hover:bg-page hover:text-ink disabled:cursor-not-allowed disabled:opacity-35 ${FOCUS}`;
 
-export function TopBar({ site, status, publishing, published, device, onDevice, onRetry, onOpenSettings, onOpenTemplates, onPreview, onPublish }: Props) {
+export function TopBar({ site, status, publishing, published, device, onDevice, onRetry, onOpenSettings, onOpenTemplates, panelOpen, onTogglePanel, onPreview, onPublish }: Props) {
   const back = usePuck((s) => s.history.back);
   const forward = usePuck((s) => s.history.forward);
   const hasPast = usePuck((s) => s.history.hasPast);
@@ -94,6 +96,16 @@ export function TopBar({ site, status, publishing, published, device, onDevice, 
       </div>
 
       <div className="flex items-center gap-2">
+        <button
+          type="button"
+          className={`${ICON_BUTTON} ${panelOpen ? "bg-brand-soft text-brand-ink" : ""}`}
+          aria-pressed={panelOpen}
+          aria-label="Panneau des réglages"
+          title={panelOpen ? "Masquer le panneau des réglages" : "Afficher le panneau des réglages"}
+          onClick={onTogglePanel}
+        >
+          <PanelRight size={17} aria-hidden />
+        </button>
         <button type="button" className={BTN_GHOST} onClick={onOpenTemplates}>
           <LayoutTemplate size={15} aria-hidden />
           Modèles

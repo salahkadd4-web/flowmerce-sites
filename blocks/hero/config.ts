@@ -1,6 +1,6 @@
 import type { ComponentConfig } from "@puckeditor/core";
 import { createElement } from "react";
-import { imageField, rangeField } from "@/blocks/fields/editor-fields";
+import { imageField, frameField, rangeField } from "@/blocks/fields/editor-fields";
 import { ALIGN_OPTIONS, buttonField, styleField, typographyField } from "@/blocks/fields/groups";
 import { RICH_TEXT_OPTIONS } from "@/blocks/rich-text";
 import { buttonStyleSchema, sectionStyleSchema, typographySchema } from "@/blocks/style";
@@ -18,7 +18,7 @@ export const heroConfig: ComponentConfig<Props> = {
     imageAlt: { type: "text", label: "Description de l'image (pour les lecteurs d'écran)" },
     imageWidth: rangeField("Largeur de l'image", { min: 30, max: 100, step: 5, unit: "%" }),
     // Réglé aux poignées du haut et du bas de l'image (éditeur) ; null : proportions naturelles.
-    imageHeight: { type: "number", label: "Hauteur du cadre de l'image (% de sa largeur)", min: 30, max: 200, step: 5 },
+    imageHeight: frameField("Cadre de l'image"),
     buttonLabel: { type: "text", label: "Texte du bouton", contentEditable: true },
     buttonHref: { type: "text", label: "Lien du bouton" },
     align: { type: "radio", label: "Alignement", options: ALIGN_OPTIONS },

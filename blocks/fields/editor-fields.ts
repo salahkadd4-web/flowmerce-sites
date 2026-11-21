@@ -9,7 +9,7 @@
 
 import { createElement, Fragment } from "react";
 
-export type EditorFieldKind = "media" | "range" | "color";
+export type EditorFieldKind = "media" | "range" | "color" | "frame";
 export type RangeOptions = { min: number; max: number; step: number; unit: string };
 export type ColorOptions = { auto: boolean };
 
@@ -33,6 +33,11 @@ export function imageField(label: string) {
 /** Un curseur borné, par paliers. */
 export function rangeField(label: string, options: RangeOptions) {
   return placeholder("range", label, options);
+}
+
+/** Cadre d'une image : proportions naturelles (null) ou hauteur en % de la largeur. */
+export function frameField(label: string) {
+  return placeholder("frame", label);
 }
 
 /** Une couleur : palette, personnalisée, et « Automatique » si permis. */

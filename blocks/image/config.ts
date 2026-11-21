@@ -1,6 +1,6 @@
 import type { ComponentConfig } from "@puckeditor/core";
 import { createElement } from "react";
-import { imageField, rangeField } from "@/blocks/fields/editor-fields";
+import { imageField, frameField, rangeField } from "@/blocks/fields/editor-fields";
 import { styleField } from "@/blocks/fields/groups";
 import { sectionStyleSchema } from "@/blocks/style";
 import { ImageBlock } from "./ImageBlock";
@@ -24,7 +24,7 @@ export const imageConfig: ComponentConfig<Props> = {
     },
     imageWidth: rangeField("Taille de l'image", { min: 30, max: 100, step: 5, unit: "%" }),
     // Réglé aux poignées du haut et du bas de l'image (éditeur) ; null : proportions naturelles.
-    imageHeight: { type: "number", label: "Hauteur du cadre de l'image (% de sa largeur)", min: 30, max: 200, step: 5 },
+    imageHeight: frameField("Cadre de l'image"),
     rounded: {
       type: "radio",
       label: "Coins arrondis",

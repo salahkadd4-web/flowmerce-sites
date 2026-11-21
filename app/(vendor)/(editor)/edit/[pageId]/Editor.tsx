@@ -8,7 +8,7 @@
 
 import "@puckeditor/core/puck.css";
 import { Puck, useGetPuck, type Data } from "@puckeditor/core";
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from "react";
 import { AlertTriangle, Plus } from "lucide-react";
 import { BTN_PRIMARY, Notice } from "@/components/dashboard/ui";
 import { dictionaryFr } from "@/blocks/dictionary.fr";
@@ -25,6 +25,7 @@ import { PageSettingsDialog } from "./shell/PageSettingsDialog";
 import { SectionBar } from "./shell/SectionBar";
 import { SectionOverlay } from "./shell/SectionOverlay";
 import { SectionsColumn } from "./shell/SectionsColumn";
+import { SettingsPanel } from "./shell/SettingsPanel";
 import { TemplatesDialog } from "./shell/TemplatesDialog";
 import { TopBar, type Device } from "./shell/TopBar";
 
@@ -36,6 +37,34 @@ type Props = {
   products: PublicProduct[];
   shipping: ShippingOption[];
 };
+
+const PANEL_KEY = "fm-editor-panel";
+const PANEL_EVENT = "fm-editor-panel";
+
+/** Choix du vendeur pour le panneau des réglages (stockage du navigateur ; sans lui, affiché). */
+function readPanel(): boolean {
+  try {
+    return window.localStorage.getItem(PANEL_KEY) !== "0";
+  } catch {
+    return true;
+  }
+}
+function writePanel(open: boolean) {
+  try {
+    window.localStorage.setItem(PANEL_KEY, open ? "1" : "0");
+  } catch {
+    // Stockage indisponible (navigation privée…) : le choix ne peut pas être retenu.
+  }
+  window.dispatchEvent(new Event(PANEL_EVENT));
+}
+function subscribePanel(notify: () => void) {
+  window.addEventListener(PANEL_EVENT, notify);
+  window.addEventListener("storage", notify);
+  return () => {
+    window.removeEventListener(PANEL_EVENT, notify);
+    window.removeEventListener("storage", notify);
+  };
+}
 
 const SERVER_DOWN = "Le serveur ne répond pas. Vos modifications ne sont pas perdues : réessayez.";
 
@@ -80,6 +109,9 @@ export function Editor({ pageId, site, initialData, products, shipping }: Props)
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [templatesOpen, setTemplatesOpen] = useState(false);
+  // Panneau des réglages à droite : affiché par défaut, le choix du vendeur est retenu.
+  const panelOpen = useSyncExternalStore(subscribePanel, readPanel, () => true);
+  const togglePanel = useCallback(() => writePanel(!readPanel()), []);
   const emptyPage = useMemo(() => ({ empty, onAdd: () => setAddOpen(true) }), [empty]);
   const [autosave] = useState(() =>
     createAutosave<Data>({
@@ -207,6 +239,8 @@ export function Editor({ pageId, site, initialData, products, shipping }: Props)
             onAdd={setAddOpen}
             templatesOpen={templatesOpen}
             onTemplates={setTemplatesOpen}
+            panelOpen={panelOpen}
+            onTogglePanel={togglePanel}
           />
         </Puck>
       </EmptyPageContext.Provider>
@@ -232,6 +266,8 @@ type LayoutProps = {
   onAdd: (open: boolean) => void;
   templatesOpen: boolean;
   onTemplates: (open: boolean) => void;
+  panelOpen: boolean;
+  onTogglePanel: () => void;
 };
 
 /** Cadre de l'éditeur, rendu dans Puck (accès à son état et à ses actions). */
@@ -252,6 +288,8 @@ function EditorLayout({
   onAdd,
   templatesOpen,
   onTemplates,
+  panelOpen,
+  onTogglePanel,
 }: LayoutProps) {
   const getPuck = useGetPuck();
   return (
@@ -266,6 +304,8 @@ function EditorLayout({
         onRetry={onRetry}
         onOpenSettings={() => onSettings(true)}
         onOpenTemplates={() => onTemplates(true)}
+        panelOpen={panelOpen}
+        onTogglePanel={onTogglePanel}
         onPreview={onPreview}
         onPublish={() => onPublish(getPuck().appState.data as Data)}
       />
@@ -286,6 +326,7 @@ function EditorLayout({
             <Puck.Preview />
           </div>
         </main>
+        {panelOpen && <SettingsPanel onClose={onTogglePanel} />}
       </div>
       <PageSettingsDialog open={settingsOpen} onClose={() => onSettings(false)} />
       <AddSectionDialog open={addOpen} onClose={() => onAdd(false)} />

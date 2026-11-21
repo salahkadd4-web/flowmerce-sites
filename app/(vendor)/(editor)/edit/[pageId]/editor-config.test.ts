@@ -80,3 +80,27 @@ it("la barre d'un texte est la même d'une construction à l'autre (sinon Puck r
   const second = buildEditorConfig([{ id: "p1", name: "x" }]).components.Hero?.fields?.title as unknown as { renderInlineMenu: unknown };
   expect(first.renderInlineMenu).toBe(second.renderInlineMenu);
 });
+
+describe("panneau des réglages : les réglages des poignées y ont leur champ", () => {
+  type Group = { objectFields: Record<string, { type: string; render?: { name: string }; options?: { label: string; value: unknown }[] }> };
+
+  it("le cadre d'une image : proportions naturelles ou hauteur choisie", () => {
+    const config = buildEditorConfig([]);
+    for (const name of ["Hero", "Image", "Product"] as const) {
+      const field = config.components[name]?.fields?.imageHeight as unknown as { render?: { name: string } };
+      expect(field.render?.name).toBe("FrameField");
+    }
+  });
+
+  it("la hauteur d'une section : selon le contenu, ou de 20 à 100 % de l'écran (jamais 10)", () => {
+    const style = buildEditorConfig([]).components.Text?.fields?.style as unknown as Group;
+    const values = style.objectFields.minHeight.options!.map((o) => o.value);
+    expect(values).toEqual([0, 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+  });
+
+  it("la largeur d'un bouton : automatique, ou de 20 à 100 % du contenu", () => {
+    const button = buildEditorConfig([]).components.Hero?.fields?.button as unknown as Group;
+    const values = button.objectFields.width.options!.map((o) => o.value);
+    expect(values).toEqual(["auto", 20, 30, 40, 50, 60, 70, 80, 90, 100]);
+  });
+});

@@ -1,6 +1,6 @@
 import type { ComponentConfig } from "@puckeditor/core";
 import { createElement } from "react";
-import { rangeField } from "@/blocks/fields/editor-fields";
+import { frameField, rangeField } from "@/blocks/fields/editor-fields";
 import { buttonField, styleField, typographyField } from "@/blocks/fields/groups";
 import { buttonStyleSchema, sectionStyleSchema, typographySchema } from "@/blocks/style";
 import type { StorefrontMetadata } from "@/lib/storefront";
@@ -15,7 +15,7 @@ export const productConfig: ComponentConfig<Props> = {
     buttonLabel: { type: "text", label: "Texte du bouton (vers le formulaire)", contentEditable: true },
     imageWidth: rangeField("Largeur de la photo principale", { min: 30, max: 100, step: 5, unit: "%" }),
     // Réglé aux poignées du haut et du bas de l'image (éditeur) ; null : proportions naturelles.
-    imageHeight: { type: "number", label: "Hauteur du cadre de l'image (% de sa largeur)", min: 30, max: 200, step: 5 },
+    imageHeight: frameField("Cadre de l'image"),
     thumbSize: {
       type: "radio",
       label: "Taille des miniatures",

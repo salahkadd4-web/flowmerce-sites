@@ -11,6 +11,7 @@ import type { ImageToolbarProps } from "@/blocks/editor/ImageToolbar";
 import { ResizableImageBox } from "@/blocks/editor/ResizableImageBox";
 import { textToolbar, type TextStyle } from "@/blocks/editor/TextToolbar";
 import { ColorField } from "@/blocks/fields/ColorField";
+import { FrameField } from "@/blocks/fields/FrameField";
 import type { EditorFieldKind } from "@/blocks/fields/editor-fields";
 import { MediaField } from "@/blocks/fields/MediaField";
 import { RangeField } from "@/blocks/fields/RangeField";
@@ -23,6 +24,7 @@ const RENDERERS: Record<EditorFieldKind, unknown> = {
   media: MediaField,
   range: RangeField,
   color: ColorField,
+  frame: FrameField,
 };
 
 type ImageToolbarSetup = Omit<ImageToolbarProps, "blockId">;
