@@ -5,13 +5,14 @@
 // Image ses coins. La largeur se règle à la poignée (ResizableImageBox).
 
 import { createUsePuck, registerOverlayPortal } from "@puckeditor/core";
-import { ImageUp, MoveHorizontal, SquareRoundCorner, Text } from "lucide-react";
+import { ImageUp, MoveHorizontal, Proportions, SquareRoundCorner, Text } from "lucide-react";
 import { useEffect, useRef } from "react";
 import type { MediaValue } from "@/blocks/shared";
 import { ImageUploader } from "@/components/media/ImageUploader";
 import { Popover } from "./Popover";
 import { SegmentedChoice } from "./SegmentedChoice";
 import { TextInput } from "./TextInput";
+import { ToolbarButton } from "./ToolbarButton";
 import { useBlockSetter, type BlockProps } from "./use-block";
 
 const usePuck = createUsePuck();
@@ -62,6 +63,11 @@ export function ImageToolbar({ blockId, imageProp, altProp, roundedProp, widthPr
             ]}
           />
         </Popover>
+      )}
+      {props.imageHeight != null && (
+        <ToolbarButton label="Retour aux proportions de la photo" icon={Proportions} onClick={() => set("imageHeight", null)}>
+          <span className="max-sm:hidden">Proportions</span>
+        </ToolbarButton>
       )}
       {roundedProp && (
         <Popover label="Coins de l'image" icon={SquareRoundCorner} text="Coins">

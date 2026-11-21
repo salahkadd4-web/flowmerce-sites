@@ -109,7 +109,7 @@ function withResizableImages(config: Config): Config {
         render({
           ...props,
           renderImageBox: (box: ImageBoxProps) =>
-            createElement(ResizableImageBox, { blockId: props.id, prop: "imageWidth", width: box.width, toolbar }, box.children),
+            createElement(ResizableImageBox, { blockId: props.id, width: box.width, height: box.height ?? null, toolbar }, box.children),
         }),
     };
   }
