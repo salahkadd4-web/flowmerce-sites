@@ -82,7 +82,12 @@ export function templateById(id: string): TemplateInfo | undefined {
  * site plutôt que la marque d'exemple du modèle. Le modèle lui-même n'est pas modifié.
  */
 export function pageFromTemplate(template: TemplateInfo, siteName: string): unknown {
-  const data = structuredClone(template.data) as { content?: { type: string; props: Record<string, unknown> }[] };
+  return pageFromData(template.data, siteName);
+}
+
+/** Même chose à partir d'un contenu de page (modèle personnel du vendeur). */
+export function pageFromData(source: unknown, siteName: string): unknown {
+  const data = structuredClone(source) as { content?: { type: string; props: Record<string, unknown> }[] };
   for (const block of data.content ?? []) {
     if (block.type === "Footer") block.props.shopName = siteName;
   }

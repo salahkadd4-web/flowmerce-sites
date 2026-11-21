@@ -1,6 +1,8 @@
 import { validatePageContent } from "@/lib/page-content";
 import { prisma } from "@/lib/prisma";
 import { createSiteForUser } from "@/lib/site-create";
+import { saveCustomTemplate } from "@/lib/custom-templates";
+import { templateById } from "@/templates";
 import { resetDb } from "@/lib/test/db";
 
 const USER = { id: "user-create", name: "Amina", email: "amina@test.local" };
@@ -39,6 +41,16 @@ it("un modèle pro : le pied de page porte le nom du site", async () => {
   const content = (page.draft as { content: { type: string; props: { shopName?: string } }[] }).content;
   expect(content.find((block) => block.type === "Footer")?.props.shopName).toBe("Boutique Amina");
   expect(validatePageContent(page.draft).ok).toBe(true);
+});
+
+it("crée un site à partir d'un modèle personnel du vendeur, pas de celui d'un autre", async () => {
+  await createSiteForUser(USER, { name: "Premier", subdomain: "premier" });
+  const saved = await saveCustomTemplate(USER.id, "Ma vitrine", "Autre", templateById("montres")!.data);
+  if (!saved.ok) throw new Error(saved.error);
+  const mine = await createSiteForUser(USER, { name: "Second", subdomain: "second", templateId: `perso:${saved.id}` });
+  expect(mine.ok).toBe(true);
+  const other = await createSiteForUser({ id: "autre", name: "B", email: "b@test.local" }, { name: "B", subdomain: "vol", templateId: `perso:${saved.id}` });
+  expect(other).toEqual({ ok: false, field: "template", error: "Choisissez un modèle" });
 });
 
 it("refuse un modèle inconnu sans rien créer", async () => {

@@ -6,7 +6,8 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { validateSubdomain } from "@/lib/subdomain";
-import { pageFromTemplate, templateById } from "@/templates";
+import { customTemplateForUser } from "@/lib/custom-templates";
+import { pageFromData, templateById } from "@/templates";
 
 type CreateResult =
   | { ok: true; siteId: string; pageId: string }
@@ -21,8 +22,10 @@ export async function createSiteForUser(
   if (name.length > 60) return { ok: false, field: "name", error: "60 caractères maximum" };
 
   // Le modèle arrive du formulaire : seul un modèle du registre est accepté.
-  const template = templateById(input.templateId ?? "landing-fr");
-  if (!template) return { ok: false, field: "template", error: "Choisissez un modèle" };
+  // Un modèle personnel (« perso:<id> ») n'est accepté que s'il appartient au vendeur.
+  const templateId = input.templateId ?? "landing-fr";
+  const source = templateId.startsWith("perso:") ? await customTemplateForUser(user.id, templateId.slice(6)) : (templateById(templateId)?.data ?? null);
+  if (!source) return { ok: false, field: "template", error: "Choisissez un modèle" };
 
   const subdomain = input.subdomain.trim();
   const subdomainError = validateSubdomain(subdomain);
@@ -47,7 +50,7 @@ export async function createSiteForUser(
       });
 
       const page = await tx.page.create({
-        data: { siteId: site.id, slug: "", title: name, draft: pageFromTemplate(template, name) as Prisma.InputJsonValue },
+        data: { siteId: site.id, slug: "", title: name, draft: pageFromData(source, name) as Prisma.InputJsonValue },
       });
 
       return { ok: true as const, siteId: site.id, pageId: page.id };

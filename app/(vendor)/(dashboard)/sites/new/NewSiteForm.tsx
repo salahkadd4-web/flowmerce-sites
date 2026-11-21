@@ -3,16 +3,16 @@
 // Formulaire de création de site — champs écrits comme le formulaire « Créer une
 // clé » de flowmerce-web-app (libellé au-dessus, aide et erreur en dessous).
 
-import Image from "next/image";
 import { useActionState, useState } from "react";
 import { Check, Loader2 } from "lucide-react";
 import { BTN_PRIMARY, FIELD, FIELD_ERROR, HINT, LABEL } from "@/components/dashboard/ui";
+import { TemplatePreview, type TemplateCover } from "@/components/templates/TemplatePreview";
 import { siteUrl } from "@/lib/host";
 import { slugifySubdomain } from "@/lib/subdomain";
 import { createSite, type CreateSiteState } from "./actions";
 
 /** Ce que le formulaire montre d'un modèle (sans son contenu). */
-export type TemplateCard = { id: string; name: string; category: string; description: string; preview: string | null };
+export type TemplateCard = { id: string; name: string; category: string; description: string; preview: string | null; cover?: TemplateCover };
 
 type Props = { rootDomain: string; protocol: "http" | "https"; port?: string; templates: TemplateCard[] };
 
@@ -115,22 +115,7 @@ export function NewSiteForm({ rootDomain, protocol, port, templates }: Props) {
                   className="sr-only"
                 />
                 <span className="relative block aspect-[4/5] overflow-hidden bg-page">
-                  {template.preview ? (
-                    <Image
-                      src={template.preview}
-                      alt=""
-                      fill
-                      sizes="(max-width: 640px) 100vw, 240px"
-                      className="object-cover object-top transition-transform duration-300 group-hover:scale-[1.02]"
-                    />
-                  ) : (
-                    <span aria-hidden className="flex h-full flex-col gap-2 p-4">
-                      <span className="h-1/3 rounded-md bg-deep" />
-                      <span className="h-3 w-2/3 rounded bg-line" />
-                      <span className="h-3 w-1/2 rounded bg-line" />
-                      <span className="mt-auto h-8 rounded-md bg-brand/70" />
-                    </span>
-                  )}
+                  <TemplatePreview preview={template.preview} cover={template.cover} />
                   {checked && (
                     <span aria-hidden className="absolute end-2 top-2 flex size-6 items-center justify-center rounded-full bg-brand text-on-brand shadow">
                       <Check size={14} strokeWidth={3} />

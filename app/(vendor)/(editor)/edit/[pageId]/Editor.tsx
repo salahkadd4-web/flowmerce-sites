@@ -25,6 +25,7 @@ import { PageSettingsDialog } from "./shell/PageSettingsDialog";
 import { SectionBar } from "./shell/SectionBar";
 import { SectionOverlay } from "./shell/SectionOverlay";
 import { SectionsColumn } from "./shell/SectionsColumn";
+import { TemplatesDialog } from "./shell/TemplatesDialog";
 import { TopBar, type Device } from "./shell/TopBar";
 
 type Props = {
@@ -78,6 +79,7 @@ export function Editor({ pageId, site, initialData, products, shipping }: Props)
   const [device, setDevice] = useState<Device>("phone");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
+  const [templatesOpen, setTemplatesOpen] = useState(false);
   const emptyPage = useMemo(() => ({ empty, onAdd: () => setAddOpen(true) }), [empty]);
   const [autosave] = useState(() =>
     createAutosave<Data>({
@@ -203,6 +205,8 @@ export function Editor({ pageId, site, initialData, products, shipping }: Props)
             onSettings={setSettingsOpen}
             addOpen={addOpen}
             onAdd={setAddOpen}
+            templatesOpen={templatesOpen}
+            onTemplates={setTemplatesOpen}
           />
         </Puck>
       </EmptyPageContext.Provider>
@@ -226,6 +230,8 @@ type LayoutProps = {
   onSettings: (open: boolean) => void;
   addOpen: boolean;
   onAdd: (open: boolean) => void;
+  templatesOpen: boolean;
+  onTemplates: (open: boolean) => void;
 };
 
 /** Cadre de l'éditeur, rendu dans Puck (accès à son état et à ses actions). */
@@ -244,6 +250,8 @@ function EditorLayout({
   onSettings,
   addOpen,
   onAdd,
+  templatesOpen,
+  onTemplates,
 }: LayoutProps) {
   const getPuck = useGetPuck();
   return (
@@ -257,6 +265,7 @@ function EditorLayout({
         onDevice={onDevice}
         onRetry={onRetry}
         onOpenSettings={() => onSettings(true)}
+        onOpenTemplates={() => onTemplates(true)}
         onPreview={onPreview}
         onPublish={() => onPublish(getPuck().appState.data as Data)}
       />
@@ -280,6 +289,7 @@ function EditorLayout({
       </div>
       <PageSettingsDialog open={settingsOpen} onClose={() => onSettings(false)} />
       <AddSectionDialog open={addOpen} onClose={() => onAdd(false)} />
+      <TemplatesDialog open={templatesOpen} onClose={() => onTemplates(false)} />
     </div>
   );
 }
