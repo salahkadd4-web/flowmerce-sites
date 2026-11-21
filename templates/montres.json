@@ -1,0 +1,201 @@
+{
+  "root": {
+    "props": {
+      "title": "Heure d'Or — montres",
+      "lang": "fr",
+      "headingFont": "playfair",
+      "bodyFont": "montserrat"
+    }
+  },
+  "content": [
+    {
+      "type": "Hero",
+      "props": {
+        "id": "hero-montres",
+        "title": "Le temps, en toute élégance",
+        "subtitle": "<p>Montres au design sobre, bracelet cuir ou acier, livrées dans leur écrin.</p>",
+        "image": null,
+        "imageAlt": "",
+        "imageWidth": 100,
+        "buttonLabel": "Voir la montre",
+        "buttonHref": "#produit-product-montres",
+        "align": "center",
+        "typography": {
+          "titleSize": "xl",
+          "titleColor": "#ffffff",
+          "textSize": "l",
+          "textColor": "#ffffff"
+        },
+        "button": {
+          "color": "#c9a227",
+          "textColor": "#0e1420",
+          "size": "l"
+        },
+        "style": {
+          "background": "image",
+          "backgroundColor": "#ffffff",
+          "backgroundImage": {
+            "url": "/templates/montres/banniere.webp",
+            "width": 1920,
+            "height": 2560
+          },
+          "overlay": 30,
+          "spacing": "airy",
+          "width": "normal"
+        }
+      }
+    },
+    {
+      "type": "Product",
+      "props": {
+        "id": "product-montres",
+        "buttonLabel": "Commander maintenant",
+        "imageWidth": 100,
+        "thumbSize": "m",
+        "typography": {
+          "titleSize": "m",
+          "titleColor": "auto",
+          "textSize": "m",
+          "textColor": "auto"
+        },
+        "button": {
+          "color": "#0e1420",
+          "textColor": "#e9cf7a",
+          "size": "l"
+        },
+        "style": {
+          "background": "color",
+          "backgroundColor": "#ffffff",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "normal",
+          "width": "normal"
+        }
+      }
+    },
+    {
+      "type": "Text",
+      "props": {
+        "id": "avantages-montres",
+        "title": "Pensée pour durer",
+        "body": "<p><strong>Mouvement précis.</strong> Un mécanisme à quartz fiable, à l'heure jour après jour.</p><p><strong>Finitions soignées.</strong> Boîtier poli, verre résistant aux rayures, bracelet confortable.</p><p><strong>Prête à offrir.</strong> Livrée dans son écrin, avec un mot si vous le souhaitez.</p>",
+        "align": "center",
+        "typography": {
+          "titleSize": "l",
+          "titleColor": "auto",
+          "textSize": "m",
+          "textColor": "auto"
+        },
+        "style": {
+          "background": "color",
+          "backgroundColor": "#f8f5ee",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "airy",
+          "width": "narrow"
+        }
+      }
+    },
+    {
+      "type": "Image",
+      "props": {
+        "id": "ambiance-montres",
+        "image": {
+          "url": "/templates/montres/ambiance.webp",
+          "width": 1920,
+          "height": 1280
+        },
+        "alt": "Montre au cadran noir orné de planètes, au poignet",
+        "caption": "Un détail qui se remarque.",
+        "width": "contained",
+        "imageWidth": 80,
+        "rounded": "soft",
+        "style": {
+          "background": "color",
+          "backgroundColor": "#ffffff",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "airy",
+          "width": "normal"
+        }
+      }
+    },
+    {
+      "type": "Text",
+      "props": {
+        "id": "livraison-montres",
+        "title": "Livraison et paiement",
+        "body": "<p><strong>58 wilayas.</strong> Livraison à domicile ou au bureau de livraison le plus proche.</p><p><strong>Paiement à la livraison.</strong> Vous réglez en espèces, à la réception.</p><p><strong>Un numéro qui répond.</strong> Nous vous appelons pour confirmer la commande.</p>",
+        "align": "center",
+        "typography": {
+          "titleSize": "l",
+          "titleColor": "auto",
+          "textSize": "m",
+          "textColor": "auto"
+        },
+        "style": {
+          "background": "color",
+          "backgroundColor": "#0e1420",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "airy",
+          "width": "narrow"
+        }
+      }
+    },
+    {
+      "type": "OrderForm",
+      "props": {
+        "id": "commande-montres",
+        "title": "Commandez votre montre",
+        "submitLabel": "Confirmer ma commande",
+        "typography": {
+          "titleSize": "m",
+          "titleColor": "auto",
+          "textSize": "m",
+          "textColor": "auto"
+        },
+        "button": {
+          "color": "#0e1420",
+          "textColor": "#e9cf7a",
+          "size": "l"
+        },
+        "style": {
+          "background": "color",
+          "backgroundColor": "#f8f5ee",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "normal",
+          "width": "normal"
+        }
+      }
+    },
+    {
+      "type": "Footer",
+      "props": {
+        "id": "pied-montres",
+        "shopName": "Heure d'Or",
+        "phone": "",
+        "email": "",
+        "facebook": "",
+        "instagram": "",
+        "tiktok": "",
+        "returnPolicy": "<p>Échange ou remboursement sous 7 jours, montre non portée et dans son écrin d'origine.</p>",
+        "typography": {
+          "titleSize": "m",
+          "titleColor": "auto",
+          "textSize": "m",
+          "textColor": "auto"
+        },
+        "style": {
+          "background": "color",
+          "backgroundColor": "#0e1420",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "normal",
+          "width": "normal"
+        }
+      }
+    }
+  ]
+}

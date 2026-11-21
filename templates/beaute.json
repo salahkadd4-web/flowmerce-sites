@@ -1,0 +1,201 @@
+{
+  "root": {
+    "props": {
+      "title": "Éclat Naturel — soins",
+      "lang": "fr",
+      "headingFont": "cormorant",
+      "bodyFont": "montserrat"
+    }
+  },
+  "content": [
+    {
+      "type": "Hero",
+      "props": {
+        "id": "hero-beaute",
+        "title": "Une peau éclatante, naturellement",
+        "subtitle": "<p>Des soins doux aux textures légères, pour une routine simple et efficace.</p>",
+        "image": null,
+        "imageAlt": "",
+        "imageWidth": 100,
+        "buttonLabel": "Découvrir le soin",
+        "buttonHref": "#produit-product-beaute",
+        "align": "center",
+        "typography": {
+          "titleSize": "xl",
+          "titleColor": "#ffffff",
+          "textSize": "l",
+          "textColor": "#ffffff"
+        },
+        "button": {
+          "color": "#ffffff",
+          "textColor": "#3b2a2d",
+          "size": "l"
+        },
+        "style": {
+          "background": "image",
+          "backgroundColor": "#ffffff",
+          "backgroundImage": {
+            "url": "/templates/beaute/banniere.webp",
+            "width": 1920,
+            "height": 2880
+          },
+          "overlay": 50,
+          "spacing": "airy",
+          "width": "normal"
+        }
+      }
+    },
+    {
+      "type": "Product",
+      "props": {
+        "id": "product-beaute",
+        "buttonLabel": "Commander maintenant",
+        "imageWidth": 100,
+        "thumbSize": "m",
+        "typography": {
+          "titleSize": "m",
+          "titleColor": "auto",
+          "textSize": "m",
+          "textColor": "auto"
+        },
+        "button": {
+          "color": "#9c5563",
+          "textColor": "#ffffff",
+          "size": "l"
+        },
+        "style": {
+          "background": "color",
+          "backgroundColor": "#ffffff",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "normal",
+          "width": "normal"
+        }
+      }
+    },
+    {
+      "type": "Text",
+      "props": {
+        "id": "avantages-beaute",
+        "title": "Votre routine en trois gestes",
+        "body": "<p><strong>Nettoyer.</strong> Une peau propre et douce, sans tiraillement.</p><p><strong>Hydrater.</strong> Une texture qui pénètre vite et ne colle pas.</p><p><strong>Sublimer.</strong> Un teint lumineux, jour après jour.</p>",
+        "align": "center",
+        "typography": {
+          "titleSize": "l",
+          "titleColor": "auto",
+          "textSize": "m",
+          "textColor": "auto"
+        },
+        "style": {
+          "background": "color",
+          "backgroundColor": "#f6ece8",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "airy",
+          "width": "narrow"
+        }
+      }
+    },
+    {
+      "type": "Image",
+      "props": {
+        "id": "ambiance-beaute",
+        "image": {
+          "url": "/templates/beaute/ambiance.webp",
+          "width": 1920,
+          "height": 2557
+        },
+        "alt": "Flacons compte-gouttes et pot de crème sur un drap clair",
+        "caption": "Des formules pensées pour toutes les peaux.",
+        "width": "contained",
+        "imageWidth": 80,
+        "rounded": "soft",
+        "style": {
+          "background": "color",
+          "backgroundColor": "#ffffff",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "airy",
+          "width": "normal"
+        }
+      }
+    },
+    {
+      "type": "Text",
+      "props": {
+        "id": "livraison-beaute",
+        "title": "Livraison et paiement",
+        "body": "<p><strong>58 wilayas.</strong> Livraison à domicile ou au bureau de livraison le plus proche.</p><p><strong>Paiement à la livraison.</strong> Vous réglez en espèces, à la réception.</p><p><strong>Un numéro qui répond.</strong> Nous vous appelons pour confirmer la commande.</p>",
+        "align": "center",
+        "typography": {
+          "titleSize": "l",
+          "titleColor": "auto",
+          "textSize": "m",
+          "textColor": "auto"
+        },
+        "style": {
+          "background": "color",
+          "backgroundColor": "#3b2a2d",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "airy",
+          "width": "narrow"
+        }
+      }
+    },
+    {
+      "type": "OrderForm",
+      "props": {
+        "id": "commande-beaute",
+        "title": "Commandez votre soin",
+        "submitLabel": "Confirmer ma commande",
+        "typography": {
+          "titleSize": "m",
+          "titleColor": "auto",
+          "textSize": "m",
+          "textColor": "auto"
+        },
+        "button": {
+          "color": "#9c5563",
+          "textColor": "#ffffff",
+          "size": "l"
+        },
+        "style": {
+          "background": "color",
+          "backgroundColor": "#f6ece8",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "normal",
+          "width": "normal"
+        }
+      }
+    },
+    {
+      "type": "Footer",
+      "props": {
+        "id": "pied-beaute",
+        "shopName": "Éclat Naturel",
+        "phone": "",
+        "email": "",
+        "facebook": "",
+        "instagram": "",
+        "tiktok": "",
+        "returnPolicy": "<p>Produit non ouvert : remboursé ou échangé sous 7 jours après la livraison.</p>",
+        "typography": {
+          "titleSize": "m",
+          "titleColor": "auto",
+          "textSize": "m",
+          "textColor": "auto"
+        },
+        "style": {
+          "background": "color",
+          "backgroundColor": "#3b2a2d",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "normal",
+          "width": "normal"
+        }
+      }
+    }
+  ]
+}

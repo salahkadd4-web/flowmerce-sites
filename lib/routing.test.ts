@@ -110,3 +110,17 @@ describe("routeRequest — hôte absent", () => {
     expect(routeRequest(req("  ", "/"), cfg)).toEqual({ kind: "not-found" });
   });
 });
+
+describe("routeRequest — photos des modèles (/templates)", () => {
+  it("les sert en lecture sur un site, sur l'hôte vendeur et sans en-tête (optimiseur next/image)", () => {
+    expect(routeRequest(req("test.localhost:3000", "/templates/mode/banniere.webp"), cfg)).toEqual({ kind: "pass" });
+    expect(routeRequest(req(null, "/templates/mode/banniere.webp"), cfg)).toEqual({ kind: "pass" });
+    expect(routeRequest(req(null, "/templates/mode/banniere.webp", "", "HEAD"), cfg)).toEqual({ kind: "pass" });
+  });
+  it("refuse d'y écrire", () => {
+    expect(routeRequest(req("test.localhost:3000", "/templates/mode/x.webp", "", "POST"), cfg)).toEqual({ kind: "not-found" });
+  });
+  it("ne confond pas /templates avec une page qui commence par templates", () => {
+    expect(routeRequest(req("test.localhost:3000", "/templatesx"), cfg)).toEqual({ kind: "site", rewritePath: "/s/test.localhost/templatesx" });
+  });
+});

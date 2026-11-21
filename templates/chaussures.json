@@ -1,0 +1,201 @@
+{
+  "root": {
+    "props": {
+      "title": "Atelier Cuir — chaussures",
+      "lang": "fr",
+      "headingFont": "montserrat",
+      "bodyFont": "montserrat"
+    }
+  },
+  "content": [
+    {
+      "type": "Hero",
+      "props": {
+        "id": "hero-chaussures",
+        "title": "Le cuir, travaillé avec exigence",
+        "subtitle": "<p>Chaussures en cuir véritable, confortables dès le premier pas. Paiement à la livraison.</p>",
+        "image": null,
+        "imageAlt": "",
+        "imageWidth": 100,
+        "buttonLabel": "Choisir ma pointure",
+        "buttonHref": "#produit-product-chaussures",
+        "align": "center",
+        "typography": {
+          "titleSize": "xl",
+          "titleColor": "#ffffff",
+          "textSize": "l",
+          "textColor": "#ffffff"
+        },
+        "button": {
+          "color": "#b08d57",
+          "textColor": "#1c1c1e",
+          "size": "l"
+        },
+        "style": {
+          "background": "image",
+          "backgroundColor": "#ffffff",
+          "backgroundImage": {
+            "url": "/templates/chaussures/banniere.webp",
+            "width": 1920,
+            "height": 1282
+          },
+          "overlay": 50,
+          "spacing": "airy",
+          "width": "normal"
+        }
+      }
+    },
+    {
+      "type": "Product",
+      "props": {
+        "id": "product-chaussures",
+        "buttonLabel": "Commander maintenant",
+        "imageWidth": 100,
+        "thumbSize": "m",
+        "typography": {
+          "titleSize": "m",
+          "titleColor": "auto",
+          "textSize": "m",
+          "textColor": "auto"
+        },
+        "button": {
+          "color": "#8a6a3b",
+          "textColor": "#ffffff",
+          "size": "l"
+        },
+        "style": {
+          "background": "color",
+          "backgroundColor": "#ffffff",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "normal",
+          "width": "normal"
+        }
+      }
+    },
+    {
+      "type": "Text",
+      "props": {
+        "id": "avantages-chaussures",
+        "title": "Ce qui fait la différence",
+        "body": "<p><strong>Cuir pleine fleur.</strong> Une matière qui respire, se patine avec le temps et garde sa forme.</p><p><strong>Confort dès le premier jour.</strong> Semelle souple, intérieur doublé : pas de période de rodage.</p><p><strong>La bonne pointure.</strong> Du 39 au 45, et l'échange si elle ne vous va pas.</p>",
+        "align": "center",
+        "typography": {
+          "titleSize": "l",
+          "titleColor": "auto",
+          "textSize": "m",
+          "textColor": "auto"
+        },
+        "style": {
+          "background": "color",
+          "backgroundColor": "#f5f2ed",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "airy",
+          "width": "narrow"
+        }
+      }
+    },
+    {
+      "type": "Image",
+      "props": {
+        "id": "ambiance-chaussures",
+        "image": {
+          "url": "/templates/chaussures/ambiance.webp",
+          "width": 1920,
+          "height": 1272
+        },
+        "alt": "Paire de chaussures en cuir noir lacées, posées sur un parquet",
+        "caption": "Finitions cousues, cirées à la main.",
+        "width": "contained",
+        "imageWidth": 80,
+        "rounded": "soft",
+        "style": {
+          "background": "color",
+          "backgroundColor": "#ffffff",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "airy",
+          "width": "normal"
+        }
+      }
+    },
+    {
+      "type": "Text",
+      "props": {
+        "id": "livraison-chaussures",
+        "title": "Livraison et paiement",
+        "body": "<p><strong>58 wilayas.</strong> Livraison à domicile ou au bureau de livraison le plus proche.</p><p><strong>Paiement à la livraison.</strong> Vous réglez en espèces, à la réception.</p><p><strong>Un numéro qui répond.</strong> Nous vous appelons pour confirmer la commande.</p>",
+        "align": "center",
+        "typography": {
+          "titleSize": "l",
+          "titleColor": "auto",
+          "textSize": "m",
+          "textColor": "auto"
+        },
+        "style": {
+          "background": "color",
+          "backgroundColor": "#1c1c1e",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "airy",
+          "width": "narrow"
+        }
+      }
+    },
+    {
+      "type": "OrderForm",
+      "props": {
+        "id": "commande-chaussures",
+        "title": "Commandez votre paire",
+        "submitLabel": "Confirmer ma commande",
+        "typography": {
+          "titleSize": "m",
+          "titleColor": "auto",
+          "textSize": "m",
+          "textColor": "auto"
+        },
+        "button": {
+          "color": "#8a6a3b",
+          "textColor": "#ffffff",
+          "size": "l"
+        },
+        "style": {
+          "background": "color",
+          "backgroundColor": "#f5f2ed",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "normal",
+          "width": "normal"
+        }
+      }
+    },
+    {
+      "type": "Footer",
+      "props": {
+        "id": "pied-chaussures",
+        "shopName": "Atelier Cuir",
+        "phone": "",
+        "email": "",
+        "facebook": "",
+        "instagram": "",
+        "tiktok": "",
+        "returnPolicy": "<p>Échange de pointure gratuit sous 7 jours, chaussures non portées et dans leur boîte.</p>",
+        "typography": {
+          "titleSize": "m",
+          "titleColor": "auto",
+          "textSize": "m",
+          "textColor": "auto"
+        },
+        "style": {
+          "background": "color",
+          "backgroundColor": "#1c1c1e",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "normal",
+          "width": "normal"
+        }
+      }
+    }
+  ]
+}

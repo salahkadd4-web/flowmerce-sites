@@ -1,3 +1,6 @@
+import fs from "node:fs";
+import path from "node:path";
+import { imageSize } from "image-size";
 import { validatePageContent } from "@/lib/page-content";
 import { templateById, TEMPLATES } from "./index";
 
@@ -24,5 +27,61 @@ describe("registre des modèles", () => {
   it.each(TEMPLATES.map((t) => [t.id, t] as const))("le modèle %s est un contenu de page valide", (_id, template) => {
     const result = validatePageContent(template.data);
     expect(result.ok ? "ok" : result.error).toBe("ok");
+  });
+});
+
+describe("les cinq modèles pro", () => {
+  const PRO = ["mode", "chaussures", "beaute", "montres", "maison"];
+  const PUBLIC = path.join(process.cwd(), "public");
+  const urls = (value: unknown): string[] => {
+    if (Array.isArray(value)) return value.flatMap(urls);
+    if (value && typeof value === "object") {
+      const record = value as Record<string, unknown>;
+      const own = typeof record.url === "string" && record.url.startsWith("/templates/") ? [record.url] : [];
+      return [...own, ...Object.values(record).flatMap(urls)];
+    }
+    return [];
+  };
+
+  it("une catégorie chacun : vêtements, chaussures, cosmétique, montres, maison", () => {
+    expect(TEMPLATES.map((t) => t.id)).toEqual(["landing-fr", ...PRO]);
+    expect(new Set(TEMPLATES.map((t) => t.category)).size).toBe(TEMPLATES.length);
+  });
+
+  it.each(PRO)("%s : chaque photo existe, aux dimensions annoncées, légère", (id) => {
+    const template = templateById(id)!;
+    const images = urls(template.data);
+    expect(images.length).toBeGreaterThanOrEqual(2);
+    const declared = new Map<string, { width: number; height: number }>();
+    const walk = (value: unknown): void => {
+      if (Array.isArray(value)) return value.forEach(walk);
+      if (value && typeof value === "object") {
+        const r = value as Record<string, unknown>;
+        if (typeof r.url === "string" && typeof r.width === "number") declared.set(r.url, { width: r.width, height: r.height as number });
+        Object.values(r).forEach(walk);
+      }
+    };
+    walk(template.data);
+    for (const url of images) {
+      const file = path.join(PUBLIC, url);
+      expect(fs.existsSync(file), url).toBe(true);
+      const bytes = fs.readFileSync(file);
+      expect(bytes.byteLength, url).toBeLessThanOrEqual(400 * 1024);
+      const size = imageSize(bytes);
+      expect({ width: size.width, height: size.height }, url).toEqual(declared.get(url));
+      expect(size.width, url).toBeLessThanOrEqual(1920);
+    }
+  });
+
+  it.each(PRO)("%s : la bannière s'ouvre sur une photo de fond", (id) => {
+    const hero = (templateById(id)!.data as { content: { type: string; props: { style: { background: string } } }[] }).content[0];
+    expect(hero.type).toBe("Hero");
+    expect(hero.props.style.background).toBe("image");
+  });
+
+  it.each(PRO)("%s : un aperçu existe pour la carte du formulaire", (id) => {
+    const preview = templateById(id)!.preview;
+    expect(preview).toBe(`/templates/${id}/apercu.webp`);
+    expect(fs.existsSync(path.join(PUBLIC, preview!))).toBe(true);
   });
 });

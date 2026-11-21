@@ -1,0 +1,201 @@
+{
+  "root": {
+    "props": {
+      "title": "Art de la Table — maison et cuisine",
+      "lang": "fr",
+      "headingFont": "cormorant",
+      "bodyFont": "montserrat"
+    }
+  },
+  "content": [
+    {
+      "type": "Hero",
+      "props": {
+        "id": "hero-maison",
+        "title": "Des objets qui ont du caractère",
+        "subtitle": "<p>Vaisselle en céramique et ustensiles choisis pour durer, du quotidien aux grandes tablées.</p>",
+        "image": null,
+        "imageAlt": "",
+        "imageWidth": 100,
+        "buttonLabel": "Découvrir l'article",
+        "buttonHref": "#produit-product-maison",
+        "align": "center",
+        "typography": {
+          "titleSize": "xl",
+          "titleColor": "#ffffff",
+          "textSize": "l",
+          "textColor": "#ffffff"
+        },
+        "button": {
+          "color": "#ffffff",
+          "textColor": "#2f3520",
+          "size": "l"
+        },
+        "style": {
+          "background": "image",
+          "backgroundColor": "#ffffff",
+          "backgroundImage": {
+            "url": "/templates/maison/banniere.webp",
+            "width": 1920,
+            "height": 1079
+          },
+          "overlay": 50,
+          "spacing": "airy",
+          "width": "normal"
+        }
+      }
+    },
+    {
+      "type": "Product",
+      "props": {
+        "id": "product-maison",
+        "buttonLabel": "Commander maintenant",
+        "imageWidth": 100,
+        "thumbSize": "m",
+        "typography": {
+          "titleSize": "m",
+          "titleColor": "auto",
+          "textSize": "m",
+          "textColor": "auto"
+        },
+        "button": {
+          "color": "#5b6b3a",
+          "textColor": "#ffffff",
+          "size": "l"
+        },
+        "style": {
+          "background": "color",
+          "backgroundColor": "#ffffff",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "normal",
+          "width": "normal"
+        }
+      }
+    },
+    {
+      "type": "Text",
+      "props": {
+        "id": "avantages-maison",
+        "title": "Pourquoi l'adopter",
+        "body": "<p><strong>Céramique émaillée.</strong> Belle, solide, et facile à entretenir.</p><p><strong>Pensée pour servir.</strong> Va au lave-vaisselle et au micro-ondes.</p><p><strong>Livrée sans casse.</strong> Un emballage renforcé, vérifié avant chaque envoi.</p>",
+        "align": "center",
+        "typography": {
+          "titleSize": "l",
+          "titleColor": "auto",
+          "textSize": "m",
+          "textColor": "auto"
+        },
+        "style": {
+          "background": "color",
+          "backgroundColor": "#f4efe6",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "airy",
+          "width": "narrow"
+        }
+      }
+    },
+    {
+      "type": "Image",
+      "props": {
+        "id": "ambiance-maison",
+        "image": {
+          "url": "/templates/maison/ambiance.webp",
+          "width": 1920,
+          "height": 2880
+        },
+        "alt": "Bols en céramique blanche et ustensiles en bois sur un plan de travail lumineux",
+        "caption": "Le plaisir des belles choses, chaque jour.",
+        "width": "contained",
+        "imageWidth": 80,
+        "rounded": "soft",
+        "style": {
+          "background": "color",
+          "backgroundColor": "#ffffff",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "airy",
+          "width": "normal"
+        }
+      }
+    },
+    {
+      "type": "Text",
+      "props": {
+        "id": "livraison-maison",
+        "title": "Livraison et paiement",
+        "body": "<p><strong>58 wilayas.</strong> Livraison à domicile ou au bureau de livraison le plus proche.</p><p><strong>Paiement à la livraison.</strong> Vous réglez en espèces, à la réception.</p><p><strong>Un numéro qui répond.</strong> Nous vous appelons pour confirmer la commande.</p>",
+        "align": "center",
+        "typography": {
+          "titleSize": "l",
+          "titleColor": "auto",
+          "textSize": "m",
+          "textColor": "auto"
+        },
+        "style": {
+          "background": "color",
+          "backgroundColor": "#2f3520",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "airy",
+          "width": "narrow"
+        }
+      }
+    },
+    {
+      "type": "OrderForm",
+      "props": {
+        "id": "commande-maison",
+        "title": "Commandez votre article",
+        "submitLabel": "Confirmer ma commande",
+        "typography": {
+          "titleSize": "m",
+          "titleColor": "auto",
+          "textSize": "m",
+          "textColor": "auto"
+        },
+        "button": {
+          "color": "#5b6b3a",
+          "textColor": "#ffffff",
+          "size": "l"
+        },
+        "style": {
+          "background": "color",
+          "backgroundColor": "#f4efe6",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "normal",
+          "width": "normal"
+        }
+      }
+    },
+    {
+      "type": "Footer",
+      "props": {
+        "id": "pied-maison",
+        "shopName": "Art de la Table",
+        "phone": "",
+        "email": "",
+        "facebook": "",
+        "instagram": "",
+        "tiktok": "",
+        "returnPolicy": "<p>Article arrivé abîmé : remplacé sans frais. Échange sous 7 jours, article non utilisé.</p>",
+        "typography": {
+          "titleSize": "m",
+          "titleColor": "auto",
+          "textSize": "m",
+          "textColor": "auto"
+        },
+        "style": {
+          "background": "color",
+          "backgroundColor": "#2f3520",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "normal",
+          "width": "normal"
+        }
+      }
+    }
+  ]
+}

@@ -38,10 +38,10 @@ export function routeRequest(
 ): RouteDecision {
   const isRead = READ_METHODS.has(input.method.toUpperCase());
 
-  // Images des sites : publiques, en lecture seule, servies quel que soit l'hôte —
-  // y compris sans en-tête Host : l'optimiseur next/image les récupère par une
-  // requête interne sans en-têtes.
-  if (isUnder(input.pathname, "/media")) {
+  // Images des sites (envoyées par les vendeurs, ou photos des modèles) : publiques,
+  // en lecture seule, servies quel que soit l'hôte — y compris sans en-tête Host :
+  // l'optimiseur next/image les récupère par une requête interne sans en-têtes.
+  if (isUnder(input.pathname, "/media") || isUnder(input.pathname, "/templates")) {
     return isRead && !input.isServerAction ? { kind: "pass" } : { kind: "not-found" };
   }
 

@@ -1,0 +1,201 @@
+{
+  "root": {
+    "props": {
+      "title": "Maison Lina — vêtements",
+      "lang": "fr",
+      "headingFont": "playfair",
+      "bodyFont": "montserrat"
+    }
+  },
+  "content": [
+    {
+      "type": "Hero",
+      "props": {
+        "id": "hero-mode",
+        "title": "L'élégance au quotidien",
+        "subtitle": "<p>Des pièces intemporelles, coupées dans des matières nobles. Livrées chez vous, partout en Algérie.</p>",
+        "image": null,
+        "imageAlt": "",
+        "imageWidth": 100,
+        "buttonLabel": "Découvrir la pièce",
+        "buttonHref": "#produit-product-mode",
+        "align": "center",
+        "typography": {
+          "titleSize": "xl",
+          "titleColor": "#ffffff",
+          "textSize": "l",
+          "textColor": "#ffffff"
+        },
+        "button": {
+          "color": "#ffffff",
+          "textColor": "#111111",
+          "size": "l"
+        },
+        "style": {
+          "background": "image",
+          "backgroundColor": "#ffffff",
+          "backgroundImage": {
+            "url": "/templates/mode/banniere.webp",
+            "width": 1920,
+            "height": 1280
+          },
+          "overlay": 40,
+          "spacing": "airy",
+          "width": "normal"
+        }
+      }
+    },
+    {
+      "type": "Product",
+      "props": {
+        "id": "product-mode",
+        "buttonLabel": "Commander maintenant",
+        "imageWidth": 100,
+        "thumbSize": "m",
+        "typography": {
+          "titleSize": "m",
+          "titleColor": "auto",
+          "textSize": "m",
+          "textColor": "auto"
+        },
+        "button": {
+          "color": "#111111",
+          "textColor": "#ffffff",
+          "size": "l"
+        },
+        "style": {
+          "background": "color",
+          "backgroundColor": "#ffffff",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "normal",
+          "width": "normal"
+        }
+      }
+    },
+    {
+      "type": "Text",
+      "props": {
+        "id": "avantages-mode",
+        "title": "Pourquoi nous choisir",
+        "body": "<p><strong>Matières choisies.</strong> Coton peigné, lin et laine douce, sélectionnés pour leur tenue et leur toucher.</p><p><strong>Coupe soignée.</strong> Des tailles fidèles, et un guide pour trouver la vôtre du premier coup.</p><p><strong>Vous voyez avant de payer.</strong> Paiement à la livraison, une fois l'article entre vos mains.</p>",
+        "align": "center",
+        "typography": {
+          "titleSize": "l",
+          "titleColor": "auto",
+          "textSize": "m",
+          "textColor": "auto"
+        },
+        "style": {
+          "background": "color",
+          "backgroundColor": "#f7f3ee",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "airy",
+          "width": "narrow"
+        }
+      }
+    },
+    {
+      "type": "Image",
+      "props": {
+        "id": "ambiance-mode",
+        "image": {
+          "url": "/templates/mode/ambiance.webp",
+          "width": 1920,
+          "height": 2880
+        },
+        "alt": "Portant de vêtements aux tons neutres dans un appartement lumineux",
+        "caption": "Une collection pensée pour se porter tous les jours.",
+        "width": "contained",
+        "imageWidth": 80,
+        "rounded": "soft",
+        "style": {
+          "background": "color",
+          "backgroundColor": "#ffffff",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "airy",
+          "width": "normal"
+        }
+      }
+    },
+    {
+      "type": "Text",
+      "props": {
+        "id": "livraison-mode",
+        "title": "Livraison et paiement",
+        "body": "<p><strong>58 wilayas.</strong> Livraison à domicile ou au bureau de livraison le plus proche.</p><p><strong>Paiement à la livraison.</strong> Vous réglez en espèces, à la réception.</p><p><strong>Un numéro qui répond.</strong> Nous vous appelons pour confirmer la commande.</p>",
+        "align": "center",
+        "typography": {
+          "titleSize": "l",
+          "titleColor": "auto",
+          "textSize": "m",
+          "textColor": "auto"
+        },
+        "style": {
+          "background": "color",
+          "backgroundColor": "#111111",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "airy",
+          "width": "narrow"
+        }
+      }
+    },
+    {
+      "type": "OrderForm",
+      "props": {
+        "id": "commande-mode",
+        "title": "Commandez votre pièce",
+        "submitLabel": "Confirmer ma commande",
+        "typography": {
+          "titleSize": "m",
+          "titleColor": "auto",
+          "textSize": "m",
+          "textColor": "auto"
+        },
+        "button": {
+          "color": "#111111",
+          "textColor": "#ffffff",
+          "size": "l"
+        },
+        "style": {
+          "background": "color",
+          "backgroundColor": "#f7f3ee",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "normal",
+          "width": "normal"
+        }
+      }
+    },
+    {
+      "type": "Footer",
+      "props": {
+        "id": "pied-mode",
+        "shopName": "Maison Lina",
+        "phone": "",
+        "email": "",
+        "facebook": "",
+        "instagram": "",
+        "tiktok": "",
+        "returnPolicy": "<p>Échange gratuit sous 7 jours si la taille ne convient pas, article non porté et dans son emballage d'origine.</p>",
+        "typography": {
+          "titleSize": "m",
+          "titleColor": "auto",
+          "textSize": "m",
+          "textColor": "auto"
+        },
+        "style": {
+          "background": "color",
+          "backgroundColor": "#111111",
+          "backgroundImage": null,
+          "overlay": 40,
+          "spacing": "normal",
+          "width": "normal"
+        }
+      }
+    }
+  ]
+}
