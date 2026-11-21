@@ -3,6 +3,7 @@
 // le seul composant client des pages publiques (OrderForm).
 
 import type { ReactNode } from "react";
+import type { RenderButton } from "@/blocks/button-box";
 import type { PageLang } from "@/blocks/i18n";
 import { Section } from "@/blocks/Section";
 import {
@@ -32,6 +33,7 @@ export function OrderFormBlock({
   button = buttonStyleSchema.parse({ size: "l" }),
   style = sectionStyleSchema.parse(undefined),
   editing = false,
+  renderButton,
 }: {
   product: PublicProduct | null;
   shipping: ShippingOption[];
@@ -42,6 +44,7 @@ export function OrderFormBlock({
   button?: ButtonStyle;
   style?: SectionStyle;
   editing?: boolean;
+  renderButton?: RenderButton;
 }) {
   const missing = !product
     ? "Choisissez le produit de la page dans les réglages de la page pour afficher le formulaire de commande."
@@ -79,6 +82,7 @@ export function OrderFormBlock({
         lang={lang}
         titleClass={titleClass}
         buttonClass={action}
+        renderButton={renderButton}
       />
     </Section>
   );

@@ -5,6 +5,7 @@
 
 import Image from "next/image";
 import type { ReactNode } from "react";
+import { renderButton as defaultButton, type RenderButton } from "@/blocks/button-box";
 import { renderImageBox as defaultImageBox, type RenderImageBox } from "@/blocks/image-box";
 import { hasText, RichText } from "@/blocks/rich-text";
 import { Section } from "@/blocks/Section";
@@ -29,6 +30,9 @@ type Props = Omit<HeroProps, "id" | "title" | "subtitle" | "buttonLabel" | "imag
   buttonLabel: ReactNode;
   imageAlt?: string;
   renderImageBox?: RenderImageBox;
+  renderButton?: RenderButton;
+  /** Éditeur : le bouton reste visible sans lien, pour qu'on puisse le régler. */
+  editing?: boolean;
 };
 
 const DEFAULTS = { tone: "light" as const, className: "bg-white text-ink", padding: "py-12 sm:py-16", width: "max-w-3xl" };
@@ -46,10 +50,13 @@ export function Hero({
   button = DEFAULT_BUTTON,
   style = DEFAULT_SECTION_STYLE,
   renderImageBox = defaultImageBox,
+  renderButton = defaultButton,
+  editing = false,
 }: Props) {
   const tone = sectionTone(style, DEFAULTS.tone);
   const centered = align === "center";
-  const showButton = hasText(buttonLabel) && buttonHref !== "" && isSafeHref(buttonHref);
+  const linked = buttonHref !== "" && isSafeHref(buttonHref);
+  const showButton = hasText(buttonLabel) && (linked || editing);
   const titleColor = colorProps(typography.titleColor, TEXT_AUTO[tone].title);
   const textColor = colorProps(typography.textColor, TEXT_AUTO[tone].text);
   const action = buttonProps(button, tone);
@@ -86,11 +93,14 @@ export function Hero({
             />
           ),
         })}
-      {showButton && (
-        <a href={buttonHref} className={action.className} style={action.style}>
-          {buttonLabel}
-        </a>
-      )}
+      {showButton &&
+        renderButton({
+          children: (
+            <a href={linked ? buttonHref : undefined} className={action.className} style={action.style}>
+              {buttonLabel}
+            </a>
+          ),
+        })}
     </Section>
   );
 }

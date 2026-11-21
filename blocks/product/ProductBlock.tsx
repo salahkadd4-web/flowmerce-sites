@@ -5,6 +5,7 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { BUYER_TEXT, fill, type PageLang } from "@/blocks/i18n";
+import { renderButton as defaultButton, type RenderButton } from "@/blocks/button-box";
 import { renderImageBox as defaultImageBox, type RenderImageBox } from "@/blocks/image-box";
 import { hasText } from "@/blocks/rich-text";
 import { Section } from "@/blocks/Section";
@@ -27,6 +28,11 @@ const THUMBS: Record<ProductProps["thumbSize"], string> = { s: "size-14", m: "si
 
 const DEFAULTS = { tone: "light" as const, className: "", padding: "py-10", width: "max-w-3xl" };
 
+/** Ancre de la fiche produit : cible possible du bouton de la bannière. */
+export function productAnchor(blockId: string): string {
+  return `produit-${blockId.replace(/[^A-Za-z0-9_-]/g, "")}`;
+}
+
 /** Ancre d'une photo : identifiant du bloc nettoyé, numéro à partir de 1. */
 export function photoAnchor(blockId: string, index: number): string {
   return `photo-${blockId.replace(/[^A-Za-z0-9_-]/g, "")}-${index + 1}`;
@@ -44,6 +50,7 @@ type Props = Partial<Omit<ProductProps, "id" | "buttonLabel">> & {
   lang?: PageLang;
   editing?: boolean;
   renderImageBox?: RenderImageBox;
+  renderButton?: RenderButton;
 };
 
 export function ProductBlock({
@@ -58,6 +65,7 @@ export function ProductBlock({
   style = sectionStyleSchema.parse(undefined),
   editing = false,
   renderImageBox = defaultImageBox,
+  renderButton = defaultButton,
 }: Props) {
   if (!product) {
     if (!editing) return null;
@@ -82,7 +90,7 @@ export function ProductBlock({
   const photoAlt = (i: number) => (i === 0 ? product.name : fill(t.photoAlt, { name: product.name, n: i + 1 }));
 
   return (
-    <Section style={style} defaults={DEFAULTS} inner="flex flex-col gap-6">
+    <Section id={productAnchor(blockId)} style={style} defaults={DEFAULTS} inner="flex flex-col gap-6">
       {images.length > 0 && (
         <div className="flex flex-col gap-3">
           {renderImageBox({
@@ -174,11 +182,15 @@ export function ProductBlock({
         );
       })}
 
-      {!soldOut && hasText(buttonLabel) && (
-        <a href="#commande" className={action.className} style={action.style}>
-          {buttonLabel}
-        </a>
-      )}
+      {!soldOut &&
+        hasText(buttonLabel) &&
+        renderButton({
+          children: (
+            <a href="#commande" className={action.className} style={action.style}>
+              {buttonLabel}
+            </a>
+          ),
+        })}
     </Section>
   );
 }

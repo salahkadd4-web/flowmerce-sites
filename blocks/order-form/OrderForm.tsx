@@ -6,6 +6,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { renderButton as defaultButton, type RenderButton } from "@/blocks/button-box";
 import { BUYER_TEXT, type PageLang } from "@/blocks/i18n";
 import { formatDA } from "@/lib/money";
 import type { PublicProduct } from "@/lib/product-input";
@@ -25,6 +26,8 @@ type Props = {
   titleClass?: ClassAndStyle;
   /** Couleur et taille du bouton de commande. */
   buttonClass?: ClassAndStyle;
+  /** Éditeur seulement : boîte du bouton avec sa barre d'outils. */
+  renderButton?: RenderButton;
 };
 type Field = "variantId" | "quantity" | "customerName" | "phone" | "wilayaCode" | "commune" | "address" | "deliveryType";
 
@@ -53,6 +56,7 @@ export function OrderForm({
   lang = "fr",
   titleClass = DEFAULT_TITLE,
   buttonClass = DEFAULT_BUTTON,
+  renderButton = defaultButton,
 }: Props) {
   const t = BUYER_TEXT[lang];
   const router = useRouter();
@@ -426,14 +430,18 @@ export function OrderForm({
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={sending}
-        className={`inline-flex items-center justify-center rounded-control font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-60 ${buttonClass.className}`}
-        style={buttonClass.style}
-      >
-        {sending ? t.sending : submitLabel}
-      </button>
+      {renderButton({
+        children: (
+          <button
+            type="submit"
+            disabled={sending}
+            className={`inline-flex items-center justify-center rounded-control font-bold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand disabled:cursor-not-allowed disabled:opacity-60 ${buttonClass.className}`}
+            style={buttonClass.style}
+          >
+            {sending ? t.sending : submitLabel}
+          </button>
+        ),
+      })}
     </form>
   );
 }

@@ -5,6 +5,7 @@
 // Puck (annulable par Ctrl+Z) ; un groupe absent part de ses valeurs par défaut.
 
 import { createUsePuck } from "@puckeditor/core";
+import { useState } from "react";
 import { z } from "zod";
 import { ImageUploader } from "@/components/media/ImageUploader";
 import type { MediaValue } from "@/blocks/shared";
@@ -19,7 +20,8 @@ import {
 } from "@/blocks/style";
 import { readGroup } from "./block-patch";
 import { ColorSwatches } from "./ColorSwatches";
-import { linkError, normalizeLink } from "./links";
+import { productAnchor } from "@/blocks/product/ProductBlock";
+import { linkError, linkTargetOf, normalizeLink, ORDER_ANCHOR } from "./links";
 import { RangeInput } from "./RangeInput";
 import { SegmentedChoice } from "./SegmentedChoice";
 import { TextInput } from "./TextInput";
@@ -270,5 +272,49 @@ export function PhotosPanel({ props, set }: PanelProps) {
         { value: "l", label: "Grandes" },
       ]}
     />
+  );
+}
+
+/** « Mène vers » du bouton de la bannière : le formulaire, la fiche produit, ou un autre lien. */
+export function LinkPanel({ props, set }: PanelProps) {
+  const content = usePuck((s) => s.appState.data.content);
+  const product = content.find((item) => item.type === "Product");
+  const productHref = product ? `#${productAnchor(String(product.props.id))}` : null;
+  const href = String(props.buttonHref ?? "");
+  // « Autre lien » choisi : le champ s'affiche, le lien actuel reste tant qu'aucune
+  // adresse n'est saisie (un lien vide masquerait le bouton et fermerait la fenêtre).
+  const [otherChosen, setOtherChosen] = useState(false);
+  const target = otherChosen ? "other" : linkTargetOf(href, productHref);
+  const options = [
+    { value: "order", label: "Commande" },
+    ...(productHref ? [{ value: "product", label: "Produit" }] : []),
+    { value: "other", label: "Autre lien" },
+  ] as const;
+  return (
+    <>
+      <SegmentedChoice
+        label="Le bouton mène vers"
+        value={target}
+        options={options as readonly { value: "order" | "product" | "other"; label: string }[]}
+        onChange={(value) => {
+          setOtherChosen(value === "other");
+          if (value === "order") set("buttonHref", ORDER_ANCHOR);
+          else if (value === "product" && productHref) set("buttonHref", productHref);
+        }}
+      />
+      {target === "order" && <p className="text-[12px] text-body">Le formulaire de commande de la page.</p>}
+      {target === "product" && <p className="text-[12px] text-body">La fiche du produit, plus bas dans la page.</p>}
+      {target === "other" && (
+        <TextInput
+          label="Adresse du lien"
+          type="url"
+          placeholder="wa.me/213555123456"
+          hint="Une page web, WhatsApp… Sans adresse, le bouton n'apparaît pas sur le site."
+          value={linkTargetOf(href, productHref) === "other" ? href : ""}
+          validate={linkError}
+          onCommit={(value) => set("buttonHref", normalizeLink(value))}
+        />
+      )}
+    </>
   );
 }

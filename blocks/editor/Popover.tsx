@@ -2,11 +2,17 @@
 
 // Petite fenêtre ouverte depuis une barre d'outils (Fond, Couleur, Réseaux…).
 // Échap ou un clic à côté la ferment, et le focus revient au bouton qui l'a
-// ouverte. Fonctionne aussi dans l'aperçu (iframe) : les écouteurs sont posés sur
-// le document du bouton, pas sur celui de l'éditeur.
+// ouverte.
+//
+// La fenêtre s'ouvre au premier plan du document du bouton (l'aperçu est un
+// iframe), en position fixe sous le bouton — ou au-dessus s'il n'y a pas la place
+// — et toujours dans la page : une section qui coupe ce qui dépasse (fond image)
+// ne la tronque pas. Elle porte data-puck-rte-menu : ouverte depuis la barre d'un
+// texte en cours d'écriture, Puck la compte dans cette barre et garde le texte actif.
 
 import { ChevronDown, type LucideIcon } from "lucide-react";
-import { createContext, useContext, useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { TOOL } from "./ToolbarButton";
 
 type Props = {
@@ -15,7 +21,7 @@ type Props = {
   icon?: LucideIcon;
   /** Texte court affiché sur le bouton. */
   text?: string;
-  /** Côté où la fenêtre s'aligne sous le bouton. */
+  /** Côté du bouton sur lequel la fenêtre s'aligne. */
   align?: "start" | "end";
   width?: number;
   children: ReactNode;
@@ -28,46 +34,65 @@ export function usePopoverClose(): () => void {
   return useContext(CloseContext);
 }
 
+const MARGIN = 8;
+
 export function Popover({ label, icon: Icon, text, align = "start", width = 264, children }: Props) {
-  const [open, setOpen] = useState(false);
+  const [doc, setDoc] = useState<Document | null>(null);
+  const open = doc !== null;
+  const [position, setPosition] = useState<CSSProperties>({ visibility: "hidden" });
   const button = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLDivElement>(null);
   const id = useId();
 
-  const close = (returnFocus = true) => {
-    setOpen(false);
-    if (returnFocus) button.current?.focus();
-  };
   const [closeAndFocus] = useState(() => () => {
-    setOpen(false);
+    setDoc(null);
     button.current?.focus();
   });
 
-  useEffect(() => {
-    if (!open) return;
-    const doc = button.current?.ownerDocument;
+  // Place la fenêtre près du bouton, dans la page ; suit le défilement.
+  useLayoutEffect(() => {
     if (!doc) return;
-    // Fenêtre gardée dans la page (aperçu téléphone étroit) : décalée si elle déborde.
-    const element = panel.current;
-    if (element) {
-      const width = doc.documentElement.clientWidth;
-      const rect = element.getBoundingClientRect();
-      const shift = rect.right > width - 8 ? width - 8 - rect.right : rect.left < 8 ? 8 - rect.left : 0;
-      element.style.translate = `${shift}px 0`;
-    }
+    const place = () => {
+      const anchor = button.current?.getBoundingClientRect();
+      const element = panel.current;
+      if (!anchor || !element || !button.current) return;
+      const view = doc.documentElement;
+      const w = Math.min(width, view.clientWidth - 2 * MARGIN);
+      const h = element.offsetHeight;
+      const rtl = getComputedStyle(button.current).direction === "rtl";
+      const toEnd = (align === "end") !== rtl;
+      let left = toEnd ? anchor.right - w : anchor.left;
+      left = Math.max(MARGIN, Math.min(left, view.clientWidth - MARGIN - w));
+      const below = anchor.bottom + MARGIN;
+      const above = anchor.top - MARGIN - h;
+      const top = below + h <= view.clientHeight - MARGIN || above < MARGIN ? below : above;
+      setPosition({ position: "fixed", top, left, width: w });
+    };
+    place();
+    const win = doc.defaultView;
+    win?.addEventListener("scroll", place, true);
+    win?.addEventListener("resize", place);
+    return () => {
+      win?.removeEventListener("scroll", place, true);
+      win?.removeEventListener("resize", place);
+    };
+  }, [doc, align, width]);
+
+  useEffect(() => {
+    if (!doc) return;
     // Premier contrôle de la fenêtre : le clavier y arrive directement.
-    element?.querySelector<HTMLElement>("button, input, select, textarea, [tabindex]")?.focus();
+    panel.current?.querySelector<HTMLElement>("button, input, select, textarea, [tabindex]")?.focus();
 
     const onPointerDown = (event: PointerEvent) => {
       const target = event.target as Node;
       if (panel.current?.contains(target) || button.current?.contains(target)) return;
-      close(false);
+      setDoc(null);
     };
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return;
       event.preventDefault();
       event.stopPropagation();
-      close();
+      closeAndFocus();
     };
     doc.addEventListener("pointerdown", onPointerDown, true);
     doc.addEventListener("keydown", onKeyDown, true);
@@ -75,10 +100,10 @@ export function Popover({ label, icon: Icon, text, align = "start", width = 264,
       doc.removeEventListener("pointerdown", onPointerDown, true);
       doc.removeEventListener("keydown", onKeyDown, true);
     };
-  }, [open]);
+  }, [doc, closeAndFocus]);
 
   return (
-    <div className="relative">
+    <>
       <button
         ref={button}
         type="button"
@@ -87,7 +112,10 @@ export function Popover({ label, icon: Icon, text, align = "start", width = 264,
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={open ? id : undefined}
-        onClick={() => setOpen((value) => !value)}
+        onClick={() => {
+          setPosition({ visibility: "hidden" });
+          setDoc((current) => (current ? null : (button.current?.ownerDocument ?? null)));
+        }}
         className={`${TOOL} ${open ? "bg-brand-soft text-brand-ink" : ""}`}
       >
         {Icon && <Icon size={16} aria-hidden />}
@@ -95,21 +123,24 @@ export function Popover({ label, icon: Icon, text, align = "start", width = 264,
         {text && <span className="max-sm:hidden">{text}</span>}
         <ChevronDown size={12} aria-hidden className="opacity-60" />
       </button>
-      {open && (
-        <div
-          ref={panel}
-          id={id}
-          role="dialog"
-          aria-label={label}
-          style={{ width: `min(${width}px, calc(100vw - 16px))` }}
-          className={`absolute top-full z-50 mt-2 flex flex-col gap-3 rounded-card border border-line bg-white p-3 text-start text-[13px] text-ink shadow-xl ${
-            align === "end" ? "end-0" : "start-0"
-          }`}
-        >
-          <p className="text-[12px] font-bold tracking-wide text-faint uppercase">{label}</p>
-          <CloseContext.Provider value={closeAndFocus}>{children}</CloseContext.Provider>
-        </div>
-      )}
-    </div>
+      {doc &&
+        createPortal(
+          <div
+            ref={panel}
+            id={id}
+            role="dialog"
+            aria-label={label}
+            data-puck-rte-menu=""
+            // Les clics dans la fenêtre ne remontent pas jusqu'à la section (Puck la re-sélectionnerait).
+            onClick={(e) => e.stopPropagation()}
+            style={position}
+            className="z-[2147483000] flex max-h-[min(480px,calc(100vh-16px))] flex-col gap-3 overflow-y-auto rounded-card border border-line bg-white p-3 text-start font-sans text-[13px] text-ink shadow-xl"
+          >
+            <p className="text-[12px] font-bold tracking-wide text-faint uppercase">{label}</p>
+            <CloseContext.Provider value={closeAndFocus}>{children}</CloseContext.Provider>
+          </div>,
+          doc.body,
+        )}
+    </>
   );
 }

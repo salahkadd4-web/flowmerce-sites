@@ -37,5 +37,5 @@ export const heroConfig: ComponentConfig<Props> = {
     button: buttonStyleSchema.parse(undefined),
     style: sectionStyleSchema.parse(undefined),
   },
-  render: ({ puck: _puck, id: _id, ...props }) => createElement(Hero, props),
+  render: ({ puck, id: _id, ...props }) => createElement(Hero, { ...props, editing: puck.isEditing }),
 };

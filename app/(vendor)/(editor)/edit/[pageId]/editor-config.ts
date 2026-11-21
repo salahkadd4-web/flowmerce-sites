@@ -4,7 +4,8 @@
 // blocks/fields/editor-fields.ts).
 
 import type { Config, Field } from "@puckeditor/core";
-import { createElement } from "react";
+import { createElement, type ReactNode } from "react";
+import { EditableButton } from "@/blocks/editor/EditableButton";
 import { ResizableImageBox } from "@/blocks/editor/ResizableImageBox";
 import { textToolbar, type TextStyle } from "@/blocks/editor/TextToolbar";
 import { ColorField } from "@/blocks/fields/ColorField";
@@ -105,6 +106,32 @@ function withResizableImages(config: Config): Config {
   return { ...config, components };
 }
 
+/** Blocs dont le bouton a sa barre d'outils ; la bannière choisit aussi où il mène. */
+const WITH_BUTTON: Record<string, { linkable: boolean }> = {
+  Hero: { linkable: true },
+  Product: { linkable: false },
+  OrderForm: { linkable: false },
+};
+
+/** Donne aux boutons des sections une boîte avec leur barre d'outils. */
+function withEditableButtons(config: Config): Config {
+  const components = { ...config.components };
+  for (const [name, { linkable }] of Object.entries(WITH_BUTTON)) {
+    const component = components[name];
+    if (!component?.render) continue;
+    const render = component.render;
+    components[name] = {
+      ...component,
+      render: (props) =>
+        render({
+          ...props,
+          renderButton: ({ children }: { children: ReactNode }) => createElement(EditableButton, { blockId: props.id, linkable }, children),
+        }),
+    };
+  }
+  return { ...config, components };
+}
+
 export function buildEditorConfig(products: { id: string; name: string }[]): Config {
-  return withProductField(withResizableImages(withEditorFields(puckConfig)), products);
+  return withProductField(withEditableButtons(withResizableImages(withEditorFields(puckConfig))), products);
 }
