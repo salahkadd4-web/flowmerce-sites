@@ -62,3 +62,14 @@ it("compte la longueur visible, pas les balises", () => {
 it("garde les retours à la ligne que l'éditeur enregistre dans un paragraphe", () => {
   expect(renderToStaticMarkup(<RichText value={"<p>Un\nDeux</p>"} />)).toBe('<p dir="auto">Un<br/>Deux</p>');
 });
+
+describe("RichText dans l'éditeur (élément d'édition de Puck)", () => {
+  it("garde la couleur et la taille du texte autour de l'éditeur", () => {
+    const html = renderToStaticMarkup(<RichText value={<span data-edition="">x</span>} className="text-lg text-white/80" style={{ color: "#ffffff" }} />);
+    expect(html).toBe('<div class="text-lg text-white/80" style="color:#ffffff"><span data-edition="">x</span></div>');
+  });
+
+  it("dans un titre, l'élément reste tel quel", () => {
+    expect(renderToStaticMarkup(<RichText value={<span data-edition="">x</span>} inline className="c" />)).toBe('<span data-edition="">x</span>');
+  });
+});

@@ -73,6 +73,17 @@ function useTyping(anchor: React.RefObject<HTMLElement | null>): boolean {
   return typing;
 }
 
+const RTE_COLORS = {
+  "--puck-color-text-inverse": "#0f1a3d",
+  "--puck-actionbar-color-text": "#0f1a3d",
+  "--puck-actionbar-opacity-text": "1",
+  "--puck-actionbar-color-action-hover": "#4338ca",
+  "--puck-actionbar-color-action-active": "#4338ca",
+  "--puck-color-interactive-inverse-hover": "#4338ca",
+  "--puck-color-interactive-inverse-active": "#4338ca",
+  "--puck-color-border-inverse": "#e5e8f3",
+} as React.CSSProperties;
+
 const BAR = "flex max-w-[calc(100vw-16px)] flex-wrap items-center justify-end gap-0.5 rounded-control border border-line bg-white p-1 text-ink shadow-lg";
 const SEP = <span aria-hidden className="mx-1 h-5 w-px bg-line" />;
 
@@ -87,7 +98,9 @@ export function SectionBar({ label, children, dragHandle }: Props) {
 
   if (textMenu && typing) {
     return (
-      <div ref={anchor} className={BAR} onClick={(e) => e.stopPropagation()} role="toolbar" aria-label="Mise en forme du texte">
+      // Puck dessine ses boutons (gras…) en blanc pour sa barre sombre : sur notre barre
+      // claire, ses variables de couleur prennent l'encre et l'indigo du thème.
+      <div ref={anchor} className={BAR} style={RTE_COLORS} onClick={(e) => e.stopPropagation()} role="toolbar" aria-label="Mise en forme du texte">
         {textMenu}
       </div>
     );

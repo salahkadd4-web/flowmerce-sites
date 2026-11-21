@@ -165,7 +165,18 @@ type RichTextProps = {
 
 /** Affiche un texte mis en forme ; dans l'éditeur, la valeur d'édition de Puck telle quelle. */
 export function RichText({ value, inline = false, className, style }: RichTextProps) {
-  if (typeof value !== "string") return value == null || value === false ? null : <>{value}</>;
+  if (typeof value !== "string") {
+    if (value == null || value === false) return null;
+    // Éditeur : Puck rend son propre champ d'écriture. Les classes et le style des
+    // paragraphes (couleur, taille) vont alors sur une enveloppe, sinon le texte en
+    // cours d'écriture reprendrait la couleur par défaut (noir sur un fond sombre).
+    if (inline || (!className && !style)) return <>{value}</>;
+    return (
+      <div className={className} style={style}>
+        {value}
+      </div>
+    );
+  }
   const paragraphs = readParagraphs(sanitizeRichText(value));
   if (paragraphs.length === 0) return null;
   if (inline) {
