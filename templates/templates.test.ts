@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { imageSize } from "image-size";
 import { validatePageContent } from "@/lib/page-content";
-import { templateById, TEMPLATES } from "./index";
+import { pageFromTemplate, templateById, TEMPLATES } from "./index";
 
 describe("registre des modèles", () => {
   it("commence par le modèle simple, connu par son identifiant historique", () => {
@@ -83,5 +83,19 @@ describe("les cinq modèles pro", () => {
     const preview = templateById(id)!.preview;
     expect(preview).toBe(`/templates/${id}/apercu.webp`);
     expect(fs.existsSync(path.join(PUBLIC, preview!))).toBe(true);
+  });
+});
+
+describe("un modèle devient la page du vendeur", () => {
+  it.each(TEMPLATES.map((t) => [t.id, t] as const))("%s : l'onglet du navigateur prend le nom du site (titre vide)", (_id, template) => {
+    expect((template.data as { root: { props: { title: string } } }).root.props.title).toBe("");
+  });
+
+  it("le pied de page porte le nom du site, sans toucher au modèle", () => {
+    const template = templateById("mode")!;
+    const before = JSON.stringify(template.data);
+    const page = pageFromTemplate(template, "Boutique Amina") as { content: { type: string; props: { shopName?: string } }[] };
+    expect(page.content.find((block) => block.type === "Footer")?.props.shopName).toBe("Boutique Amina");
+    expect(JSON.stringify(template.data)).toBe(before);
   });
 });

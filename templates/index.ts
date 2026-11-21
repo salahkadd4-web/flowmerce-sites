@@ -76,3 +76,15 @@ export const TEMPLATES: readonly TemplateInfo[] = [
 export function templateById(id: string): TemplateInfo | undefined {
   return TEMPLATES.find((template) => template.id === id);
 }
+
+/**
+ * Page d'un nouveau site à partir d'un modèle : le pied de page porte le nom du
+ * site plutôt que la marque d'exemple du modèle. Le modèle lui-même n'est pas modifié.
+ */
+export function pageFromTemplate(template: TemplateInfo, siteName: string): unknown {
+  const data = structuredClone(template.data) as { content?: { type: string; props: Record<string, unknown> }[] };
+  for (const block of data.content ?? []) {
+    if (block.type === "Footer") block.props.shopName = siteName;
+  }
+  return data;
+}

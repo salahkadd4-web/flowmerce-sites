@@ -32,6 +32,15 @@ it("crée la page à partir du modèle choisi", async () => {
   expect(validatePageContent(page.draft).ok).toBe(true);
 });
 
+it("un modèle pro : le pied de page porte le nom du site", async () => {
+  const result = await createSiteForUser(USER, { name: "Boutique Amina", subdomain: "amina", templateId: "mode" });
+  if (!result.ok) throw new Error(result.error);
+  const page = await prisma.page.findUniqueOrThrow({ where: { id: result.pageId } });
+  const content = (page.draft as { content: { type: string; props: { shopName?: string } }[] }).content;
+  expect(content.find((block) => block.type === "Footer")?.props.shopName).toBe("Boutique Amina");
+  expect(validatePageContent(page.draft).ok).toBe(true);
+});
+
 it("refuse un modèle inconnu sans rien créer", async () => {
   expect(await createSiteForUser(USER, { name: "X", subdomain: "inconnu", templateId: "inconnu" })).toEqual({
     ok: false,

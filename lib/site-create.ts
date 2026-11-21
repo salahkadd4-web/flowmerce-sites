@@ -6,7 +6,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { validateSubdomain } from "@/lib/subdomain";
-import { templateById } from "@/templates";
+import { pageFromTemplate, templateById } from "@/templates";
 
 type CreateResult =
   | { ok: true; siteId: string; pageId: string }
@@ -42,7 +42,7 @@ export async function createSiteForUser(
       });
 
       const page = await tx.page.create({
-        data: { siteId: site.id, slug: "", title: name, draft: template.data as Prisma.InputJsonValue },
+        data: { siteId: site.id, slug: "", title: name, draft: pageFromTemplate(template, name) as Prisma.InputJsonValue },
       });
 
       return { ok: true as const, siteId: site.id, pageId: page.id };
